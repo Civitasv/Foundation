@@ -901,3 +901,186 @@
     grid-template-columns: 1fr;
   }
 }
+
+
+/* Probability distribution playground */
+
+.distribution-playground {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  gap: 36px;
+  align-items: stretch;
+}
+
+.distribution-chart {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
+  min-height: 320px;
+  padding: 18px 12px 0;
+  border-bottom: 1px solid #d2d2d7;
+}
+
+.distribution-column {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  gap: 12px;
+  min-width: 0;
+}
+
+.distribution-bar-area {
+  display: flex;
+  align-items: end;
+  justify-content: center;
+  min-height: 240px;
+}
+
+.distribution-bar {
+  position: relative;
+  width: min(68px, 75%);
+  min-height: 2px;
+  border-radius: 8px 8px 0 0;
+  background: #0066cc;
+  transition: height 180ms ease;
+}
+
+.distribution-bar span {
+  position: absolute;
+  left: 50%;
+  top: -24px;
+  transform: translateX(-50%);
+  color: var(--secondary);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.distribution-column > strong {
+  padding-bottom: 10px;
+  color: var(--secondary);
+  font-size: 11px;
+  font-weight: 500;
+  text-align: center;
+}
+
+.distribution-controls > p {
+  margin: 0 0 20px;
+  color: var(--secondary);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.distribution-sliders {
+  display: grid;
+  gap: 12px;
+}
+
+.distribution-sliders label {
+  display: grid;
+  grid-template-columns: 92px 1fr 38px;
+  gap: 10px;
+  align-items: center;
+  color: var(--secondary);
+  font-size: 11px;
+}
+
+.distribution-sliders input {
+  width: 100%;
+  accent-color: var(--accent);
+}
+
+.distribution-sliders output {
+  color: var(--text);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.distribution-facts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  margin: 24px 0 0;
+  background: #e5e5e7;
+}
+
+.distribution-facts > div {
+  padding: 12px;
+  background: #fbfbfc;
+}
+
+.distribution-facts dt {
+  color: var(--tertiary);
+  font-size: 10px;
+  line-height: 1.35;
+}
+
+.distribution-facts dd {
+  margin: 5px 0 0;
+  color: var(--text);
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+}
+
+.distribution-sample {
+  appearance: none;
+  margin-top: 18px;
+  padding: 7px 12px;
+  border: 1px solid #d2d2d7;
+  border-radius: 8px;
+  background: #ffffff;
+  color: var(--text);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.distribution-sample:hover {
+  background: #f5f5f7;
+}
+
+.distribution-presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  margin-top: 20px;
+}
+
+.distribution-presets > span {
+  width: 100%;
+  color: var(--tertiary);
+  font-size: 10px;
+}
+
+.distribution-presets button {
+  appearance: none;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--accent);
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.distribution-presets button:hover {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .distribution-bar {
+    transition: none;
+  }
+}
+
+@media (max-width: 720px) {
+  .distribution-playground {
+    grid-template-columns: 1fr;
+  }
+
+  .distribution-chart {
+    min-height: 260px;
+  }
+
+  .distribution-bar-area {
+    min-height: 190px;
+  }
+}

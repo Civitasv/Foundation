@@ -2,12 +2,309 @@
 
 ## Why it exists
 
-A language model does not directly emit a sentence. At each step it represents uncertainty over possible next tokens.
+A language model does not simply know the next token and emit it.
 
-## Interactive target
+A closer mental model is that it first assigns scores to many candidate tokens, then turns those scores into a **probability distribution**. The distribution expresses how probability mass is spread across possible next outcomes.
 
-Manipulate a discrete distribution and observe normalization, expectation, and entropy.
+The system can then choose the maximum-probability outcome or sample from the distribution.
 
-## Connection to agents
+So probability distributions are the prerequisite for understanding Softmax, sampling, temperature, entropy, and why the same Agent prompt can sometimes lead to different trajectories.
 
-Agent decisions ultimately emerge from probabilistic model outputs even when the surrounding runtime is deterministic.
+<Aside kind="context" title="This chapter stays discrete">
+
+Probability theory is broad. Here we only build the first layer: outcomes, probability mass, normalization, expectation, entropy, and sampling for discrete random variables. Conditional probability, Bayes, KL divergence, and cross-entropy can wait until they become necessary.
+
+</Aside>
+
+## Uncertainty is a set of possibilities
+
+Suppose a random variable X can take four values:
+
+<Equation>
+
+**X ∈ {0, 1, 2, 3}**
+
+</Equation>
+
+Assign a probability to each outcome:
+
+<Equation label="Discrete probability distribution">
+
+**P(X = xᵢ) = pᵢ**
+
+</Equation>
+
+The probabilities must satisfy:
+
+<Equation>
+
+**pᵢ ≥ 0**
+
+**Σᵢ pᵢ = 1**
+
+</Equation>
+
+For example:
+
+<Equation>
+
+**P(X) = [0.5, 0.3, 0.1, 0.1]**
+
+</Equation>
+
+This does not say the outcome is certainly 0. It says that across repeated samples from the same mechanism, 0 should appear more often than the other outcomes.
+
+<Aside kind="definition" title="Probability mass">
+
+For a discrete distribution, imagine the total probability `1` as one block of mass. You distribute that mass across outcomes. More mass means a greater chance of being sampled.
+
+</Aside>
+
+## Normalization: turn positive weights into probabilities
+
+Often we begin with nonnegative weights rather than probabilities:
+
+<Equation>
+
+**w = [5, 3, 1, 1]**
+
+</Equation>
+
+Divide each weight by the total:
+
+<Equation label="Normalization">
+
+**pᵢ = wᵢ / Σⱼ wⱼ**
+
+</Equation>
+
+Then:
+
+<Equation>
+
+**[5, 3, 1, 1] → [0.5, 0.3, 0.1, 0.1]**
+
+</Equation>
+
+The durable idea is:
+
+> **Probability depends on relative mass, not the absolute raw scale.**
+
+Multiplying every weight by 10 leaves the normalized distribution unchanged.
+
+<Aside kind="tip" title="Softmax is more than this normalization">
+
+Softmax must handle arbitrary real-valued logits, including negative values. It first exponentiates and then normalizes. We use nonnegative weights here to isolate the idea of normalization itself.
+
+</Aside>
+
+## Interactive experiment
+
+Adjust the four raw weights below. They are normalized automatically.
+
+Try:
+
+1. make all four weights equal and inspect entropy;
+2. put all mass on one outcome and inspect entropy;
+3. preserve all ratios while scaling every weight up and see whether probabilities change;
+4. repeatedly click Sample once without changing the distribution.
+
+<InteractiveBreakout title="Probability Distribution Playground">
+
+<DistributionPlayground locale="en" />
+
+</InteractiveBreakout>
+
+The bars show normalized probabilities, not raw weights.
+
+## Expectation: where the long-run average lands
+
+When outcomes are numerical, define expectation as:
+
+<Equation label="Expectation">
+
+**E[X] = Σᵢ pᵢ xᵢ**
+
+</Equation>
+
+For probabilities `[0.5, 0.3, 0.1, 0.1]` over `{0,1,2,3}`:
+
+<Equation>
+
+**E[X] = 0×0.5 + 1×0.3 + 2×0.1 + 3×0.1 = 0.8**
+
+</Equation>
+
+But `0.8` is not even a possible sampled outcome.
+
+Expectation is therefore not the most likely outcome. It is the probability-weighted long-run average.
+
+<Aside kind="definition" title="Expectation ≠ argmax">
+
+`argmax` asks which single outcome has the highest probability. Expectation asks where the probability-weighted numerical average lies. Token IDs are categorical labels rather than meaningful numeric quantities, so taking the expectation of token IDs usually makes no sense.
+
+</Aside>
+
+## Entropy: how spread out the uncertainty is
+
+Two distributions over the same four outcomes can have very different uncertainty:
+
+- `[1, 0, 0, 0]`: fully determined;
+- `[0.25, 0.25, 0.25, 0.25]`: all outcomes equally likely.
+
+Shannon entropy summarizes this spread:
+
+<Equation label="Shannon entropy">
+
+**H(X) = -Σᵢ pᵢ log₂ pᵢ**
+
+</Equation>
+
+Using `log₂` gives units of bits.
+
+With four outcomes:
+
+- a deterministic distribution has `0 bits` of entropy;
+- the uniform distribution has `log₂4 = 2 bits`.
+
+The intuition is: **more concentrated probability mass means lower entropy; more evenly spread mass means higher entropy.**
+
+<Aside kind="tip" title="Entropy is not error rate">
+
+High entropy means the distribution is more spread out. It does not guarantee the model is wrong. Low entropy only means the model distribution is concentrated; it does not guarantee that concentration is on the correct answer.
+
+</Aside>
+
+## A distribution and a sample are different objects
+
+A distribution describes a generating mechanism. A sample is one realized outcome from that mechanism.
+
+If:
+
+<Equation>
+
+**P(X) = [0.5, 0.3, 0.1, 0.1]**
+
+</Equation>
+
+one sample can still be 2 even though 2 has only 10% probability.
+
+That does not violate probability. It is what probability means.
+
+Only across many repeated samples do empirical frequencies tend to approach the original probabilities.
+
+<Aside kind="definition" title="distribution ≠ sample">
+
+The distribution is the full set of possibilities. A sample is one concrete realization. Agent trajectories have the same distinction: an internal model distribution can exist, while an actual run commits to one token, one tool call, and one path.
+
+</Aside>
+
+## Minimal implementation
+
+Implement the three core operations used in this chapter: normalization, expectation, and entropy.
+
+<CodeStep title="distribution.ts">
+
+~~~ts
+function normalize(weights: number[]): number[] {
+  const total = weights.reduce((sum, value) => sum + value, 0);
+
+  if (total <= 0) {
+    throw new Error("weights must contain positive mass");
+  }
+
+  return weights.map((value) => value / total);
+}
+
+function expectation(values: number[], probabilities: number[]): number {
+  return values.reduce(
+    (sum, value, index) => sum + value * probabilities[index]!,
+    0
+  );
+}
+
+function entropyBits(probabilities: number[]): number {
+  return probabilities.reduce((sum, probability) => {
+    if (probability === 0) return sum;
+    return sum - probability * Math.log2(probability);
+  }, 0);
+}
+~~~
+
+</CodeStep>
+
+The `p = 0` branch is skipped because `p log p → 0` in the limiting sense.
+
+## Connection to LLMs
+
+At every decode step, a language model produces logits for candidate tokens in its vocabulary.
+
+Logits are not probabilities yet. Softmax will convert them into:
+
+<Equation>
+
+**P(next token | context)**
+
+</Equation>
+
+That distribution can then feed:
+
+- greedy / argmax selection;
+- temperature scaling;
+- top-k / top-p truncation;
+- sampling.
+
+Text generation is therefore a repeated loop:
+
+> **context → distribution → choose/sample token → append token → new context**
+
+<Aside kind="source" title="A calibration warning">
+
+Next-token probability is a conditional distribution in token space. It should not be naively read as “there is an 82% probability this statement is factually true.” Factual confidence, calibration, and uncertainty estimation are separate problems.
+
+</Aside>
+
+## Connection to Agent engineering
+
+An Agent runtime can be deterministic at the outer layer: state machines, tool schemas, timeouts, and retries can all follow explicit rules.
+
+But whenever an LLM decision sits inside the loop, an internal probability distribution still exists.
+
+This helps explain:
+
+- why the same task can produce different plans;
+- why tool-call arguments can vary;
+- why temperature changes behavioral stability;
+- why Agent evaluation often needs repeated runs;
+- why a model can be confidently wrong.
+
+Probability distributions are therefore not just training mathematics. They are part of understanding Agent variability and evaluation.
+
+<Aside kind="source" title="Where this leads">
+
+Now we know the target object: a valid probability distribution. The Softmax chapter asks how arbitrary real-valued logits can be converted into one stably.
+
+</Aside>
+
+## Challenge
+
+<Challenge title="Check your intuition">
+
+1. Do weights `[1,2,7]` and `[10,20,70]` normalize to the same distribution? Why?
+2. Must the expectation of `[0.5,0.5]` be a possible sampled outcome? Give a counterexample.
+3. Which has higher entropy: `[0.7,0.1,0.1,0.1]` or `[0.4,0.3,0.2,0.1]`? Predict first, then calculate.
+4. Why does sampling a low-probability outcome once not mean the distribution was wrong?
+5. If a model assigns probability 0.99 to a wrong answer, is its entropy high or low? What limitation of entropy does this expose?
+6. Explain distribution, argmax, and sample in your own words.
+
+</Challenge>
+
+## References
+
+<ReferenceList>
+
+- [MIT OpenCourseWare — Introduction to Probability and Statistics](https://ocw.mit.edu/courses/18-05-introduction-to-probability-and-statistics-spring-2014/)
+- [Deep Learning — Probability and Information Theory](https://www.deeplearningbook.org/contents/prob.html)
+- [A Mathematical Theory of Communication — Claude Shannon](https://people.math.harvard.edu/~ctm/home/text/others/shannon/entropy/entropy.pdf)
+
+</ReferenceList>

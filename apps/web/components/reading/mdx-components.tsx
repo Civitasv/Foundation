@@ -2,6 +2,7 @@ import type { ComponentProps, ReactNode } from "react";
 import { slugifyHeading } from "@foundation/knowledge";
 import { DotProductPlayground } from "./dot-product-playground";
 import { MatrixTransformPlayground } from "./matrix-transform-playground";
+import { DistributionPlayground } from "./distribution-playground";
 import { VectorPlayground } from "./vector-playground";
 
 function headingText(children: ReactNode): string {
@@ -100,5 +101,6 @@ export const mdxComponents = {
   ReferenceList,
   DotProductPlayground,
   MatrixTransformPlayground,
+  DistributionPlayground,
   VectorPlayground
 };
