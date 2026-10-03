@@ -1,6 +1,7 @@
 import type { ComponentProps, ReactNode } from "react";
 import { slugifyHeading } from "@foundation/knowledge";
 import { DotProductPlayground } from "./dot-product-playground";
+import { MatrixTransformPlayground } from "./matrix-transform-playground";
 import { VectorPlayground } from "./vector-playground";
 
 function headingText(children: ReactNode): string {
@@ -98,5 +99,6 @@ export const mdxComponents = {
   Challenge,
   ReferenceList,
   DotProductPlayground,
+  MatrixTransformPlayground,
   VectorPlayground
 };

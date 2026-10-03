@@ -5,12 +5,12 @@
     "en": "Matrix"
   },
   "summary": {
-    "zh-CN": "把矩阵理解成空间变换，而不只是一张数字表。",
-    "en": "Understand matrices as transformations rather than tables of numbers."
+    "zh-CN": "把矩阵理解成对向量和空间施加的线性变换，并连接到神经网络中的投影、矩阵乘法与 Q/K/V。",
+    "en": "Understand matrices as linear transformations of vectors and spaces, then connect that view to projections, matrix multiplication, and Q/K/V in neural networks."
   },
   "domain": "foundations",
   "depth": "implementation",
-  "status": "seed",
+  "status": "ai-draft",
   "prerequisites": [
     "vector"
   ],
