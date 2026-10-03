@@ -34,6 +34,9 @@ machine-readable concept metadata
         v
 apps/web
   Learn / Explore / Build projections
+        |
+        v
+static export -> GitHub Pages
 ```
 
 Concept metadata is the source of truth for the learning graph. UI navigation and future curricula should be derived from it rather than maintained separately.
@@ -72,6 +75,18 @@ Create a concept seed:
 ```bash
 pnpm concept:new -- vector-space "Vector Space" foundations
 ```
+
+## Deployment
+
+The web app is statically exported and deployed from `master` with GitHub Actions.
+
+Target URL:
+
+```text
+https://civitasv.github.io/Foundation/
+```
+
+The deployment workflow runs the full validation suite before publishing `apps/web/out`.
 
 ## Current status
 
