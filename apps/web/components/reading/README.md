@@ -30,6 +30,8 @@ ChapterShell
 
 A reading component must not become a second source of curriculum truth.
 
+Fenced code blocks are highlighted during MDX compilation with Shiki's GitHub Light theme. Language tags such as `ts` select the grammar; unsupported tags fall back to plain text. The static HTML includes token colors, so highlighting requires no client-side script. Inline code retains its normal prose styling.
+
 ## Sidebar rule
 
 Components receive semantic aside data and choose a responsive presentation.

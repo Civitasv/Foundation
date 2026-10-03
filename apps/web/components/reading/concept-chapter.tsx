@@ -2,6 +2,7 @@ import path from "node:path";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { MDXRemote } from "next-mdx-remote/rsc";
+import rehypeShiki from "@shikijs/rehype";
 import {
   extractLessonHeadings,
   getConceptNeighbors,
@@ -126,7 +127,20 @@ export async function ConceptChapter({
           </details>
 
           <article className="chapter-flow">
-            <MDXRemote components={mdxComponents} source={body} />
+            <MDXRemote
+              components={mdxComponents}
+              source={body}
+              options={{
+                mdxOptions: {
+                  rehypePlugins: [[rehypeShiki, {
+                    theme: "github-light",
+                    lazy: true,
+                    fallbackLanguage: "text",
+                    addLanguageClass: true
+                  }]]
+                }
+              }}
+            />
 
             <nav className="chapter-prev-next" aria-label={locale === "zh-CN" ? "章节导航" : "Chapter navigation"}>
               {id === "agent-engineering" ? (
