@@ -37,6 +37,41 @@ Important fields:
 
 Do not store `unlocks`. It is derived by reversing prerequisite edges.
 
+## Lesson structure
+
+Concept lessons are continuous technical chapters.
+
+The baseline authoring structure is defined in:
+- `docs/design/reading-architecture.md`;
+- `docs/design/content-blocks.md`;
+- `docs/design/concept-page-template.md`.
+
+A concept may include semantic blocks such as:
+
+- equation;
+- figure;
+- code step;
+- aside;
+- interactive lab;
+- challenge;
+- design note;
+- checkpoint;
+- references.
+
+Semantic meaning belongs in content. Responsive placement belongs in the renderer.
+
+For example, content may define a `definition` aside. It must not define "right sidebar box at 280px width".
+
+## Sidebar rule
+
+Supplemental content can be rendered as a margin note, rail item, disclosure, popover, sticky inspector, or inline block.
+
+The source expresses the semantic role. The reading runtime selects the presentation based on viewport and context.
+
+Essential knowledge must remain understandable in canonical document order.
+
+See `docs/design/sidebar-system.md`.
+
 ## Graph rules
 
 1. IDs are globally unique.
