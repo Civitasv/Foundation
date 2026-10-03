@@ -1,13 +1,13 @@
-# Agent Loop
+# Agent 循环
 
-## Why it exists
+## 为什么需要它
 
-An agent needs more than a single model response. It must repeatedly decide, act in an environment, observe results, and update state.
+Agent 不是一次模型调用。它必须持续做决定、作用于环境、读取结果，并更新自己的状态。
 
-## Interactive target
+## 交互目标
 
-Step through model decision, tool call, tool result, state update, retry, completion, and interruption.
+逐步执行模型决策、tool call、tool result、state update、retry、completion 和 interruption。
 
-## Connection to agents
+## 与 Agent 的关系
 
-This loop is the smallest useful runtime abstraction beneath ReAct, planners, graph agents, and coding agents.
+这是 ReAct、Planner、Graph Agent 和 Coding Agent 下面最小而有用的 Runtime 抽象。

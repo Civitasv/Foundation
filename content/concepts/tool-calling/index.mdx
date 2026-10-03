@@ -1,13 +1,13 @@
-# Tool Calling
+# 工具调用
 
-## Why it exists
+## 为什么需要它
 
-A language model cannot directly read a file, query a database, or execute a shell command. An agent runtime can expose typed capabilities and interpret model output as requests to use them.
+语言模型本身不能直接读取文件、查询数据库或执行 shell。Agent Runtime 可以暴露受控能力，并把模型输出解释成调用这些能力的请求。
 
-## Interactive target
+## 交互目标
 
-Inspect schema selection, argument validation, execution, failure, and observation return.
+观察 schema 选择、参数校验、执行、失败和 observation 返回的完整过程。
 
-## Connection to agents
+## 与 Agent 的关系
 
-Tool boundaries are capability and security boundaries, not merely function wrappers.
+Tool boundary 本质上是 capability boundary 和 security boundary，而不只是函数封装。

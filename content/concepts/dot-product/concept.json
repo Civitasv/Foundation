@@ -1,7 +1,13 @@
 {
   "id": "dot-product",
-  "title": "Dot Product",
-  "summary": "Measure directional alignment and build the intuition behind similarity and attention scores.",
+  "title": {
+    "zh-CN": "点积",
+    "en": "Dot Product"
+  },
+  "summary": {
+    "zh-CN": "用一个标量衡量两个方向的对齐程度，并建立相似度与 Attention score 的直觉。",
+    "en": "Measure directional alignment and build the intuition behind similarity and attention scores."
+  },
   "domain": "foundations",
   "depth": "implementation",
   "status": "seed",

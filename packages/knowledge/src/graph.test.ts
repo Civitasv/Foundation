@@ -9,8 +9,14 @@ import type { ConceptMetadata } from "./types";
 function concept(id: string, prerequisites: string[] = []): ConceptMetadata {
   return {
     id,
-    title: id,
-    summary: `Learn ${id}`,
+    title: {
+      "zh-CN": id,
+      en: id
+    },
+    summary: {
+      "zh-CN": `学习 ${id}`,
+      en: `Learn ${id}`
+    },
     domain: "foundations",
     depth: "understanding",
     status: "seed",

@@ -1,7 +1,13 @@
 {
   "id": "probability",
-  "title": "Probability Distribution",
-  "summary": "Reason about uncertainty as a distribution over possible outcomes.",
+  "title": {
+    "zh-CN": "概率分布",
+    "en": "Probability Distribution"
+  },
+  "summary": {
+    "zh-CN": "把不确定性表示成多个可能结果上的概率分布。",
+    "en": "Reason about uncertainty as a distribution over possible outcomes."
+  },
   "domain": "foundations",
   "depth": "understanding",
   "status": "seed",
