@@ -41,31 +41,43 @@ const depthLabels: Record<FoundationLocale, Record<ConceptMetadata["depth"], str
     "deep-dive": "深入"
   },
   en: {
-    awareness: "awareness",
-    understanding: "understanding",
-    implementation: "implementation",
-    "deep-dive": "deep dive"
+    awareness: "Awareness",
+    understanding: "Understanding",
+    implementation: "Implementation",
+    "deep-dive": "Deep dive"
+  }
+};
+
+const interactionLabels: Record<
+  FoundationLocale,
+  Record<ConceptMetadata["interaction"]["kind"], string>
+> = {
+  "zh-CN": {
+    none: "无",
+    visualizer: "可视化",
+    simulator: "模拟器",
+    lab: "实验"
+  },
+  en: {
+    none: "None",
+    visualizer: "Visualizer",
+    simulator: "Simulator",
+    lab: "Lab"
   }
 };
 
 const copy = {
   "zh-CN": {
     requires: "前置知识",
-    unlocks: "解锁",
-    noneRequired: "当前种子图中没有前置知识。",
-    noneUnlocked: "当前种子图中没有后续节点。",
-    interaction: "交互目标",
-    noneAssigned: "尚未分配",
-    empty: "还没有知识节点。"
+    unlocks: "接下来",
+    interaction: "交互",
+    none: "无"
   },
   en: {
     requires: "Requires",
-    unlocks: "Unlocks",
-    noneRequired: "No prerequisites in the seed graph.",
-    noneUnlocked: "No dependent seed concepts yet.",
-    interaction: "Interactive target",
-    noneAssigned: "Not assigned yet",
-    empty: "No concepts have been added yet."
+    unlocks: "Next",
+    interaction: "Interaction",
+    none: "None"
   }
 } satisfies Record<FoundationLocale, Record<string, string>>;
 
@@ -75,7 +87,6 @@ export function KnowledgeExplorer({
 }: Readonly<{ concepts: ConceptMetadata[]; locale: FoundationLocale }>) {
   const [selectedId, setSelectedId] = useState(concepts[0]?.id ?? "");
   const text = copy[locale];
-
   const selected = concepts.find((concept) => concept.id === selectedId) ?? concepts[0];
 
   const byId = useMemo(
@@ -83,9 +94,7 @@ export function KnowledgeExplorer({
     [concepts]
   );
 
-  if (!selected) {
-    return <p>{text.empty}</p>;
-  }
+  if (!selected) return null;
 
   const prerequisites = selected.prerequisites
     .map((id) => byId.get(id))
@@ -97,25 +106,25 @@ export function KnowledgeExplorer({
 
   return (
     <div className="explorer">
-      <div className="domain-stack" aria-label="Concept map">
+      <div className="concept-browser">
         {domainOrder.map((domain) => {
           const nodes = concepts.filter((concept) => concept.domain === domain);
           if (nodes.length === 0) return null;
 
           return (
-            <section className="domain-row" key={domain}>
-              <div className="domain-label">{domainLabels[locale][domain]}</div>
-              <div className="concept-row">
+            <section className="concept-group" key={domain}>
+              <h3>{domainLabels[locale][domain]}</h3>
+              <div className="concept-list">
                 {nodes.map((concept) => (
                   <button
-                    className="concept-node"
+                    className="concept-row"
                     data-active={concept.id === selected.id}
                     key={concept.id}
                     onClick={() => setSelectedId(concept.id)}
                     type="button"
                   >
                     <span>{localize(concept.title, locale)}</span>
-                    <small>{depthLabels[locale][concept.depth]}</small>
+                    <span aria-hidden="true">›</span>
                   </button>
                 ))}
               </div>
@@ -124,48 +133,47 @@ export function KnowledgeExplorer({
         })}
       </div>
 
-      <aside className="concept-inspector" aria-live="polite">
-        <div className="inspector-kicker">
+      <aside className="concept-detail" aria-live="polite">
+        <div className="concept-meta">
           {domainLabels[locale][selected.domain]} · {depthLabels[locale][selected.depth]}
         </div>
         <h3>{localize(selected.title, locale)}</h3>
-        <p>{localize(selected.summary, locale)}</p>
+        <p className="concept-summary">{localize(selected.summary, locale)}</p>
 
-        <div className="inspector-block">
-          <h4>{text.requires}</h4>
-          {prerequisites.length > 0 ? (
-            <div className="chip-row">
-              {prerequisites.map((concept) => (
-                <button key={concept.id} type="button" onClick={() => setSelectedId(concept.id)}>
-                  {localize(concept.title, locale)}
-                </button>
-              ))}
-            </div>
-          ) : (
-            <span className="muted">{text.noneRequired}</span>
-          )}
-        </div>
+        <dl className="concept-facts">
+          <div>
+            <dt>{text.requires}</dt>
+            <dd>
+              {prerequisites.length > 0 ? prerequisites.map((concept, index) => (
+                <span key={concept.id}>
+                  <button type="button" onClick={() => setSelectedId(concept.id)}>
+                    {localize(concept.title, locale)}
+                  </button>
+                  {index < prerequisites.length - 1 ? "、" : ""}
+                </span>
+              )) : text.none}
+            </dd>
+          </div>
 
-        <div className="inspector-block">
-          <h4>{text.unlocks}</h4>
-          {unlocks.length > 0 ? (
-            <div className="chip-row">
-              {unlocks.map((concept) => (
-                <button key={concept.id} type="button" onClick={() => setSelectedId(concept.id)}>
-                  {localize(concept.title, locale)}
-                </button>
-              ))}
-            </div>
-          ) : (
-            <span className="muted">{text.noneUnlocked}</span>
-          )}
-        </div>
+          <div>
+            <dt>{text.unlocks}</dt>
+            <dd>
+              {unlocks.length > 0 ? unlocks.map((concept, index) => (
+                <span key={concept.id}>
+                  <button type="button" onClick={() => setSelectedId(concept.id)}>
+                    {localize(concept.title, locale)}
+                  </button>
+                  {index < unlocks.length - 1 ? "、" : ""}
+                </span>
+              )) : text.none}
+            </dd>
+          </div>
 
-        <div className="interaction-callout">
-          <span>{text.interaction}</span>
-          <strong>{selected.interaction.kind}</strong>
-          <small>{selected.interaction.component ?? text.noneAssigned}</small>
-        </div>
+          <div>
+            <dt>{text.interaction}</dt>
+            <dd>{interactionLabels[locale][selected.interaction.kind]}</dd>
+          </div>
+        </dl>
       </aside>
     </div>
   );
