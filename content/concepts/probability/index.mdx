@@ -2,12 +2,313 @@
 
 ## 为什么需要它
 
-语言模型不会直接“吐出一句话”。在每一步，它都在一组候选 token 上表示下一步的不确定性。
+语言模型不是在每一步“知道”下一个 token 是什么，然后把答案吐出来。
 
-## 交互目标
+更接近真实情况的是：模型会先给很多候选 token 一个分数，再把这些分数变成一个**概率分布**。这个分布表达的是：
 
-操作一个离散概率分布，观察归一化、期望和熵如何变化。
+> 在当前上下文下，不同下一步结果分别有多大的概率质量。
+
+之后系统可以选择最大概率结果，也可以按照这个分布采样。
+
+所以如果你想理解 Softmax、sampling、temperature、entropy，甚至 Agent 为什么同一个 prompt 可能走出不同轨迹，第一步都是理解“概率分布到底是什么”。
+
+<Aside kind="context" title="这章先只学离散分布">
+
+概率论很大。这一章只建立离散随机变量的核心直觉：结果集合、概率质量、归一化、期望、熵和采样。条件概率、Bayes、KL divergence、cross-entropy 会在后续真正需要时再展开。
+
+</Aside>
+
+## 不确定性不是一个数，而是一组可能性
+
+假设一个随机变量 `X` 只能取四个值：
+
+<Equation>
+
+**X ∈ {0, 1, 2, 3}**
+
+</Equation>
+
+我们可以给每个结果一个概率：
+
+<Equation label="离散概率分布">
+
+**P(X = xᵢ) = pᵢ**
+
+</Equation>
+
+这些概率必须满足两个条件：
+
+<Equation>
+
+**pᵢ ≥ 0**
+
+**Σᵢ pᵢ = 1**
+
+</Equation>
+
+这就是一个离散概率分布。
+
+例如：
+
+<Equation>
+
+**P(X) = [0.5, 0.3, 0.1, 0.1]**
+
+</Equation>
+
+它不是说结果一定是 0，而是说如果重复从同样的机制采样很多次，0 会比其他结果更常出现。
+
+<Aside kind="definition" title="概率质量">
+
+在离散分布里，可以把总概率 `1` 想成一整块质量。你只是把这块质量分配给不同结果。某个结果拿到更多质量，它被采到的机会就更大。
+
+</Aside>
+
+## 归一化：把任意正权重变成概率
+
+很多时候我们先得到的不是概率，而是一组非负权重：
+
+<Equation>
+
+**w = [5, 3, 1, 1]**
+
+</Equation>
+
+它们的和是 10。只要除以总和，就能得到概率：
+
+<Equation label="归一化">
+
+**pᵢ = wᵢ / Σⱼ wⱼ**
+
+</Equation>
+
+于是：
+
+<Equation>
+
+**[5, 3, 1, 1] → [0.5, 0.3, 0.1, 0.1]**
+
+</Equation>
+
+这里最值得内化的不是除法，而是：
+
+> **概率关心相对质量，而不是原始数值本身。**
+
+把所有权重同时乘 10，归一化后的分布不会变化。
+
+<Aside kind="tip" title="Softmax 不是简单的归一化">
+
+下一章 Softmax 会处理任意实数 logits，包括负数。它会先做指数变换，再归一化。这里先用非负权重，是为了把“归一化”这件事单独看清楚。
+
+</Aside>
+
+## 交互实验
+
+调节下面四个结果的原始权重。页面会自动把它们归一化成概率。
+
+建议依次尝试：
+
+1. 把四个权重设成一样，观察 entropy；
+2. 把全部质量集中到一个结果，观察 entropy；
+3. 保持相对比例不变，把所有权重一起放大，观察概率是否变化；
+4. 在同一个分布上连续点击“采样一次”，观察每次结果是否一样。
+
+<InteractiveBreakout title="Probability Distribution Playground">
+
+<DistributionPlayground locale="zh-CN" />
+
+</InteractiveBreakout>
+
+实验中的柱高代表归一化后的概率，而不是原始权重。
+
+## 期望：如果长期重复，平均会落在哪里
+
+当随机变量的结果是数值时，可以定义期望：
+
+<Equation label="期望">
+
+**E[X] = Σᵢ pᵢ xᵢ**
+
+</Equation>
+
+对于分布 `[0.5, 0.3, 0.1, 0.1]` 和结果 `{0,1,2,3}`：
+
+<Equation>
+
+**E[X] = 0×0.5 + 1×0.3 + 2×0.1 + 3×0.1 = 0.8**
+
+</Equation>
+
+注意：`0.8` 甚至不是一个可能被采样到的结果。
+
+所以期望不是“最可能结果”，而是概率加权后的长期平均位置。
+
+<Aside kind="definition" title="期望 ≠ argmax">
+
+`argmax` 问的是“哪个单个结果概率最大”；期望问的是“把所有结果按概率加权后，平均落在哪里”。对 token 这种类别型结果，token ID 的数值本身没有自然意义，因此通常不会对 token ID 求期望。
+
+</Aside>
+
+## 熵：分布有多不确定
+
+两个分布可能拥有相同数量的候选结果，但不确定程度完全不同：
+
+- `[1, 0, 0, 0]`：结果已经确定；
+- `[0.25, 0.25, 0.25, 0.25]`：四个结果同样可能。
+
+Shannon entropy 用一个数来描述这种不确定程度：
+
+<Equation label="Shannon entropy">
+
+**H(X) = -Σᵢ pᵢ log₂ pᵢ**
+
+</Equation>
+
+使用 `log₂` 时，单位是 bits。
+
+对于四个结果：
+
+- 完全确定分布的 entropy 是 `0 bits`；
+- 完全均匀分布的 entropy 是 `log₂4 = 2 bits`。
+
+直觉上：**概率质量越集中，熵越低；越平均地铺开，熵越高。**
+
+<Aside kind="tip" title="熵不是“错误率”">
+
+高 entropy 表示分布更分散、更不确定，不代表模型一定更容易答错。低 entropy 也只说明模型的分布更集中，不保证它集中在正确答案上。
+
+</Aside>
+
+## 分布和采样是两件不同的事
+
+概率分布描述的是一个生成机制；采样是从这个机制里真正取一次结果。
+
+如果：
+
+<Equation>
+
+**P(X) = [0.5, 0.3, 0.1, 0.1]**
+
+</Equation>
+
+那么一次采样可能得到 2，即使 2 只有 10% 概率。
+
+这不是系统“违反概率”，恰恰是概率的含义。
+
+重复采样很多次以后，各结果出现的频率才会逐渐接近原始概率。
+
+<Aside kind="definition" title="distribution ≠ sample">
+
+分布是一整组可能性；sample 是一次具体实现。Agent 轨迹也是一样：模型内部可以有一个分布，而实际运行时只会落到某一个 token、某一个 tool call、某一条路径上。
+
+</Aside>
+
+## 最小实现
+
+下面只实现离散分布最基本的三个操作：归一化、期望和熵。
+
+<CodeStep title="distribution.ts">
+
+~~~ts
+function normalize(weights: number[]): number[] {
+  const total = weights.reduce((sum, value) => sum + value, 0);
+
+  if (total <= 0) {
+    throw new Error("weights must contain positive mass");
+  }
+
+  return weights.map((value) => value / total);
+}
+
+function expectation(values: number[], probabilities: number[]): number {
+  return values.reduce(
+    (sum, value, index) => sum + value * probabilities[index]!,
+    0
+  );
+}
+
+function entropyBits(probabilities: number[]): number {
+  return probabilities.reduce((sum, probability) => {
+    if (probability === 0) return sum;
+    return sum - probability * Math.log2(probability);
+  }, 0);
+}
+~~~
+
+</CodeStep>
+
+这里 `p = 0` 时跳过，是因为极限意义下 `p log p → 0`。
+
+## 与 LLM 的关系
+
+语言模型在每个 decode step 都会为 vocabulary 中的候选 token 产生一组 logits。
+
+logits 还不是概率。下一章会看到 Softmax 如何把它们转换成：
+
+<Equation>
+
+**P(next token | context)**
+
+</Equation>
+
+这个分布随后可以进入：
+
+- greedy / argmax 选择；
+- temperature 调整；
+- top-k / top-p 截断；
+- sampling。
+
+因此生成文本本质上是一个不断重复的过程：
+
+> **context → distribution → choose/sample token → append token → new context**
+
+<Aside kind="source" title="一个重要的校准问题">
+
+next-token probability 是模型在 token 空间中的条件分布。它不能被简单解释成“这句话有 82% 概率是真的”。事实置信度、校准和不确定性估计是另外的问题。
+
+</Aside>
 
 ## 与 Agent 的关系
 
-即使 Agent 外层运行时是确定性的，模型内部的决策仍来自概率分布。
+Agent Runtime 外层可以写得非常确定：状态机、tool schema、timeout、retry 都可以是明确规则。
+
+但只要中间有 LLM decision，内部就仍然存在概率分布。
+
+这会直接影响：
+
+- 同一个任务为什么可能生成不同计划；
+- 为什么 tool call 可能出现不同参数；
+- 为什么 temperature 会改变行为稳定性；
+- 为什么评测 Agent 不能只运行一次；
+- 为什么“模型非常确定地说错话”是可能发生的。
+
+所以概率分布不是只属于模型训练的数学知识，它也是理解 Agent 行为波动和评测方法的基础。
+
+<Aside kind="source" title="下一步">
+
+现在我们已经有“什么是概率分布”的目标对象。下一章 Softmax 会回答：模型产生的是任意实数 logits，怎样稳定地把它们变成一个合法概率分布？
+
+</Aside>
+
+## 练习
+
+<Challenge title="检查你的直觉">
+
+1. 两组权重 `[1,2,7]` 与 `[10,20,70]` 归一化以后是否相同？为什么？
+2. 分布 `[0.5,0.5]` 的期望一定是一个可采样结果吗？举一个反例。
+3. 在四分类问题中，哪个 entropy 更高：`[0.7,0.1,0.1,0.1]` 还是 `[0.4,0.3,0.2,0.1]`？先凭直觉判断，再计算。
+4. 为什么一次采样得到低概率结果，并不意味着概率分布“错了”？
+5. 如果一个模型对错误答案分配 0.99 概率，它的 entropy 高还是低？这说明了 entropy 的什么局限？
+6. 用自己的话解释 distribution、argmax、sample 三者的区别。
+
+</Challenge>
+
+## 参考资料
+
+<ReferenceList>
+
+- [MIT OpenCourseWare — Introduction to Probability and Statistics](https://ocw.mit.edu/courses/18-05-introduction-to-probability-and-statistics-spring-2014/)
+- [Deep Learning — Probability and Information Theory](https://www.deeplearningbook.org/contents/prob.html)
+- [A Mathematical Theory of Communication — Claude Shannon](https://people.math.harvard.edu/~ctm/home/text/others/shannon/entropy/entropy.pdf)
+
+</ReferenceList>

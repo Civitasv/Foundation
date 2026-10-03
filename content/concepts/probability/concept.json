@@ -5,12 +5,12 @@
     "en": "Probability Distribution"
   },
   "summary": {
-    "zh-CN": "把不确定性表示成多个可能结果上的概率分布。",
-    "en": "Reason about uncertainty as a distribution over possible outcomes."
+    "zh-CN": "把不确定性表示成多个可能结果上的概率质量，并建立归一化、期望、熵与采样的直觉。",
+    "en": "Represent uncertainty as probability mass over possible outcomes and build intuition for normalization, expectation, entropy, and sampling."
   },
   "domain": "foundations",
   "depth": "understanding",
-  "status": "seed",
+  "status": "ai-draft",
   "prerequisites": [],
   "interaction": {
     "kind": "visualizer",
