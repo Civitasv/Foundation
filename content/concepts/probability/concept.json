@@ -1,0 +1,17 @@
+{
+  "id": "probability",
+  "title": "Probability Distribution",
+  "summary": "Reason about uncertainty as a distribution over possible outcomes.",
+  "domain": "foundations",
+  "depth": "understanding",
+  "status": "seed",
+  "prerequisites": [],
+  "interaction": {
+    "kind": "visualizer",
+    "component": "DistributionPlayground"
+  },
+  "tags": [
+    "probability",
+    "uncertainty"
+  ]
+}

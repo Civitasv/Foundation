@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://foundation.dev/schema/concept.schema.json",
+  "title": "Foundation Concept",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "title", "summary", "domain", "depth", "status", "prerequisites", "interaction", "tags"],
+  "properties": {
+    "id": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
+    "title": { "type": "string", "minLength": 1 },
+    "summary": { "type": "string", "minLength": 1 },
+    "domain": { "enum": ["foundations", "models", "agents", "systems", "production"] },
+    "depth": { "enum": ["awareness", "understanding", "implementation", "deep-dive"] },
+    "status": { "enum": ["seed", "draft", "review", "complete"] },
+    "prerequisites": { "type": "array", "uniqueItems": true, "items": { "type": "string" } },
+    "interaction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind"],
+      "properties": {
+        "kind": { "enum": ["none", "visualizer", "simulator", "lab"] },
+        "component": { "type": "string", "minLength": 1 }
+      }
+    },
+    "tags": { "type": "array", "uniqueItems": true, "items": { "type": "string" } }
+  }
+}

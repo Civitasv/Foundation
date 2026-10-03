@@ -1,0 +1,28 @@
+name: Feature
+description: Propose a product, architecture, or interaction change.
+title: "feat: "
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What learning or engineering problem should this solve?
+    validations:
+      required: true
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Desired outcome
+      description: Describe the observable result, not only an implementation.
+    validations:
+      required: true
+  - type: textarea
+    id: contract
+    attributes:
+      label: Contract / architecture notes
+      description: What durable contract or boundary is affected?
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Acceptance evidence
+      description: What would demonstrate that this is complete?

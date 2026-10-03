@@ -1,0 +1,19 @@
+{
+  "id": "softmax",
+  "title": "Softmax",
+  "summary": "Turn arbitrary scores into a probability distribution and see how relative scale changes decisions.",
+  "domain": "foundations",
+  "depth": "implementation",
+  "status": "seed",
+  "prerequisites": [
+    "probability"
+  ],
+  "interaction": {
+    "kind": "visualizer",
+    "component": "SoftmaxTemperaturePlayground"
+  },
+  "tags": [
+    "probability",
+    "sampling"
+  ]
+}

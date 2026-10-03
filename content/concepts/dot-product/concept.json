@@ -1,0 +1,19 @@
+{
+  "id": "dot-product",
+  "title": "Dot Product",
+  "summary": "Measure directional alignment and build the intuition behind similarity and attention scores.",
+  "domain": "foundations",
+  "depth": "implementation",
+  "status": "seed",
+  "prerequisites": [
+    "vector"
+  ],
+  "interaction": {
+    "kind": "visualizer",
+    "component": "DotProductPlayground"
+  },
+  "tags": [
+    "linear-algebra",
+    "similarity"
+  ]
+}

@@ -1,0 +1,28 @@
+name: Concept content
+description: Add or improve a concept in the knowledge graph.
+title: "content: "
+body:
+  - type: input
+    id: concept
+    attributes:
+      label: Concept ID
+      placeholder: self-attention
+    validations:
+      required: true
+  - type: textarea
+    id: gap
+    attributes:
+      label: Learning gap
+      description: What should a learner understand after this change?
+    validations:
+      required: true
+  - type: textarea
+    id: prerequisites
+    attributes:
+      label: Prerequisites
+      description: Which existing concepts should come first?
+  - type: textarea
+    id: interaction
+    attributes:
+      label: Interactive idea
+      description: What should the learner manipulate, simulate, inspect, or build?
