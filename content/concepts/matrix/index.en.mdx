@@ -1,115 +1,70 @@
 # Matrix
 
-## Why it exists
+## Abstract
 
-If vectors are the basic objects models use to represent information, matrices are the basic rules that **change those representations**.
+Matrices can store batches of data or represent linear transformations once bases are chosen. Distinguishing these roles helps make neural-network formulas readable. This chapter derives multiplication from the images of basis vectors, uses two-dimensional examples to examine determinants, rank, and invertibility, then extends composition to batched representations and Transformer computations. Geometry, entry-wise calculation, and model applications are compared throughout, with particular attention to dimensions and information preservation rather than calling every matrix operation a projection.
 
-Neural networks repeatedly use expressions like:
+## From a representation to a transformation
 
-<Equation>
+The vector chapter examined how coordinates represent objects. How can we change a representation systematically? Doubling the horizontal coordinate of every point, or converting three input features into two scores, calls for a rule that applies to many inputs.
 
-**y = Ax**
+A matrix can encode that rule. In `y = Ax`, x is the input, A specifies a transformation, and y is the output. But a matrix can also simply arrange data: each row of a table might contain a sample, or each row of a model input might contain a token representation. The same two-dimensional array can play different roles. Identifying data and parameters, then checking their operations, is often more useful than looking at multiplication alone.
 
-</Equation>
+<Aside kind="context" title="Reading prerequisites">
 
-and Transformers use:
-
-<Equation>
-
-**Q = XW_Q,   K = XW_K,   V = XW_V**
-
-</Equation>
-
-These are often introduced as matrix multiplication. A more durable interpretation is: **a matrix maps representations from one vector space into another.**
-
-So this chapter treats a matrix as a function you can inspect, compose, and reason about — not merely a table of numbers.
-
-<Aside kind="context" title="Prerequisites">
-
-You only need vectors, vector addition, and scalar multiplication. Dot products are not required for the first half, but they reappear naturally when matrix multiplication connects to Attention.
+This chapter builds on [Vector](/en/concepts/vector/), vector addition, and scalar multiplication. The geometric examples use column vectors. Dot products appear in entry-wise calculations, but the derivation can begin directly with linear combinations.
 
 </Aside>
 
-## A matrix is first a transformation
+## How a linear transformation determines matrix columns
 
-Consider a 2×2 matrix:
+### What linearity preserves
 
-<Equation label="2×2 matrix">
+A linear transformation T satisfies:
 
-**A = [[a, b], [c, d]]**
+<Equation label="The two conditions of linearity">
 
-</Equation>
+**T(u + v) = T(u) + T(v)**
 
-Apply it to the column vector `v = [x, y]ᵀ`:
-
-<Equation label="Matrix acting on a vector">
-
-**Av = [ax + by, cx + dy]ᵀ**
+**T(αv) = αT(v)**
 
 </Equation>
 
-You can read this as four multiplications and two additions. That is computationally correct, but conceptually weak.
+These conditions let us decompose an input, transform its pieces, and recombine them with the original coefficients. They also imply `T(0) = 0`. Rotation about the origin and scaling along coordinate axes can be linear; moving every point one unit right cannot.
 
-A better question is:
+<Aside kind="definition" title="Matrices and bases">
 
-> What does this matrix do to the whole space?
-
-Apply the same matrix to every point of a 2D grid. Lines remain lines and the origin stays fixed, but the grid can rotate, stretch, shrink, shear, reflect, or collapse onto a lower-dimensional shape.
-
-<Aside kind="definition" title="Linear transformation">
-
-Matrices represent linear transformations. They preserve two structures: `A(u + v) = Au + Av` and `A(αv) = αAv`. Transforming after addition is the same as transforming each vector first and then adding.
+In finite-dimensional spaces, choosing input and output bases gives each linear transformation a matrix representation. Changing bases can change the matrix describing the same map. We use standard bases here to concentrate on the transformation itself.
 
 </Aside>
 
-## The columns tell you where the basis vectors go
+### Deriving multiplication from two basis vectors
 
-The standard basis vectors in 2D are:
+Let `e₁ = [1, 0]ᵀ` and `e₂ = [0, 1]ᵀ`. Suppose their desired images are `[2, 1]ᵀ` and `[-1, 1]ᵀ`. Place those images in columns:
 
-<Equation>
+<Equation label="Constructing a matrix from basis-vector images">
 
-**e₁ = [1, 0]ᵀ,   e₂ = [0, 1]ᵀ**
+**A = [[2, -1], [1, 1]]**
 
-</Equation>
-
-Apply A:
-
-<Equation label="Columns of a matrix">
-
-**Ae₁ = [a, c]ᵀ**
-
-**Ae₂ = [b, d]ᵀ**
+**Ae₁ = [2, 1]ᵀ,　Ae₂ = [-1, 1]ᵀ**
 
 </Equation>
 
-So **the first column tells you where e₁ goes, and the second column tells you where e₂ goes.**
+Each inner pair of brackets denotes a row. Since every `v = [x, y]ᵀ` equals `xe₁ + ye₂`, linearity gives:
 
-Any vector can be written as `v = xe₁ + ye₂`, therefore:
+<Equation label="Input coordinates combine the columns">
 
-<Equation>
-
-**Av = xAe₁ + yAe₂**
+**Av = xAe₁ + yAe₂ = [2x - y, x + y]ᵀ**
 
 </Equation>
 
-Once you know where the basis vectors go, you know the transformation of the entire plane.
+For `v = [3, 2]ᵀ`, the result is `3[2, 1]ᵀ + 2[-1, 1]ᵀ = [4, 5]ᵀ`. This gives the multiplication rule its purpose: multiply the first column by the first input coordinate, the second column by the second coordinate, and add.
 
-<Aside kind="tip" title="Do not memorize the multiplication rule first">
+For a general `A = [[a, b], [c, d]]`, we obtain `Av = [ax + by, cx + dy]ᵀ`. The column view combines transformed basis vectors; the row view calculates each output component as a weighted sum of the input. They describe the same operation. Columns help visualize the space, while rows make individual outputs easy to check.
 
-If `ax + by` and `cx + dy` feel arbitrary, return to the basis-vector view. Matrix-vector multiplication is simply recombining the transformed basis vectors using the input coordinates.
+## Interactive experiment: from basis vectors to a plane
 
-</Aside>
-
-## Interactive experiment
-
-The blue and orange endpoints below are the transformed basis vectors e₁ and e₂. Dragging them directly edits the two columns of the matrix.
-
-Try to observe:
-
-1. what changes when only the first column moves;
-2. how area changes when both basis vectors become longer;
-3. what happens when both columns lie on the same line;
-4. how rotation, scale, shear, and reflection differ.
+The experiment displays A's columns as draggable arrows, with controls for its four entries. A faint gray grid shows the original space; the blue grid shows the transformed space. Set the matrix to `[[2, -1], [1, 1]]`. The fixed example input `[2, 1]ᵀ` should become `[3, 3]ᵀ`, which can be checked directly with the preceding formula.
 
 <InteractiveBreakout title="Explore matrix transformations">
 
@@ -117,92 +72,97 @@ Try to observe:
 
 </InteractiveBreakout>
 
-The faint gray grid is the original space. The blue grid is the transformed space.
+Compare several transformations. `[[2, 0], [0, 1]]` doubles horizontal lengths while leaving vertical lengths alone. `[[1, 1], [0, 1]]` replaces each horizontal coordinate with `x + y`, producing a shear. `[[-1, 0], [0, 1]]` reflects across the vertical axis. The rotation preset changes directions while preserving lengths and angles.
 
-## Determinant: stretch, flip, or collapse
+These examples share linearity, but not every geometric property. A general matrix need not preserve lengths or angles. A line may map to a line or collapse to a point; the grid can degenerate, though the origin remains fixed. Making the second column a multiple of the first shows such a collapse. Rank and determinant describe it numerically.
 
-For a 2×2 matrix:
+## Determinant, rank, and lost information
 
-<Equation label="2×2 determinant">
+### Area scaling is not length scaling
+
+The unit square has edges e₁ and e₂. After transformation they become the matrix columns, enclosing a parallelogram of area `|ad - bc|`. The determinant records area scaling and orientation:
+
+<Equation label="Two-dimensional determinant">
 
 **det(A) = ad - bc**
 
 </Equation>
 
-One of the determinant's most useful geometric meanings is **signed area scale**.
+For `[[2, -1], [1, 1]]`, the determinant is 3, so areas triple. A negative determinant reverses orientation, while its absolute value still gives the area factor. `[[-1, 0], [0, 1]]` has determinant -1: it preserves area and reverses orientation.
 
-- `|det(A)| = 2`: area doubles;
-- `|det(A)| = 0.5`: area is halved;
-- `det(A) < 0`: orientation flips as well as scaling;
-- `det(A) = 0`: the plane collapses into a lower-dimensional space and information is lost.
+The determinant does not describe every geometric change. `[[2, 0], [0, 0.5]]` has determinant 1 while stretching horizontally and compressing vertically. Preserving area does not imply preserving lengths or angles, and does not identify a rotation.
 
-<Aside kind="derivation" title="Why det = 0 is special">
+### Why different inputs can share an output
 
-If the two columns become collinear, they no longer span a plane. Distinct inputs can map to the same output, so the transformation is not invertible.
+Consider `P = [[1, 0], [0, 0]]`. It sends `[x, y]ᵀ` to `[x, 0]ᵀ`, so both `[2, 1]ᵀ` and `[2, 7]ᵀ` become `[2, 0]ᵀ`. The output cannot recover the second input coordinate. Information has been irreversibly lost.
+
+A matrix's rank is the dimension spanned by its columns. P spans only the horizontal axis and has rank 1. The zero matrix has rank 0; a two-dimensional square matrix with independent columns has rank 2. For square matrices, a nonzero determinant, full rank, and invertibility are equivalent conditions.
+
+<Aside kind="derivation" title="The null space identifies differences that disappear">
+
+Inputs mapped to zero form the null space. If `Az = 0`, then `A(v + z) = Av`: inputs differing by z have the same output. For P, every `[0, y]ᵀ` lies in the null space, so vertical differences disappear completely.
 
 </Aside>
 
-## Matrix multiplication is composition
+Neural networks often use rectangular matrices. They have no ordinary determinant, but rank still applies. A linear map from three dimensions to two has rank at most 2 and must lose some input distinctions. In the other direction, mapping two dimensions into three gives outputs with three coordinates, but the reachable representations still occupy at most a two-dimensional subspace. Additional coordinates alone do not create independent information.
 
-Suppose A transforms first and B transforms second:
+Compression can be useful. If a task depends only on x, discarding y may be appropriate. The engineering question is whether the distinctions removed remain necessary for subsequent work.
 
-<Equation>
+## Why composition has an order
 
-**v → Av → B(Av)**
+Applying A and then B takes a column vector through `v → Av → B(Av)`. Matrix multiplication represents the combined action:
 
-</Equation>
-
-The two transformations can be combined:
-
-<Equation label="Composed transformation">
+<Equation label="Matrix multiplication represents composition">
 
 **B(Av) = (BA)v**
 
 </Equation>
 
-The most useful interpretation is:
+Column j of BA is B applied to column j of A. That column of A records the first destination of basis vector j; applying B records its destination after both steps. This also derives the row-by-column algorithm: each entry of BA sums products of corresponding entries from a row of B and a column of A.
 
-> **Matrix multiplication = composition of linear transformations.**
+A small example exposes the effect of order. Let S double the horizontal coordinate and R rotate 90° counterclockwise about the origin:
 
-Order matters. With the column-vector convention, `BA` means A first, then B. Usually `AB ≠ BA`, because rotate-then-shear is not the same as shear-then-rotate.
+<Equation label="Scaling first and rotating first give different results">
 
-<Aside kind="tip" title="Row times column is an algorithm, not the essence">
+**S = [[2, 0], [0, 1]],　R = [[0, -1], [1, 0]]**
 
-The row-by-column rule tells you how to compute matrix multiplication. Composition tells you why the operation is defined that way.
+**RS[1, 0]ᵀ = [0, 2]ᵀ**
 
-</Aside>
-
-## From one vector to a batch of vectors
-
-Neural networks rarely process one vector at a time. They stack many vectors into a matrix.
-
-If n token hidden states form X:
-
-<Equation>
-
-**X ∈ ℝⁿˣᵈ**
+**SR[1, 0]ᵀ = [0, 1]ᵀ**
 
 </Equation>
 
-and a learned weight matrix is `W ∈ ℝᵈˣᵏ`, then:
+The difference comes from the direction in which scaling acts. After rotation, the initially horizontal vector is on the vertical axis, where S does not stretch it. Matrix multiplication is generally noncommutative, though it is associative: `C(BA) = (CB)A` whenever dimensions match.
 
-<Equation>
+Composition also explains why neural networks need nonlinear operations. A sequence of purely linear layers combines into one matrix. Adding biases without other nonlinear operations still leaves an affine map after composition. Nonlinearity between layers allows the network to go beyond that restriction.
 
-**Y = XW,   Y ∈ ℝⁿˣᵏ**
+## Data matrices and batch computation
+
+So far, vectors have been columns. A matrix A with m rows and d columns maps a d-dimensional input to an m-dimensional output. Implementations also commonly store batches of inputs as rows. Let X contain n token representations of dimension d, and W have d rows and k columns:
+
+<Equation label="Dimensions of a batched transformation">
+
+**X ∈ ℝⁿˣᵈ,　W ∈ ℝᵈˣᵏ**
+
+**Y = XW ∈ ℝⁿˣᵏ**
 
 </Equation>
 
-This is the same linear transformation W applied in batch to every token representation.
+The shared dimension d indexes the features being summed over. The result retains n tokens, each with k output components. X carries data; W carries shared transformation parameters. This operation alone does not mix tokens: each row is transformed independently using the same W.
 
-<Aside kind="definition" title="Why Av here, but XW in deep-learning code?">
+For example, take `X = [[1, 2], [3, 4]]` and `W = [[2], [-1]]`. The first row produces `1×2 + 2×(-1) = 0`, and the second produces `3×2 + 4×(-1) = 2`. The result is `[[0], [2]]`: the same rule applied twice.
 
-The visualizer uses column vectors, so a transformation is written `Av`. Deep-learning libraries commonly store token representations as rows, so the batch form becomes `XW`. The underlying linear map is the same; only the storage and transpose convention differ.
+<Aside kind="definition" title="Relating row and column conventions">
+
+Transposing the column-vector expression `y = Ax` gives `yᵀ = xᵀAᵀ`. The same transformation therefore uses `W = Aᵀ` with row vectors; the matrix cannot simply be moved unchanged to the other side. Transposition swaps rows and columns: an m×d matrix becomes d×m.
 
 </Aside>
 
-## Minimal implementation
+A neural-network linear layer often includes a bias, `y = Ax + b`. Strictly, this is affine: A transforms the representation and b translates the result. With a nonzero bias, the origin is no longer fixed. “Linear layer” is conventional terminology, but the distinction matters in a derivation.
 
-First implement matrix-vector multiplication, then matrix-matrix multiplication.
+## Minimal implementation and input assumptions
+
+The implementation gives matrix–vector multiplication, transposition, and matrix–matrix multiplication. It assumes nonempty rectangular matrices containing finite real values and compatible multiplication dimensions. The `!` assertions tell TypeScript that indexed values exist; they do not perform runtime checks.
 
 <CodeStep title="matrix.ts">
 
@@ -235,50 +195,39 @@ function matMul(a: Matrix, b: Matrix): Matrix {
 
 </CodeStep>
 
-Matrix multiplication repeatedly uses the previous chapter's dot product: one row dotted with one column gives one output entry.
+`matVec([[2, -1], [1, 1]], [3, 2])` returns `[4, 5]`. `matMul([[1, 2], [3, 4]], [[2], [-1]])` returns `[[0], [2]]`. Passing R and S to `matMul` in both orders checks the rotation-and-scaling example. The repeated operation of multiplying corresponding values and summing them is the [dot product](/en/concepts/dot-product/).
 
-The dependency chain is now visible:
+The code exposes the computation without handling ragged arrays, incompatible dimensions, or large-scale efficiency. A shorter-than-expected row can introduce missing values and produce `NaN`. Real inputs require validation of the assumptions; large models ordinarily delegate these operations to tensor libraries and optimized numerical implementations.
 
-> **Vector → Dot Product → Matrix Multiplication → Attention.**
+## Identifying matrix roles in a Transformer
 
-## Connection to Transformers and Agents
+Consider one self-attention head. Rows of X hold token representations. Three weight matrices form queries, keys, and values, then a query–key product produces scores between positions. The Transformer paper gives a concrete use of these operations. [Vaswani et al., 2017](https://arxiv.org/abs/1706.03762).
 
-### Q, K, and V are learned projections
+<Equation label="From feature transformations to position comparisons">
 
-Self Attention begins with:
+**Q = XW_Q,　K = XW_K,　V = XW_V**
 
-<Equation>
-
-**Q = XW_Q**
-
-**K = XW_K**
-
-**V = XW_V**
+**Q, K: n × dₖ;　QKᵀ: n × n**
 
 </Equation>
 
-`W_Q`, `W_K`, and `W_V` are learned matrices. They map the same token representation X into three different representation spaces, giving the model different roles for matching and carrying information.
+Here dₖ is the query and key dimension. Entry i,j of QKᵀ is the dot product between query i and key j. Whereas XW transforms features independently within rows, this operation compares positions. Scores still need scaling, any required mask, and [Softmax](/en/concepts/softmax/) to obtain weights. Multiplying those weights by V aggregates information across positions. [Self Attention](/en/concepts/self-attention/) develops the full mechanism.
 
-Then `QKᵀ` is another matrix multiplication, and every entry inside it is a Query-Key dot product.
+These learned matrices are often called projections, but usually mean general linear maps. A mathematical projection satisfies `P² = P`; an orthogonal projection has additional conditions. Q/K/V weights are not generally constrained in that way. Describing a query as “what I am looking for” can illustrate its role, but which information the map extracts depends on training.
 
-### Linear layers are the model's basic transformers
+## Discussion: calculating and interpreting
 
-Attention projections, MLPs, and output projections all rely on learned matrices. Training learns many useful linear transformations and combines them with nonlinearities, normalization, and residual paths.
+Geometry shows how matrices act on spaces, entry-wise calculations verify outputs, and dimension analysis helps locate code errors. These views support one another. Two-dimensional pictures can invite excessive interpretation of high-dimensional models, while array arithmetic alone can conceal how information changes or disappears.
 
-For an Agent, prompts, tool results, and memory look like text and structured data at the system layer. Once they enter the model, they are repeatedly projected into new internal vector representations by learned matrices.
+For agents, user requests, tool results, and retrieved material enter the model's representation computations. Correct matrix shapes and expected output dimensions establish local computational consistency; they do not establish that the system understood a task or completed an operation. Evaluation still needs model outputs and execution results.
 
-<Aside kind="source" title="Where this leads">
+This chapter offers a way to read formulas: identify what each matrix carries, check its input and output spaces, then follow composition and information preservation. Vectors, matrices, and dot products form one connected line of reasoning. Probability distributions and Softmax add weights and selection. Together, they make attention's calculations possible to unpack step by step.
 
-Matrices and dot products now cover the linear-algebra side of Attention. The other prerequisite branch is Probability → Softmax. Once those branches meet, Self Attention can be opened end to end.
-
-</Aside>
-
-## References
+## References and further reading
 
 <ReferenceList>
 
-- [3Blue1Brown — Linear transformations and matrices](https://www.3blue1brown.com/lessons/linear-transformations)
-- [MIT OpenCourseWare — Linear Algebra (18.06)](https://ocw.mit.edu/courses/18-06-linear-algebra-spring-2010/)
-- [Attention Is All You Need](https://arxiv.org/abs/1706.03762)
+- Strang, G. (2010). [Linear Algebra, 18.06](https://ocw.mit.edu/courses/18-06-linear-algebra-spring-2010/). MIT OpenCourseWare. A systematic course on linear transformations, column and null spaces, rank, and determinants.
+- Vaswani, A., et al. (2017). [Attention Is All You Need](https://arxiv.org/abs/1706.03762). *NeurIPS*. Section 3 combines matrix transformations, position comparisons, and information aggregation in the Transformer.
 
 </ReferenceList>
