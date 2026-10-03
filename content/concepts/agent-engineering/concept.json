@@ -5,8 +5,8 @@
     "en": "From Turing Machines to Large Language Models"
   },
   "summary": {
-    "zh-CN": "沿计算理论、网络与数据、机器学习和深度学习的历史脉络，理解大语言模型的形成，并连接其数学基础与 Agent 系统。",
-    "en": "Trace computation, networks and data, machine learning, and deep learning to understand the formation of large language models and their connections to mathematics and agent systems."
+    "zh-CN": "从可计算性、表示学习与语言预测出发，比较大模型形成的关键方法与条件，讨论任务迁移的依据及其进入 Agent 系统后的局限。",
+    "en": "Examine computability, representation learning, and language prediction to understand how large models develop reusable capabilities and what remains unresolved in agent systems."
   },
   "domain": "systems",
   "depth": "awareness",
