@@ -16,6 +16,12 @@ validation   graph rules    ordering
                    v
                 apps/web
         Learn / Explore / Build
+                   |
+                   v
+            static export
+                   |
+                   v
+             GitHub Pages
 ```
 
 ## Why this boundary exists
@@ -38,9 +44,13 @@ Deterministic graph semantics. This layer validates IDs, prerequisites, cycles, 
 
 The first product surface. It can render any projection of the graph but does not own the graph.
 
+The current hosting contract is a Next.js static export. Repository-backed content is compiled at build time and the generated `apps/web/out` artifact is deployed to GitHub Pages.
+
 ### Future adapters
 
 AI tutors, search indexes, export tools, or alternate front ends should consume the same knowledge boundary rather than scraping UI code.
+
+If a future capability genuinely requires request-time server execution, change the deployment contract explicitly instead of quietly introducing server-only behavior into the web layer.
 
 ## Non-goals for M0
 
