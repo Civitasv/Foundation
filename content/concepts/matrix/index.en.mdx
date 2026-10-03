@@ -2,12 +2,296 @@
 
 ## Why it exists
 
-A matrix becomes much more intuitive when viewed as a transformation of vectors.
+If vectors are the basic objects models use to represent information, matrices are the basic rules that **change those representations**.
 
-## Interactive target
+Neural networks repeatedly use expressions like:
 
-Drag basis vectors and watch a grid rotate, scale, or shear under a matrix.
+<Equation>
 
-## Connection to agents
+**y = Ax**
 
-Expressions such as Q = XW are matrix transformations. Understanding them spatially makes Transformer projections easier to reason about.
+</Equation>
+
+and Transformers use:
+
+<Equation>
+
+**Q = XW_Q,   K = XW_K,   V = XW_V**
+
+</Equation>
+
+These are often introduced as matrix multiplication. A more durable interpretation is: **a matrix maps representations from one vector space into another.**
+
+So this chapter treats a matrix as a function you can inspect, compose, and reason about — not merely a table of numbers.
+
+<Aside kind="context" title="Prerequisites">
+
+You only need vectors, vector addition, and scalar multiplication. Dot products are not required for the first half, but they reappear naturally when matrix multiplication connects to Attention.
+
+</Aside>
+
+## A matrix is first a transformation
+
+Consider a 2×2 matrix:
+
+<Equation label="2×2 matrix">
+
+**A = [[a, b], [c, d]]**
+
+</Equation>
+
+Apply it to the column vector `v = [x, y]ᵀ`:
+
+<Equation label="Matrix acting on a vector">
+
+**Av = [ax + by, cx + dy]ᵀ**
+
+</Equation>
+
+You can read this as four multiplications and two additions. That is computationally correct, but conceptually weak.
+
+A better question is:
+
+> What does this matrix do to the whole space?
+
+Apply the same matrix to every point of a 2D grid. Lines remain lines and the origin stays fixed, but the grid can rotate, stretch, shrink, shear, reflect, or collapse onto a lower-dimensional shape.
+
+<Aside kind="definition" title="Linear transformation">
+
+Matrices represent linear transformations. They preserve two structures: `A(u + v) = Au + Av` and `A(αv) = αAv`. Transforming after addition is the same as transforming each vector first and then adding.
+
+</Aside>
+
+## The columns tell you where the basis vectors go
+
+The standard basis vectors in 2D are:
+
+<Equation>
+
+**e₁ = [1, 0]ᵀ,   e₂ = [0, 1]ᵀ**
+
+</Equation>
+
+Apply A:
+
+<Equation label="Columns of a matrix">
+
+**Ae₁ = [a, c]ᵀ**
+
+**Ae₂ = [b, d]ᵀ**
+
+</Equation>
+
+So **the first column tells you where e₁ goes, and the second column tells you where e₂ goes.**
+
+Any vector can be written as `v = xe₁ + ye₂`, therefore:
+
+<Equation>
+
+**Av = xAe₁ + yAe₂**
+
+</Equation>
+
+Once you know where the basis vectors go, you know the transformation of the entire plane.
+
+<Aside kind="tip" title="Do not memorize the multiplication rule first">
+
+If `ax + by` and `cx + dy` feel arbitrary, return to the basis-vector view. Matrix-vector multiplication is simply recombining the transformed basis vectors using the input coordinates.
+
+</Aside>
+
+## Interactive experiment
+
+The blue and orange endpoints below are the transformed basis vectors e₁ and e₂. Dragging them directly edits the two columns of the matrix.
+
+Try to observe:
+
+1. what changes when only the first column moves;
+2. how area changes when both basis vectors become longer;
+3. what happens when both columns lie on the same line;
+4. how rotation, scale, shear, and reflection differ.
+
+<InteractiveBreakout title="Matrix Transformation Playground">
+
+<MatrixTransformPlayground locale="en" />
+
+</InteractiveBreakout>
+
+The faint gray grid is the original space. The blue grid is the transformed space.
+
+## Determinant: stretch, flip, or collapse
+
+For a 2×2 matrix:
+
+<Equation label="2×2 determinant">
+
+**det(A) = ad - bc**
+
+</Equation>
+
+One of the determinant's most useful geometric meanings is **signed area scale**.
+
+- `|det(A)| = 2`: area doubles;
+- `|det(A)| = 0.5`: area is halved;
+- `det(A) < 0`: orientation flips as well as scaling;
+- `det(A) = 0`: the plane collapses into a lower-dimensional space and information is lost.
+
+<Aside kind="derivation" title="Why det = 0 is special">
+
+If the two columns become collinear, they no longer span a plane. Distinct inputs can map to the same output, so the transformation is not invertible.
+
+</Aside>
+
+## Matrix multiplication is composition
+
+Suppose A transforms first and B transforms second:
+
+<Equation>
+
+**v → Av → B(Av)**
+
+</Equation>
+
+The two transformations can be combined:
+
+<Equation label="Composed transformation">
+
+**B(Av) = (BA)v**
+
+</Equation>
+
+The most useful interpretation is:
+
+> **Matrix multiplication = composition of linear transformations.**
+
+Order matters. With the column-vector convention, `BA` means A first, then B. Usually `AB ≠ BA`, because rotate-then-shear is not the same as shear-then-rotate.
+
+<Aside kind="tip" title="Row times column is an algorithm, not the essence">
+
+The row-by-column rule tells you how to compute matrix multiplication. Composition tells you why the operation is defined that way.
+
+</Aside>
+
+## From one vector to a batch of vectors
+
+Neural networks rarely process one vector at a time. They stack many vectors into a matrix.
+
+If n token hidden states form X:
+
+<Equation>
+
+**X ∈ ℝⁿˣᵈ**
+
+</Equation>
+
+and a learned weight matrix is `W ∈ ℝᵈˣᵏ`, then:
+
+<Equation>
+
+**Y = XW,   Y ∈ ℝⁿˣᵏ**
+
+</Equation>
+
+This is the same linear transformation W applied in batch to every token representation.
+
+<Aside kind="definition" title="Why Av here, but XW in deep-learning code?">
+
+The visualizer uses column vectors, so a transformation is written `Av`. Deep-learning libraries commonly store token representations as rows, so the batch form becomes `XW`. The underlying linear map is the same; only the storage and transpose convention differ.
+
+</Aside>
+
+## Minimal implementation
+
+First implement matrix-vector multiplication, then matrix-matrix multiplication.
+
+<CodeStep title="matrix.ts">
+
+~~~ts
+type Matrix = number[][];
+type Vector = number[];
+
+function matVec(matrix: Matrix, vector: Vector): Vector {
+  return matrix.map((row) =>
+    row.reduce((sum, value, index) => sum + value * vector[index]!, 0)
+  );
+}
+
+function transpose(matrix: Matrix): Matrix {
+  return matrix[0]!.map((_, column) =>
+    matrix.map((row) => row[column]!)
+  );
+}
+
+function matMul(a: Matrix, b: Matrix): Matrix {
+  const columns = transpose(b);
+
+  return a.map((row) =>
+    columns.map((column) =>
+      row.reduce((sum, value, index) => sum + value * column[index]!, 0)
+    )
+  );
+}
+~~~
+
+</CodeStep>
+
+Matrix multiplication repeatedly uses the previous chapter's dot product: one row dotted with one column gives one output entry.
+
+The dependency chain is now visible:
+
+> **Vector → Dot Product → Matrix Multiplication → Attention.**
+
+## Connection to Transformers and Agents
+
+### Q, K, and V are learned projections
+
+Self Attention begins with:
+
+<Equation>
+
+**Q = XW_Q**
+
+**K = XW_K**
+
+**V = XW_V**
+
+</Equation>
+
+`W_Q`, `W_K`, and `W_V` are learned matrices. They map the same token representation X into three different representation spaces, giving the model different roles for matching and carrying information.
+
+Then `QKᵀ` is another matrix multiplication, and every entry inside it is a Query-Key dot product.
+
+### Linear layers are the model's basic transformers
+
+Attention projections, MLPs, and output projections all rely on learned matrices. Training learns many useful linear transformations and combines them with nonlinearities, normalization, and residual paths.
+
+For an Agent, prompts, tool results, and memory look like text and structured data at the system layer. Once they enter the model, they are repeatedly projected into new internal vector representations by learned matrices.
+
+<Aside kind="source" title="Where this leads">
+
+Matrices and dot products now cover the linear-algebra side of Attention. The other prerequisite branch is Probability → Softmax. Once those branches meet, Self Attention can be opened end to end.
+
+</Aside>
+
+## Challenge
+
+<Challenge title="Check your intuition">
+
+1. Without multiplying every coordinate, describe what `[[2,0],[0,1]]` does to the unit square.
+2. If the two columns of a 2×2 matrix are identical, what is `det(A)` and why?
+3. Use the playground to find a matrix with `det(A) < 0`. What visibly changes?
+4. Explain why `(BA)v` means A first and B second for column vectors.
+5. If X has shape `128×768` and `W_Q` has shape `768×64`, what is the shape of Q?
+6. Explain in your own words why `Q = XW_Q` can be called a projection rather than merely arithmetic.
+
+</Challenge>
+
+## References
+
+<ReferenceList>
+
+- [3Blue1Brown — Linear transformations and matrices](https://www.3blue1brown.com/lessons/linear-transformations)
+- [MIT OpenCourseWare — Linear Algebra (18.06)](https://ocw.mit.edu/courses/18-06-linear-algebra-spring-2010/)
+- [Attention Is All You Need](https://arxiv.org/abs/1706.03762)
+
+</ReferenceList>

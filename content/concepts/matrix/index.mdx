@@ -2,12 +2,296 @@
 
 ## 为什么需要它
 
-当你把矩阵看成“对向量做变换的规则”，很多公式会突然变得直观。
+如果向量是模型用来表示信息的基本对象，那么矩阵就是**改变这些表示的基本规则**。
 
-## 交互目标
+在神经网络里，你会反复看到这样的式子：
 
-拖动基向量，观察二维网格如何在矩阵作用下被旋转、拉伸或剪切。
+<Equation>
 
-## 与 Agent 的关系
+**y = Ax**
 
-像 Q = XW 这样的表达式本质上就是矩阵变换。理解这一点，是理解 Transformer 内部投影的基础。
+</Equation>
+
+或者在 Transformer 里看到：
+
+<Equation>
+
+**Q = XW_Q,   K = XW_K,   V = XW_V**
+
+</Equation>
+
+这些式子表面上是在“做矩阵乘法”，但更有用的理解是：**矩阵在把一个向量空间里的表示，变成另一个向量空间里的表示。**
+
+所以这一章不把矩阵当成一张数字表，而把它当成一个可以观察、组合和推理的函数。
+
+<Aside kind="context" title="前置知识">
+
+你只需要先理解向量、向量加法和标量乘法。点积不是这一章的必要前置，但后面理解 `QKᵀ` 时会与矩阵乘法汇合。
+
+</Aside>
+
+## 矩阵首先是一个变换
+
+考虑一个 2×2 矩阵：
+
+<Equation label="2×2 矩阵">
+
+**A = [[a, b], [c, d]]**
+
+</Equation>
+
+把它作用在列向量 `v = [x, y]ᵀ` 上：
+
+<Equation label="矩阵作用于向量">
+
+**Av = [ax + by, cx + dy]ᵀ**
+
+</Equation>
+
+你当然可以把这看成四次乘法加两次加法，但这样很难形成长期直觉。
+
+更好的问题是：
+
+> 这个矩阵把原来的空间变成了什么样？
+
+如果你把整个二维坐标网格里的每个点都乘上同一个矩阵，那么直线仍然是直线，原点仍然停在原点，但网格可能被旋转、拉伸、压缩、剪切、翻转，甚至压成一条线。
+
+<Aside kind="definition" title="线性变换">
+
+矩阵描述的是线性变换。它保留两条关键结构：`A(u + v) = Au + Av`，以及 `A(αv) = αAv`。这意味着“先相加再变换”和“先分别变换再相加”是一样的。
+
+</Aside>
+
+## 两列数字其实告诉你两根基向量去了哪里
+
+二维空间最基本的两根基向量是：
+
+<Equation>
+
+**e₁ = [1, 0]ᵀ,   e₂ = [0, 1]ᵀ**
+
+</Equation>
+
+把矩阵 A 作用到它们上面：
+
+<Equation label="矩阵的列">
+
+**Ae₁ = [a, c]ᵀ**
+
+**Ae₂ = [b, d]ᵀ**
+
+</Equation>
+
+也就是说，**矩阵的第一列告诉你 e₁ 被送去了哪里，第二列告诉你 e₂ 被送去了哪里。**
+
+而任何二维向量都可以写成 `v = xe₁ + ye₂`，所以：
+
+<Equation>
+
+**Av = xAe₁ + yAe₂**
+
+</Equation>
+
+这就是为什么只要知道两根基向量变成了什么样，你就已经知道整个平面会怎样变换。
+
+<Aside kind="tip" title="不要先背乘法规则">
+
+如果你总是忘记 `ax + by`、`cx + dy` 到底怎么来的，回到“列 = 基向量的新位置”这个几何解释。矩阵乘向量不是任意规则，而是在用输入坐标重新组合变换后的基向量。
+
+</Aside>
+
+## 交互实验
+
+下面的蓝色和橙色端点就是变换后的 `e₁` 与 `e₂`。拖动它们，相当于直接修改矩阵的两列。
+
+尝试依次观察：
+
+1. 单独改变第一列时，哪些网格线会变化；
+2. 把两根基向量都拉长时，面积怎么变化；
+3. 把两根基向量拖到同一条线上时，空间发生了什么；
+4. 旋转、缩放、剪切、反射看起来有什么不同。
+
+<InteractiveBreakout title="Matrix Transformation Playground">
+
+<MatrixTransformPlayground locale="zh-CN" />
+
+</InteractiveBreakout>
+
+这个实验里，淡灰色网格代表原空间，蓝色网格代表变换后的空间。
+
+## 行列式：空间被放大、翻转还是压扁
+
+对于 2×2 矩阵：
+
+<Equation label="2×2 determinant">
+
+**det(A) = ad - bc**
+
+</Equation>
+
+行列式最重要的几何含义之一是**有向面积缩放倍数**。
+
+- `|det(A)| = 2`：面积放大为 2 倍；
+- `|det(A)| = 0.5`：面积缩小为一半；
+- `det(A) < 0`：除了缩放，还发生了方向翻转；
+- `det(A) = 0`：二维空间被压进更低维，信息不可逆地丢失。
+
+<Aside kind="derivation" title="为什么 det = 0 很特别">
+
+当两列向量共线时，它们无法张成二维平面。所有输入最终都落在同一条线上，因此不同输入可能得到相同输出。这个变换不再可逆。
+
+</Aside>
+
+## 矩阵乘法就是组合变换
+
+如果矩阵 `A` 先做一次变换，矩阵 `B` 再做一次：
+
+<Equation>
+
+**v → Av → B(Av)**
+
+</Equation>
+
+可以把两次变换合成一次：
+
+<Equation label="组合变换">
+
+**B(Av) = (BA)v**
+
+</Equation>
+
+所以矩阵乘法最值得内化的解释不是“行乘列”，而是：
+
+> **矩阵乘法 = 线性变换的组合。**
+
+顺序也因此很重要。对列向量约定来说，`BA` 表示先做 A，再做 B。通常 `AB ≠ BA`，因为“先旋转再剪切”和“先剪切再旋转”不是同一件事。
+
+<Aside kind="tip" title="行乘列是算法，不是本质">
+
+“行乘列”告诉你怎么计算矩阵乘法；“组合变换”告诉你为什么这个运算应该这样定义。前者适合手算，后者适合长期理解。
+
+</Aside>
+
+## 从一个向量到一批向量
+
+神经网络不会一次只处理一个二维向量。它通常把很多向量堆成一个矩阵。
+
+例如，把 `n` 个 token 的 hidden state 放进矩阵 `X`：
+
+<Equation>
+
+**X ∈ ℝⁿˣᵈ**
+
+</Equation>
+
+每一行是一个 token 的 d 维表示。再乘上参数矩阵 `W ∈ ℝᵈˣᵏ`：
+
+<Equation>
+
+**Y = XW,   Y ∈ ℝⁿˣᵏ**
+
+</Equation>
+
+你可以把它理解成：**同一个线性变换 W 被批量应用到每一个 token 表示上。**
+
+<Aside kind="definition" title="为什么前面写 Av，这里却写 XW？">
+
+交互实验使用列向量约定，所以变换写成 `Av`。深度学习代码经常把 token 表示存成行向量，于是批量形式写成 `XW`。两者描述的是同一种线性变换，只是数据摆放和转置约定不同。不要把记号方向误认为概念差异。
+
+</Aside>
+
+## 最小实现
+
+先实现矩阵乘向量，再实现矩阵乘矩阵。代码故意保持朴素，让运算结构可见。
+
+<CodeStep title="matrix.ts">
+
+~~~ts
+type Matrix = number[][];
+type Vector = number[];
+
+function matVec(matrix: Matrix, vector: Vector): Vector {
+  return matrix.map((row) =>
+    row.reduce((sum, value, index) => sum + value * vector[index]!, 0)
+  );
+}
+
+function transpose(matrix: Matrix): Matrix {
+  return matrix[0]!.map((_, column) =>
+    matrix.map((row) => row[column]!)
+  );
+}
+
+function matMul(a: Matrix, b: Matrix): Matrix {
+  const columns = transpose(b);
+
+  return a.map((row) =>
+    columns.map((column) =>
+      row.reduce((sum, value, index) => sum + value * column[index]!, 0)
+    )
+  );
+}
+~~~
+
+</CodeStep>
+
+你会发现矩阵乘法内部不断重复上一章的点积：一行和一列做点积，得到输出矩阵里的一个元素。
+
+因此知识链开始连接起来：
+
+> **向量 → 点积 → 矩阵乘法 → Attention。**
+
+## 与 Transformer 和 Agent 的关系
+
+### Q、K、V 是学出来的投影
+
+Self Attention 里：
+
+<Equation>
+
+**Q = XW_Q**
+
+**K = XW_K**
+
+**V = XW_V**
+
+</Equation>
+
+`W_Q`、`W_K`、`W_V` 都是可学习矩阵。它们把同一个 token 表示 X 投影到三个不同的表示空间，让模型分别得到“我在找什么”“我提供什么索引”“我携带什么内容”这样的不同角色。
+
+随后 `QKᵀ` 又是一次矩阵乘法，而它内部每个元素实际上就是一个 Query 向量与一个 Key 向量的点积。
+
+### 线性层是模型最基本的变换器
+
+Transformer 的 Attention、MLP、输出投影等地方都会反复使用权重矩阵。模型训练，本质上是在学习很多适合当前任务的线性变换，再与非线性、归一化、残差等机制组合。
+
+对 Agent 来说，这意味着 prompt、tool result、memory 虽然在系统层面看起来是文本和结构化数据，但一旦进入模型，它们就会不断被矩阵投影成新的内部表示。
+
+<Aside kind="source" title="下一步">
+
+矩阵和点积已经把 Attention 的线性代数地基铺好了。另一条前置链是 Probability → Softmax。等两条链汇合后，就可以完整拆开 Self Attention。
+
+</Aside>
+
+## 练习
+
+<Challenge title="检查你的直觉">
+
+1. 不手算全部元素：矩阵 `[[2,0],[0,1]]` 会怎样改变单位正方形？
+2. 如果一个 2×2 矩阵的两列完全相同，`det(A)` 是多少？为什么？
+3. 用交互实验找一个 `det(A) < 0` 的矩阵，观察空间发生了什么。
+4. 解释为什么对列向量来说 `(BA)v` 表示先 A 后 B。
+5. 假设 `X` 的形状是 `128×768`，`W_Q` 是 `768×64`，那么 `Q` 的形状是什么？
+6. 用自己的话解释：为什么 `Q = XW_Q` 可以叫“投影”，而不是简单的数字乘法？
+
+</Challenge>
+
+## 参考资料
+
+<ReferenceList>
+
+- [3Blue1Brown — Linear transformations and matrices](https://www.3blue1brown.com/lessons/linear-transformations)
+- [MIT OpenCourseWare — Linear Algebra (18.06)](https://ocw.mit.edu/courses/18-06-linear-algebra-spring-2010/)
+- [Attention Is All You Need](https://arxiv.org/abs/1706.03762)
+
+</ReferenceList>
