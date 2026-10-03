@@ -1,0 +1,19 @@
+{
+  "id": "matrix",
+  "title": "Matrix",
+  "summary": "Understand matrices as transformations rather than tables of numbers.",
+  "domain": "foundations",
+  "depth": "implementation",
+  "status": "seed",
+  "prerequisites": [
+    "vector"
+  ],
+  "interaction": {
+    "kind": "visualizer",
+    "component": "MatrixTransformPlayground"
+  },
+  "tags": [
+    "linear-algebra",
+    "transformation"
+  ]
+}

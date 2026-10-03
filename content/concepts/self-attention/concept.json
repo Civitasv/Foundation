@@ -1,0 +1,22 @@
+{
+  "id": "self-attention",
+  "title": "Self Attention",
+  "summary": "See how tokens construct context-dependent representations by weighting information from other tokens.",
+  "domain": "models",
+  "depth": "deep-dive",
+  "status": "seed",
+  "prerequisites": [
+    "matrix",
+    "dot-product",
+    "softmax"
+  ],
+  "interaction": {
+    "kind": "simulator",
+    "component": "AttentionPlayground"
+  },
+  "tags": [
+    "transformer",
+    "attention",
+    "qkv"
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "id": "agent-loop",
+  "title": "Agent Loop",
+  "summary": "Model an agent as a stateful observe-decide-act transition system.",
+  "domain": "agents",
+  "depth": "implementation",
+  "status": "seed",
+  "prerequisites": [
+    "tool-calling"
+  ],
+  "interaction": {
+    "kind": "simulator",
+    "component": "AgentLoopSimulator"
+  },
+  "tags": [
+    "agents",
+    "state",
+    "runtime"
+  ]
+}

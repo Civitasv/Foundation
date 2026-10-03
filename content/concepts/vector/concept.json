@@ -1,0 +1,17 @@
+{
+  "id": "vector",
+  "title": "Vector",
+  "summary": "Represent magnitude, direction, and learned features as coordinates that models can transform.",
+  "domain": "foundations",
+  "depth": "implementation",
+  "status": "seed",
+  "prerequisites": [],
+  "interaction": {
+    "kind": "visualizer",
+    "component": "VectorPlayground"
+  },
+  "tags": [
+    "linear-algebra",
+    "representation"
+  ]
+}

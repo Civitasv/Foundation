@@ -1,0 +1,18 @@
+{
+  "id": "tool-calling",
+  "title": "Tool Calling",
+  "summary": "Treat model output as a typed request for an external capability rather than trusted execution.",
+  "domain": "agents",
+  "depth": "implementation",
+  "status": "seed",
+  "prerequisites": [],
+  "interaction": {
+    "kind": "simulator",
+    "component": "ToolCallSimulator"
+  },
+  "tags": [
+    "agents",
+    "tools",
+    "capabilities"
+  ]
+}

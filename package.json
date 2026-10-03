@@ -1,0 +1,29 @@
+{
+  "name": "foundation",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "packageManager": "pnpm@11.7.0",
+  "engines": {
+    "node": "^22.19.0 || >=24.0.0"
+  },
+  "scripts": {
+    "dev": "pnpm --filter @foundation/web dev",
+    "build": "pnpm --filter @foundation/web build",
+    "typecheck": "tsc --noEmit -p packages/knowledge/tsconfig.json && tsc --noEmit -p apps/web/tsconfig.json",
+    "lint": "oxlint apps packages scripts",
+    "test": "vitest run",
+    "content:validate": "node scripts/validate-content.mjs",
+    "concept:new": "node scripts/new-concept.mjs",
+    "check": "pnpm content:validate && pnpm typecheck && pnpm lint && pnpm test && pnpm build"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "oxlint": "1.76.0",
+    "typescript": "7.0.2",
+    "vitest": "4.1.8"
+  }
+}
