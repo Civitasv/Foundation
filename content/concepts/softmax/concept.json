@@ -1,7 +1,13 @@
 {
   "id": "softmax",
-  "title": "Softmax",
-  "summary": "Turn arbitrary scores into a probability distribution and see how relative scale changes decisions.",
+  "title": {
+    "zh-CN": "Softmax",
+    "en": "Softmax"
+  },
+  "summary": {
+    "zh-CN": "把任意 score 转换成概率分布，并观察尺度如何改变最终选择。",
+    "en": "Turn arbitrary scores into a probability distribution and see how relative scale changes decisions."
+  },
   "domain": "foundations",
   "depth": "implementation",
   "status": "seed",

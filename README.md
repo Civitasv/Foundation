@@ -1,23 +1,18 @@
 # Foundation
 
-**Foundation** is an open-source, interactive map of the knowledge required to understand and build AI agents from first principles.
+**Foundation** 是一张从第一性原理理解和开发 AI Agent 的开源、可交互知识地图。
 
-It is not a framework tutorial and not a linear book. The project treats agent engineering as a connected system of ideas spanning mathematics, neural networks, Transformers, LLM inference, agent architecture, systems engineering, security, and evaluation.
+它不是框架教程，也不是一本线性的书。项目把 Agent Engineering 看成一套彼此连接的知识系统：数学、神经网络、Transformer、LLM 推理、Agent 架构、系统工程、安全与评测。
+
+English is maintained as a first-class secondary language. The product defaults to Chinese.
 
 ## Product idea
 
-Foundation has three complementary learning modes:
+Foundation 有三种互补的学习方式：
 
-- **Learn** — guided prerequisite-aware paths.
-- **Explore** — a knowledge graph for moving between concepts freely.
-- **Build** — interactive visualizers, simulators, and labs that turn abstractions into things you can manipulate.
-
-Every concept is intended to answer four questions:
-
-1. Why does this exist?
-2. What is the intuition and mathematics behind it?
-3. Can I manipulate or implement it myself?
-4. How does it connect back to agent engineering?
+- **Learn / 学习** — 根据前置知识生成学习路径。
+- **Explore / 探索** — 在知识图谱中自由移动。
+- **Build / 动手** — 用可视化、模拟器和实验把抽象概念变成可操作的机制。
 
 ## Architecture
 
@@ -25,74 +20,37 @@ Every concept is intended to answer four questions:
 content/concepts/*
         |
         v
-machine-readable concept metadata
+bilingual concept metadata + lessons
         |
         v
 @foundation/knowledge
-  validation / graph / ordering
         |
         v
 apps/web
-  Learn / Explore / Build projections
         |
         v
-static export -> GitHub Pages
+GitHub Pages
 ```
 
-Concept metadata is the source of truth for the learning graph. UI navigation and future curricula should be derived from it rather than maintained separately.
-
-## AI-native repository
-
-Foundation is designed to be developed by humans and coding agents together.
-
-- `AGENTS.md` defines the collaboration contract.
-- `Code.md` is the shortest route from intent to implementation.
-- `docs/specs/` holds durable feature contracts.
-- `content/schema/concept.schema.json` makes content structure machine-readable.
-- `pnpm content:validate` rejects broken prerequisite graphs.
-- CI is the evidence gate; an agent must not claim Green without running the applicable checks.
-
 ## Development
-
-Requirements:
-
-- Node.js `^22.19.0 || >=24.0.0`
-- pnpm `11.7.0`
 
 ```bash
 pnpm install
 pnpm dev
-```
-
-Validation:
-
-```bash
 pnpm check
 ```
 
-Create a concept seed:
+Create a bilingual concept seed:
 
 ```bash
-pnpm concept:new -- vector-space "Vector Space" foundations
+pnpm concept:new -- vector-space "向量空间" "Vector Space" foundations
 ```
 
-## Deployment
-
-The web app is statically exported and deployed from `master` with GitHub Actions.
-
-Target URL:
+## Website
 
 ```text
 https://civitasv.github.io/Foundation/
 ```
-
-The deployment workflow runs the full validation suite before publishing `apps/web/out`.
-
-## Current status
-
-M0 establishes the repository, knowledge model, integrity checks, CI, and a first interactive graph projection. Lesson rendering and the interactive lab registry are intentionally left for the next milestones.
-
-See `docs/roadmap.md`.
 
 ## License
 

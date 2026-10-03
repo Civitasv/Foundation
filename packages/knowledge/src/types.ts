@@ -1,3 +1,5 @@
+export const foundationLocales = ["zh-CN", "en"] as const;
+
 export const conceptDomains = [
   "foundations",
   "models",
@@ -27,10 +29,16 @@ export const interactionKinds = [
   "lab"
 ] as const;
 
+export type FoundationLocale = (typeof foundationLocales)[number];
 export type ConceptDomain = (typeof conceptDomains)[number];
 export type ConceptDepth = (typeof conceptDepths)[number];
 export type ConceptStatus = (typeof conceptStatuses)[number];
 export type InteractionKind = (typeof interactionKinds)[number];
+
+export interface LocalizedText {
+  "zh-CN": string;
+  en: string;
+}
 
 export interface ConceptInteraction {
   kind: InteractionKind;
@@ -39,8 +47,8 @@ export interface ConceptInteraction {
 
 export interface ConceptMetadata {
   id: string;
-  title: string;
-  summary: string;
+  title: LocalizedText;
+  summary: LocalizedText;
   domain: ConceptDomain;
   depth: ConceptDepth;
   status: ConceptStatus;

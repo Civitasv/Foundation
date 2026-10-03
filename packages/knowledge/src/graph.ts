@@ -2,9 +2,11 @@ import {
   conceptDepths,
   conceptDomains,
   conceptStatuses,
+  foundationLocales,
   interactionKinds,
   type ConceptMetadata,
-  type KnowledgeNode
+  type KnowledgeNode,
+  type LocalizedText
 } from "./types";
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -22,21 +24,28 @@ function isOneOf<T extends readonly string[]>(
   return typeof value === "string" && allowed.includes(value);
 }
 
-export function assertConceptMetadata(
-  value: unknown
-): asserts value is ConceptMetadata {
+function isLocalizedText(value: unknown): value is LocalizedText {
+  if (!isRecord(value)) return false;
+
+  return foundationLocales.every((locale) => {
+    const localized = value[locale];
+    return typeof localized === "string" && localized.trim().length > 0;
+  });
+}
+
+export function assertConceptMetadata(value: unknown): asserts value is ConceptMetadata {
   if (!isRecord(value)) throw new Error("Concept metadata must be an object.");
 
   if (typeof value.id !== "string" || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(value.id)) {
     throw new Error("Concept id must be lowercase kebab-case.");
   }
 
-  if (typeof value.title !== "string" || value.title.trim().length === 0) {
-    throw new Error(`Concept ${value.id}: title is required.`);
+  if (!isLocalizedText(value.title)) {
+    throw new Error(`Concept ${value.id}: localized title is required.`);
   }
 
-  if (typeof value.summary !== "string" || value.summary.trim().length === 0) {
-    throw new Error(`Concept ${value.id}: summary is required.`);
+  if (!isLocalizedText(value.summary)) {
+    throw new Error(`Concept ${value.id}: localized summary is required.`);
   }
 
   if (!isOneOf(value.domain, conceptDomains)) throw new Error(`Concept ${value.id}: invalid domain.`);
@@ -54,9 +63,7 @@ export function assertConceptMetadata(
   }
 }
 
-export function assertConceptCatalog(
-  value: unknown
-): asserts value is ConceptMetadata[] {
+export function assertConceptCatalog(value: unknown): asserts value is ConceptMetadata[] {
   if (!Array.isArray(value)) throw new Error("Concept catalog must be an array.");
   for (const concept of value) assertConceptMetadata(concept);
 }
@@ -128,9 +135,7 @@ export function topologicalOrder(concepts: ConceptMetadata[]): string[] {
   return order;
 }
 
-export function buildKnowledgeGraph(
-  concepts: ConceptMetadata[]
-): KnowledgeNode[] {
+export function buildKnowledgeGraph(concepts: ConceptMetadata[]): KnowledgeNode[] {
   const order = topologicalOrder(concepts);
   const byId = validateReferences(concepts);
   const unlocks = new Map<string, string[]>();

@@ -3,10 +3,10 @@ import path from "node:path";
 import process from "node:process";
 
 const domains = new Set(["foundations", "models", "agents", "systems", "production"]);
-const [id, title, domain] = process.argv.slice(2);
+const [id, chineseTitle, englishTitle, domain] = process.argv.slice(2);
 
-if (!id || !title || !domain) {
-  console.error('Usage: pnpm concept:new -- <id> "<title>" <domain>');
+if (!id || !chineseTitle || !englishTitle || !domain) {
+  console.error('Usage: pnpm concept:new -- <id> "<中文标题>" "<English title>" <domain>');
   process.exit(1);
 }
 
@@ -34,8 +34,14 @@ await mkdir(directory, { recursive: true });
 
 const metadata = {
   id,
-  title,
-  summary: `TODO: explain why ${title} matters.`,
+  title: {
+    "zh-CN": chineseTitle,
+    en: englishTitle
+  },
+  summary: {
+    "zh-CN": `TODO：解释为什么需要理解「${chineseTitle}」。`,
+    en: `TODO: explain why ${englishTitle} matters.`
+  },
   domain,
   depth: "awareness",
   status: "seed",
@@ -44,7 +50,22 @@ const metadata = {
   tags: []
 };
 
-const lesson = `# ${title}
+const chineseLesson = `# ${chineseTitle}
+
+## 为什么需要它
+
+TODO
+
+## 直觉
+
+TODO
+
+## 与 Agent 的关系
+
+TODO
+`;
+
+const englishLesson = `# ${englishTitle}
 
 ## Why it exists
 
@@ -61,7 +82,8 @@ TODO
 
 await Promise.all([
   writeFile(path.join(directory, "concept.json"), `${JSON.stringify(metadata, null, 2)}\n`, "utf8"),
-  writeFile(path.join(directory, "index.mdx"), lesson, "utf8")
+  writeFile(path.join(directory, "index.mdx"), chineseLesson, "utf8"),
+  writeFile(path.join(directory, "index.en.mdx"), englishLesson, "utf8")
 ]);
 
-console.log(`Created content/concepts/${id}`);
+console.log(`Created bilingual concept content/concepts/${id}`);

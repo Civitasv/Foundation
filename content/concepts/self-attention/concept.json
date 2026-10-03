@@ -1,7 +1,13 @@
 {
   "id": "self-attention",
-  "title": "Self Attention",
-  "summary": "See how tokens construct context-dependent representations by weighting information from other tokens.",
+  "title": {
+    "zh-CN": "自注意力",
+    "en": "Self Attention"
+  },
+  "summary": {
+    "zh-CN": "理解 token 如何根据上下文，对其他 token 的信息进行加权并重建自己的表示。",
+    "en": "See how tokens construct context-dependent representations by weighting information from other tokens."
+  },
   "domain": "models",
   "depth": "deep-dive",
   "status": "seed",

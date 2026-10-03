@@ -1,7 +1,13 @@
 {
   "id": "tool-calling",
-  "title": "Tool Calling",
-  "summary": "Treat model output as a typed request for an external capability rather than trusted execution.",
+  "title": {
+    "zh-CN": "工具调用",
+    "en": "Tool Calling"
+  },
+  "summary": {
+    "zh-CN": "把模型输出理解为对外部能力的类型化请求，而不是可信的直接执行指令。",
+    "en": "Treat model output as a typed request for an external capability rather than trusted execution."
+  },
   "domain": "agents",
   "depth": "implementation",
   "status": "seed",

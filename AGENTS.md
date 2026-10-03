@@ -4,6 +4,8 @@
 
 Foundation is an interactive, prerequisite-aware knowledge system for learning agent engineering from first principles. It is a content graph first and a website second.
 
+The product is Chinese-first. English is a first-class secondary language.
+
 ## Start here
 
 For any non-trivial change:
@@ -16,7 +18,8 @@ For any non-trivial change:
 
 ## Durable source of truth
 
-- Concept prose lives at `content/concepts/<id>/index.mdx`.
+- Chinese concept prose lives at `content/concepts/<id>/index.mdx`.
+- English concept prose lives at `content/concepts/<id>/index.en.mdx`.
 - Concept graph metadata lives at `content/concepts/<id>/concept.json`.
 - `prerequisites` is the canonical edge direction. Do not persist duplicate `unlocks` edges; derive them.
 - `content/schema/concept.schema.json` defines the public content shape.
@@ -34,50 +37,12 @@ Chat history, issue discussion, generated summaries, and UI state are context, n
 6. Derived views such as unlocks, learning order, readiness, and progress are computed from canonical metadata.
 7. Do not introduce an AI provider dependency into the knowledge model. Future AI features belong behind explicit adapters.
 8. Prefer typed boundaries and deterministic validation over prompt-only conventions.
-
-## AI-native change workflow
-
-For meaningful product changes use:
-
-```text
-Intent
-  -> Spec / contract
-  -> Implementation
-  -> Tests / content validation
-  -> Build evidence
-  -> PR
-```
-
-Agents should leave artifacts that another agent can resume from without reconstructing hidden reasoning.
-
-## Content change checklist
-
-- Concept ID is stable, lowercase kebab-case.
-- Prerequisites exist.
-- No dependency cycle is introduced.
-- Summary explains why the concept matters.
-- Depth reflects the expected mastery level.
-- Interaction metadata describes the intended learning interaction.
-- Prose connects the concept back to agent engineering where applicable.
-
-Run:
-
-```bash
-pnpm content:validate
-```
+9. Chinese is the primary locale; English must preserve conceptual parity.
+10. Visual work follows the restrained UI contract: hierarchy and spacing before decoration; motion must have a reason.
 
 ## Completion checklist
 
-Run all applicable checks:
-
-```bash
-pnpm typecheck
-pnpm lint
-pnpm test
-pnpm build
-```
-
-Or run:
+Run:
 
 ```bash
 pnpm check
@@ -85,4 +50,4 @@ pnpm check
 
 Never claim Green for a command that was not executed successfully. If validation cannot run, mark it pending.
 
-Use Conventional Commit messages. For completed PRs, prefer squash merge once required checks are Green and there are no blocking review threads.
+Use Conventional Commit messages.

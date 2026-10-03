@@ -1,7 +1,13 @@
 {
   "id": "matrix",
-  "title": "Matrix",
-  "summary": "Understand matrices as transformations rather than tables of numbers.",
+  "title": {
+    "zh-CN": "矩阵",
+    "en": "Matrix"
+  },
+  "summary": {
+    "zh-CN": "把矩阵理解成空间变换，而不只是一张数字表。",
+    "en": "Understand matrices as transformations rather than tables of numbers."
+  },
   "domain": "foundations",
   "depth": "implementation",
   "status": "seed",

@@ -6,10 +6,13 @@ export {
   topologicalOrder
 } from "./graph";
 
+export { localize } from "./localize";
+
 export {
   conceptDepths,
   conceptDomains,
   conceptStatuses,
+  foundationLocales,
   interactionKinds
 } from "./types";
 
@@ -19,6 +22,8 @@ export type {
   ConceptInteraction,
   ConceptMetadata,
   ConceptStatus,
+  FoundationLocale,
   InteractionKind,
-  KnowledgeNode
+  KnowledgeNode,
+  LocalizedText
 } from "./types";

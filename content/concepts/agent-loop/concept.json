@@ -1,7 +1,13 @@
 {
   "id": "agent-loop",
-  "title": "Agent Loop",
-  "summary": "Model an agent as a stateful observe-decide-act transition system.",
+  "title": {
+    "zh-CN": "Agent 循环",
+    "en": "Agent Loop"
+  },
+  "summary": {
+    "zh-CN": "把 Agent 理解成一个持续 Observe、Decide、Act 并更新状态的系统。",
+    "en": "Model an agent as a stateful observe-decide-act transition system."
+  },
   "domain": "agents",
   "depth": "implementation",
   "status": "seed",
