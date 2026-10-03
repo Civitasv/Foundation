@@ -104,7 +104,7 @@
 
 .chapter-toc a[data-depth="3"] {
   padding-left: 12px;
-  color: var(--textiary);
+  color: var(--tertiary);
 }
 
 .chapter-toc a:hover {
@@ -570,5 +570,141 @@
 
   .chapter-prev-next > div:last-child {
     text-align: left;
+  }
+}
+
+
+/* Dot product playground */
+
+.dot-product-playground {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 280px;
+  gap: 34px;
+  align-items: center;
+}
+
+.dot-stage {
+  min-width: 0;
+}
+
+.dot-stage svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  touch-action: none;
+}
+
+.dot-vector-a,
+.dot-vector-b {
+  fill: none;
+  stroke-width: 3;
+}
+
+.dot-vector-a {
+  stroke: #0066cc;
+}
+
+.dot-vector-b {
+  stroke: #bf4800;
+}
+
+.dot-arrow-a-fill {
+  fill: #0066cc;
+}
+
+.dot-arrow-b-fill {
+  fill: #bf4800;
+}
+
+.dot-handle-a,
+.dot-handle-b {
+  fill: #ffffff;
+  stroke-width: 3;
+  cursor: grab;
+}
+
+.dot-handle-a {
+  stroke: #0066cc;
+}
+
+.dot-handle-b {
+  stroke: #bf4800;
+}
+
+.dot-handle-a:active,
+.dot-handle-b:active {
+  cursor: grabbing;
+}
+
+.dot-controls > p {
+  margin: 0 0 22px;
+  color: var(--secondary);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.dot-vector-values {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  margin-bottom: 22px;
+  background: #e5e5e7;
+}
+
+.dot-vector-values > div {
+  padding: 12px;
+  background: #fbfbfc;
+}
+
+.dot-vector-values span {
+  display: block;
+  color: var(--tertiary);
+  font-size: 10px;
+}
+
+.dot-vector-values strong {
+  display: block;
+  margin-top: 5px;
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.dot-controls dl {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  margin: 0;
+  background: #e5e5e7;
+}
+
+.dot-controls dl > div {
+  padding: 13px;
+  background: #fbfbfc;
+}
+
+.dot-controls dt {
+  color: var(--tertiary);
+  font-size: 10px;
+  line-height: 1.35;
+}
+
+.dot-controls dd {
+  margin: 5px 0 0;
+  color: var(--text);
+  font-size: 16px;
+  font-variant-numeric: tabular-nums;
+}
+
+.dot-relationship {
+  margin-top: 18px;
+  color: var(--secondary);
+  font-size: 12px;
+}
+
+@media (max-width: 720px) {
+  .dot-product-playground {
+    grid-template-columns: 1fr;
   }
 }
