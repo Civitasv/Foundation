@@ -17,7 +17,9 @@ export const conceptDepths = [
 
 export const conceptStatuses = [
   "seed",
-  "draft",
+  "ai-draft",
+  "learning",
+  "author-rewrite",
   "review",
   "complete"
 ] as const;

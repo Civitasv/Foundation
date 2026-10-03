@@ -22,7 +22,7 @@
     "summary": { "$ref": "#/$defs/localizedText" },
     "domain": { "enum": ["foundations", "models", "agents", "systems", "production"] },
     "depth": { "enum": ["awareness", "understanding", "implementation", "deep-dive"] },
-    "status": { "enum": ["seed", "draft", "review", "complete"] },
+    "status": { "enum": ["seed", "ai-draft", "learning", "author-rewrite", "review", "complete"] },
     "prerequisites": { "type": "array", "uniqueItems": true, "items": { "type": "string" } },
     "interaction": {
       "type": "object",

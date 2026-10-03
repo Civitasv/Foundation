@@ -8,6 +8,7 @@
 | Reading/design system | Design contracts | `docs/design/` |
 | Concept-page implementation contract | Feature-05 | `docs/specs/Feature-05-concept-reading-architecture.md` |
 | Content architecture | Content model | `docs/architecture/content-model.md` |
+| Authoring maturity | Learning/authoring lifecycle | `docs/content/authoring-lifecycle.md` |
 | Concept schema | JSON Schema | `content/schema/concept.schema.json` |
 | Concept source | Content contract | `content/concepts/*` |
 | Graph semantics | Knowledge architecture | `packages/knowledge/` |

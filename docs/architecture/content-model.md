@@ -21,6 +21,20 @@ content/concepts/<concept-id>/
 
 The knowledge graph itself is language-neutral: IDs, dependency edges, tags, domains, depth, status, and interaction metadata do not change by locale.
 
+## Authoring lifecycle
+
+Content maturity follows:
+
+```text
+seed → ai-draft → learning → author-rewrite → review → complete
+```
+
+The lifecycle intentionally separates engineering completeness from intellectual authorship.
+
+An AI-generated chapter, even with working code and a finished interactive lab, is at most `ai-draft` until the human author studies and rewrites the canonical Chinese lesson.
+
+See `docs/content/authoring-lifecycle.md` for promotion rules.
+
 ## concept.json
 
 Important fields:
@@ -30,7 +44,7 @@ Important fields:
 - `summary` — localized one-sentence reason to care.
 - `domain` — major curriculum area.
 - `depth` — expected mastery level.
-- `status` — authoring maturity.
+- `status` — authoring/learning maturity, not implementation completeness.
 - `prerequisites` — canonical incoming dependency edges.
 - `interaction` — intended interactive teaching surface.
 - `tags` — discovery vocabulary.

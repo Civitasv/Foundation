@@ -53,6 +53,19 @@ Chat history, issue discussion, generated summaries, and UI state are context, n
 9. Motion must communicate state, causality, or continuity and must support reduced motion.
 10. User-facing pages must not expose internal implementation names such as component class names.
 
+## Learning and authoring policy
+
+Concept maturity follows `seed → ai-draft → learning → author-rewrite → review → complete`.
+
+1. AI-generated lesson prose may be created and improved up to `ai-draft`.
+2. Do not infer that the author has learned a concept. Only the author may move it to `learning`.
+3. Do not promote AI-written prose to `author-rewrite`. That state requires the author to rewrite the canonical Chinese chapter in their own words.
+4. During `review`, act primarily as a factual, mathematical, code, logic, and editorial reviewer. Preserve the author's explanatory voice.
+5. `complete` requires a reviewed author-written Chinese chapter, validated math/code where applicable, interaction aligned to the final explanation, adequate references, English synchronized from the final Chinese meaning, and green CI.
+6. Engineering completion of a page or interactive lab does not by itself make the concept content `complete`.
+
+See `docs/content/authoring-lifecycle.md`.
+
 ## Pull request completion policy
 
 Unless the user explicitly asks to hold a pull request open, automatically squash-merge when all of the following are true:

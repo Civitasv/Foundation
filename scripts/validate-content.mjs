@@ -6,7 +6,7 @@ const root = path.resolve(process.cwd(), "content", "concepts");
 const locales = ["zh-CN", "en"];
 const domains = new Set(["foundations", "models", "agents", "systems", "production"]);
 const depths = new Set(["awareness", "understanding", "implementation", "deep-dive"]);
-const statuses = new Set(["seed", "draft", "review", "complete"]);
+const statuses = new Set(["seed", "ai-draft", "learning", "author-rewrite", "review", "complete"]);
 const interactions = new Set(["none", "visualizer", "simulator", "lab"]);
 
 function fail(message) {
