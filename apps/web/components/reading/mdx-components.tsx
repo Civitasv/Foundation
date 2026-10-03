@@ -1,5 +1,6 @@
 import type { ComponentProps, ReactNode } from "react";
 import { slugifyHeading } from "@foundation/knowledge";
+import { DotProductPlayground } from "./dot-product-playground";
 import { VectorPlayground } from "./vector-playground";
 
 function headingText(children: ReactNode): string {
@@ -96,5 +97,6 @@ export const mdxComponents = {
   InteractiveBreakout,
   Challenge,
   ReferenceList,
+  DotProductPlayground,
   VectorPlayground
 };

@@ -5,12 +5,12 @@
     "en": "Dot Product"
   },
   "summary": {
-    "zh-CN": "用一个标量衡量两个方向的对齐程度，并建立相似度与 Attention score 的直觉。",
-    "en": "Measure directional alignment and build the intuition behind similarity and attention scores."
+    "zh-CN": "把两个向量的方向关系压缩成一个标量，建立相似度、投影与 Attention score 的共同直觉。",
+    "en": "Compress the directional relationship between two vectors into one scalar and connect projection, similarity, and attention scores."
   },
   "domain": "foundations",
   "depth": "implementation",
-  "status": "seed",
+  "status": "complete",
   "prerequisites": [
     "vector"
   ],
