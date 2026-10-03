@@ -2,7 +2,7 @@
 
 Foundation chapters use semantic blocks inside a continuous reading flow.
 
-The block system is inspired by the variety in Crafting Interpreters — prose, code snippets, asides, challenges, and design notes — but adapted for Agent engineering and interactive learning.
+The block system is inspired by the variety in Crafting Interpreters — prose, code snippets, asides, and design notes — but adapted for Agent engineering and interactive learning.
 
 ## Prose
 
@@ -73,21 +73,6 @@ See `sidebar-system.md`.
 
 The author specifies meaning; responsive presentation is chosen by the runtime.
 
-## Challenge
-
-A challenge intentionally goes beyond simple recall.
-
-Good challenges ask the learner to:
-
-- change a mechanism;
-- predict behavior;
-- compare architectures;
-- investigate an edge case;
-- implement a missing piece;
-- connect the concept to another system.
-
-Challenges usually appear near the end of a concept or major section.
-
 ## Design note
 
 A short essay about a tradeoff where there is no single mechanically correct answer.
@@ -101,18 +86,6 @@ Examples:
 - richer context versus context noise.
 
 A design note is not a callout card. It is editorial content and may use normal article width.
-
-## Checkpoint
-
-A small comprehension check before continuing.
-
-Possible forms:
-- predict the next state;
-- explain an equation in words;
-- identify a failure mode;
-- choose which tool call is valid.
-
-The default presentation is inline.
 
 ## Reference list
 

@@ -101,7 +101,7 @@
 3. 夹角大于 `90°` 时，点积为什么会变成负数；
 4. 保持方向不变，只放大某个向量，点积是否也会变大。
 
-<InteractiveBreakout title="Dot Product Playground">
+<InteractiveBreakout title="夹角、投影与点积">
 
 <DotProductPlayground locale="zh-CN" />
 
@@ -224,18 +224,6 @@ Agent 的 prompt、tool result、memory 最终都进入模型 context。Transfor
 所以你可以把点积理解成一个非常基础的“**相关性压缩器**”：
 
 > **两个高维方向进去，一个关系强度出来。**
-
-## 练习
-
-<Challenge title="检查你的直觉">
-
-1. 不计算分量：两个长度非零且垂直的向量，点积是多少？
-2. `[1, 0] · [-3, 0]` 的结果为什么是负数？
-3. 如果把向量 a 乘 10，但 b 不变，点积会怎样变化？cosine similarity 呢？
-4. 实现一个 `normalize(v)`，然后验证 `dot(normalize(a), normalize(b))` 等于 cosine similarity。
-5. 思考：为什么只看 dot product 可能把“方向相同但长度很大”和“方向更一致”混在一起？
-
-</Challenge>
 
 ## 参考资料
 

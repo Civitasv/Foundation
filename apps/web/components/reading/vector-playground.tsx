@@ -71,6 +71,7 @@ export function VectorPlayground({
             if (dragging) updateFromPointer(event.clientX, event.clientY);
           }}
           onPointerUp={() => setDragging(false)}
+          onPointerCancel={() => setDragging(false)}
           onPointerLeave={() => setDragging(false)}
           ref={svgRef}
           role="img"
@@ -129,8 +130,6 @@ export function VectorPlayground({
               setDragging(true);
             }}
             r="9"
-            role="button"
-            tabIndex={0}
           />
         </svg>
       </div>

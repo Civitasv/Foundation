@@ -111,7 +111,7 @@
 3. 把两根基向量拖到同一条线上时，空间发生了什么；
 4. 旋转、缩放、剪切、反射看起来有什么不同。
 
-<InteractiveBreakout title="Matrix Transformation Playground">
+<InteractiveBreakout title="观察矩阵变换">
 
 <MatrixTransformPlayground locale="zh-CN" />
 
@@ -272,19 +272,6 @@ Transformer 的 Attention、MLP、输出投影等地方都会反复使用权重�
 矩阵和点积已经把 Attention 的线性代数地基铺好了。另一条前置链是 Probability → Softmax。等两条链汇合后，就可以完整拆开 Self Attention。
 
 </Aside>
-
-## 练习
-
-<Challenge title="检查你的直觉">
-
-1. 不手算全部元素：矩阵 `[[2,0],[0,1]]` 会怎样改变单位正方形？
-2. 如果一个 2×2 矩阵的两列完全相同，`det(A)` 是多少？为什么？
-3. 用交互实验找一个 `det(A) < 0` 的矩阵，观察空间发生了什么。
-4. 解释为什么对列向量来说 `(BA)v` 表示先 A 后 B。
-5. 假设 `X` 的形状是 `128×768`，`W_Q` 是 `768×64`，那么 `Q` 的形状是什么？
-6. 用自己的话解释：为什么 `Q = XW_Q` 可以叫“投影”，而不是简单的数字乘法？
-
-</Challenge>
 
 ## 参考资料
 

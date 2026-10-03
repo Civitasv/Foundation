@@ -46,7 +46,7 @@ Human-readable bilingual lessons plus machine-readable metadata.
 
 Content owns meaning, not viewport presentation.
 
-A lesson may express semantic blocks such as an aside, challenge, equation, code step, or interactive lab. It must not encode assumptions like "show this in the permanent right sidebar".
+A lesson may express semantic blocks such as an aside, equation, code step, or interactive lab. It must not encode assumptions like "show this in the permanent right sidebar".
 
 ### Knowledge
 
@@ -68,7 +68,7 @@ Structure follows the Foundation reading architecture:
 - stable prose measure;
 - headings and generated TOC;
 - adaptive semantic asides;
-- code, formula, diagrams, challenges, and labs;
+- code, formula, diagrams, and labs;
 - sequential navigation.
 
 #### Explore

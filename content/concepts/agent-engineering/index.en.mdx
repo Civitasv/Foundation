@@ -1,0 +1,111 @@
+# Agent Engineering Overview
+
+## See the system through a task
+
+Suppose you ask an agent to fix a bug in a project and verify the change. It needs to interpret the request, find the relevant code, edit it, run checks, and use the results to decide whether to continue or finish. A failed check must inform the next attempt. Missing permission should cause a pause, rather than a guess presented as success.
+
+This task connects several layers: **the goal defines the outcome, the model proposes the next step, tools reach the outside world, the runtime executes and retains state, and feedback informs the next decision.** Context determines what the model can see, permissions determine what the system can do, and evaluation determines how we judge the result.
+
+This article opens up that system, then connects it to models and mathematics. Read it through for the overall picture, or follow a link when a specific question arises. Return afterward to place the detail within the whole.
+
+## The loop: feed action results into the next decision
+
+One model response produces output under the conditions of that call. A task that requires exploration needs repeated observation, decision, action, and state updates. This flow summarizes a common model-driven agent:
+
+```text
+Goal and current state
+          ↓
+Build context → Model proposes the next step
+                            ↓
+              Check request and execution conditions
+                            ↓
+                      Execute tool
+                            ↓
+               Record result, update state
+                            ↓
+             Continue / Finish / Pause / Fail
+```
+
+In the code task, reading files yields observations, editing changes the environment, and tests yield new observations. What matters is that each call can incorporate the changes caused by the previous action. Passing checks, exhausting a budget, user cancellation, and missing permission are distinct reasons to finish or pause.
+
+[Agent Loop](/en/concepts/agent-loop/) opens up this control structure. Look for the state that must survive, the events that permit a transition, and the conditions for completion. ReAct studies interleaving reasoning and environmental actions; the runtime perspective here also considers execution, state, and termination.
+
+A fixed workflow may suffice when the task path is known. Delegating more decisions to a model becomes useful when information obtained during execution must change that path. The degree of autonomy is a design choice.
+
+## Tools: turn a proposal into an action
+
+A model saying “I ran the tests” does not establish that tests ran. External evidence comes from an execution system invoking the tool, collecting the process result, and recording it.
+
+A tool call is a request with a name, arguments, and a result. For a file read, the execution layer checks arguments and access scope, reads the file, and returns its contents or an error. **The model proposes the request; the execution layer decides whether it can run and reports what actually happened.** Valid argument syntax alone does not authorize an action.
+
+[Tool Calling](/en/concepts/tool-calling/) explains this boundary between structured model output and capabilities, validation, permissions, and error handling. In the complete task, tools obtain evidence and change project state. Their results become inputs to the next decision.
+
+## Models: generate the next step from context
+
+In many language-model agents, a model receives task instructions, relevant material, and tool results, then generates an answer or a tool request. Common autoregressive language models generate token by token: represent the existing sequence, compute scores for the next token, and select an output. A complete behavior involves many generation steps; a single token probability is not the probability of task success.
+
+For Transformer models, [Self Attention](/en/concepts/self-attention/) explains how context participates in computing representations. A token can update its representation using information at other positions. In a causal language model, a mask prevents access to future positions. Attention is one mechanism within a larger model that also includes feed-forward layers, residual connections, normalization, and other parts.
+
+Context therefore becomes an engineering concern. Code absent from the input cannot directly inform the decision; an omitted tool error can leave subsequent generation relying on outdated information. Including material makes it available for processing, but does not guarantee correct interpretation or use.
+
+To understand this mechanism more precisely, open the mathematical layer.
+
+## Mathematics: represent, transform, compare, and weight
+
+Each foundation has a specific job. Placing them within attention explains why they appear together.
+
+**Vectors describe representations.** A token representation is typically a collection of numbers: coordinates that support computation. Individual coordinates need not correspond to named human concepts. [Vector](/en/concepts/vector/) develops intuition for length, direction, and coordinates, providing the objects that later operations transform and compare.
+
+**Matrices describe linear transformations.** Different projections of the same representation produce Q, K, and V for querying, matching, and supplying content. [Matrix](/en/concepts/matrix/) explains transformations of vectors and how matrix multiplication organizes the computation.
+
+**Dot products provide comparison scores.** In scaled dot-product attention, a query–key dot product contributes to the matching score. Both direction and magnitude affect it, so it is not simply a measure of direction alone. [Dot Product](/en/concepts/dot-product/) connects coordinate arithmetic, angles, and projection.
+
+**Softmax turns scores into normalized weights.** Raw scores can be negative and need not sum to one. Softmax produces weights for a weighted sum of values. [Softmax](/en/concepts/softmax/) explores how score scale changes this allocation. Attention weights mix representations, whereas output token probabilities support generation choices; these occur at different points in the computation.
+
+**Probability distributions describe uncertain choices.** Normalization, expectation, entropy, and sampling help explain output distributions and selection strategies. [Probability Distribution](/en/concepts/probability/) provides a foundation for Softmax and generation. A higher probability expresses a model's preference under current conditions, without guaranteeing truth or safe action.
+
+Two foundational paths meet in self-attention:
+
+```text
+Vector → Matrix ──────────┐
+   └───→ Dot Product ────┼→ Self Attention
+Probability → Softmax ───┘
+```
+
+These are conceptual dependencies. You can first understand how a system uses its model, then follow these paths into the computation as needed. Observing an agent does not require completing every mathematical chapter first.
+
+## Systems: make success repeatable
+
+Connecting model, tools, and loop leaves questions that span the task. These topics do not yet have independent detailed chapters, but they belong in the overall picture.
+
+**Context and memory.** Current context is the input available to this call. Runtime state and long-term memory can be stored externally and selected into context when needed. Modified files, failed checks, and user constraints may all need to survive. Storage, retrieval, and inclusion in input are separate steps.
+
+**Retrieval and evidence.** File search, document retrieval, and database queries obtain relevant material. The system still needs to retain sources, check applicability, and handle conflicting results. Retrieval supplies candidate evidence; a model answer cannot replace checking that evidence.
+
+**Runtime and recovery.** Timeouts, retries, cancellation, concurrency, and persistence determine whether the loop operates reliably. A failed read can often be retried. Writes, commits, payments, and other side effects require checking whether execution already happened before repeating it. Explicit state and execution rules should handle these cases.
+
+**Safety and permissions.** Files, web pages, and tool results may contain text phrased as instructions, but they are task material. The execution system must distinguish that material from user authorization and check requests at capability boundaries. Higher-risk actions require clear permission conditions and traceable records.
+
+**Evaluation and observability.** Correct changes, actual test execution, and avoiding unrelated edits reveal more about this task than a confident answer. Task evaluation checks the outcome; execution traces help locate the step, input, or tool that caused a failure. Cost and latency are also aspects of system performance.
+
+These constraints span the loop. Studying a model can focus on one mechanism; delivering a system requires bringing them together around the task.
+
+## Read between the overview and the chapters
+
+To understand how an agent works, begin with [Tool Calling](/en/concepts/tool-calling/), then [Agent Loop](/en/concepts/agent-loop/). The first explains how an action crosses the execution boundary; the second connects actions into a task through state and feedback.
+
+To understand the model's computation, begin with [Vector](/en/concepts/vector/), then branch into [Matrix](/en/concepts/matrix/) and [Dot Product](/en/concepts/dot-product/). Another path runs from [Probability Distribution](/en/concepts/probability/) to [Softmax](/en/concepts/softmax/). Bring these foundations together in [Self Attention](/en/concepts/self-attention/).
+
+Vector, matrix, dot product, and probability currently have developed explanations and interactive labs. Softmax, self-attention, tool calling, and agent loop remain chapter outlines to be expanded. This overview is a global index; it does not imply that every detail is already written.
+
+After reading a detailed chapter, return to the code task: which step does this concept help explain? Does it describe computation inside the model, or actions and constraints in the surrounding system? Moving between these scales connects the overview to the chapters.
+
+## References
+
+<ReferenceList>
+
+- [ReAct: Synergizing Reasoning and Acting in Language Models](https://arxiv.org/abs/2210.03629): research on interleaving reasoning and environmental actions.
+- [Attention Is All You Need](https://arxiv.org/abs/1706.03762): the original paper on Transformers and scaled dot-product attention.
+- [Building effective agents](https://www.anthropic.com/engineering/building-effective-agents): practical discussion of workflows, agents, and engineering complexity.
+
+</ReferenceList>

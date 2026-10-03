@@ -121,12 +121,13 @@ export function KnowledgeExplorer({
 
           return (
             <section className="concept-group" key={domain}>
-              <h3>{domainLabels[locale][domain]}</h3>
+              <h2>{domainLabels[locale][domain]}</h2>
               <div className="concept-list">
                 {nodes.map((concept) => (
                   <button
                     className="concept-row"
-                    data-active={concept.id === selected.id}
+                    aria-controls="concept-detail"
+                    aria-pressed={concept.id === selected.id}
                     key={concept.id}
                     onClick={() => setSelectedId(concept.id)}
                     type="button"
@@ -141,11 +142,11 @@ export function KnowledgeExplorer({
         })}
       </div>
 
-      <aside className="concept-detail" aria-live="polite">
+      <aside className="concept-detail" id="concept-detail" aria-labelledby="concept-title" aria-live="polite">
         <div className="concept-meta">
           {domainLabels[locale][selected.domain]} · {depthLabels[locale][selected.depth]}
         </div>
-        <h3>{localize(selected.title, locale)}</h3>
+        <h2 id="concept-title">{localize(selected.title, locale)}</h2>
         <p className="concept-summary">{localize(selected.summary, locale)}</p>
         <Link className="concept-read-link" href={chapterHref}>
           {text.read} ›

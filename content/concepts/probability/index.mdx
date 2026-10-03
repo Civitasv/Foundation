@@ -113,7 +113,7 @@
 3. 保持相对比例不变，把所有权重一起放大，观察概率是否变化；
 4. 在同一个分布上连续点击“采样一次”，观察每次结果是否一样。
 
-<InteractiveBreakout title="Probability Distribution Playground">
+<InteractiveBreakout title="调整权重，观察分布">
 
 <DistributionPlayground locale="zh-CN" />
 
@@ -289,19 +289,6 @@ Agent Runtime 外层可以写得非常确定：状态机、tool schema、timeout
 现在我们已经有“什么是概率分布”的目标对象。下一章 Softmax 会回答：模型产生的是任意实数 logits，怎样稳定地把它们变成一个合法概率分布？
 
 </Aside>
-
-## 练习
-
-<Challenge title="检查你的直觉">
-
-1. 两组权重 `[1,2,7]` 与 `[10,20,70]` 归一化以后是否相同？为什么？
-2. 分布 `[0.5,0.5]` 的期望一定是一个可采样结果吗？举一个反例。
-3. 在四分类问题中，哪个 entropy 更高：`[0.7,0.1,0.1,0.1]` 还是 `[0.4,0.3,0.2,0.1]`？先凭直觉判断，再计算。
-4. 为什么一次采样得到低概率结果，并不意味着概率分布“错了”？
-5. 如果一个模型对错误答案分配 0.99 概率，它的 entropy 高还是低？这说明了 entropy 的什么局限？
-6. 用自己的话解释 distribution、argmax、sample 三者的区别。
-
-</Challenge>
 
 ## 参考资料
 

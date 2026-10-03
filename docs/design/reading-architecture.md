@@ -4,7 +4,7 @@
 
 Foundation concept pages are technical chapters, not product dashboards.
 
-The structural reference is Crafting Interpreters: a stable reading column, long-form prose, strong section hierarchy, code and diagrams embedded in context, optional asides, exercises, and sequential navigation.
+The structural reference is Crafting Interpreters: a stable reading column, long-form prose, strong section hierarchy, code and diagrams embedded in context, optional asides and sequential navigation.
 
 The visual treatment is Foundation's Apple-inspired system defined separately in `visual-system.md`.
 
@@ -41,7 +41,6 @@ Context / TOC      Main chapter                    Aside rail
                                       source / caveat
                    Connection to Agent engineering
 
-                   Challenge / checkpoint
                    References
 
                    Previous          Next
@@ -61,8 +60,9 @@ Not every concept needs every section, but the default sequence is:
 4. **交互实验 / Interactive model**
 5. **最小实现 / Minimal implementation**
 6. **与 Agent 的关系 / Connection to Agent engineering**
-7. **练习 / Challenge**
-8. **参考资料 / References**
+7. **参考资料 / References**
+
+Chapters do not include standalone exercise or quiz sections. Understanding comes from the explanations, worked examples, and interactive labs.
 
 Authors may reorder sections when the concept demands it. The order must follow learning logic, not visual variety.
 

@@ -23,7 +23,7 @@ Crafting Interpreters is the structural reference for long-form technical learni
 - chapter-oriented reading;
 - continuous prose instead of dashboard cards;
 - clear heading hierarchy;
-- code, diagrams, asides, challenges, and design notes embedded in the reading flow;
+- code, diagrams, asides, and design notes embedded in the reading flow;
 - progressive implementation that builds on previous material;
 - previous/next chapter navigation;
 - supplemental information that can sit beside the main text without interrupting it.

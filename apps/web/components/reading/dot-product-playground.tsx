@@ -136,6 +136,7 @@ export function DotProductPlayground({
             }
           }}
           onPointerUp={() => setDragging(null)}
+          onPointerCancel={() => setDragging(null)}
           onPointerLeave={() => setDragging(null)}
           ref={svgRef}
           role="img"
@@ -215,8 +216,6 @@ export function DotProductPlayground({
               setDragging("a");
             }}
             r="9"
-            role="button"
-            tabIndex={0}
           />
 
           <circle
@@ -229,8 +228,6 @@ export function DotProductPlayground({
               setDragging("b");
             }}
             r="9"
-            role="button"
-            tabIndex={0}
           />
         </svg>
       </div>
@@ -247,6 +244,30 @@ export function DotProductPlayground({
             <span>{text.vectorB}</span>
             <strong>[{b.x.toFixed(1)}, {b.y.toFixed(1)}]</strong>
           </div>
+        </div>
+
+        <div className="dot-sliders">
+          {(["a", "b"] as const).map((target) =>
+            (["x", "y"] as const).map((axis) => (
+              <label key={`${target}-${axis}`}>
+                <span>{target}.{axis}</span>
+                <input
+                  aria-label={`${target === "a" ? text.vectorA : text.vectorB} ${axis}`}
+                  max="5"
+                  min="-5"
+                  onChange={(event) => {
+                    const next = { ...(target === "a" ? a : b), [axis]: Number(event.target.value) };
+                    if (target === "a") setA(next);
+                    else setB(next);
+                  }}
+                  step="0.1"
+                  type="range"
+                  value={(target === "a" ? a : b)[axis]}
+                />
+                <output>{(target === "a" ? a : b)[axis].toFixed(1)}</output>
+              </label>
+            ))
+          )}
         </div>
 
         <dl>

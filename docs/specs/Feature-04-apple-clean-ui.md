@@ -23,12 +23,10 @@ This feature removes those devices rather than restyling them.
 The homepage contains only:
 
 - a quiet navigation bar;
-- one hero headline, one supporting paragraph, and text links;
-- a concise explanation of the learning philosophy;
-- three learning modes;
-- the knowledge map.
+- the chapter catalog (章节 / Chapters) as the main content, with its title and supporting paragraph;
+- a quiet footer with the Foundation name only.
 
-No hero eyebrow, numbered section label, stat strip, boxed logo, or filled CTA is required.
+No hero, learning-philosophy section, learning-mode section, numbered section label, stat strip, boxed logo, or filled CTA is required.
 
 ## Knowledge map
 
@@ -45,6 +43,8 @@ Concept groups       Detail
 ```
 
 Concepts are rows, not cards. Detail is separated by a single rule rather than a floating inspector card.
+
+The map uses a white canvas, a shared alignment grid, and responsive system typography. Hairline separators distinguish rows; a pale blue selection and a leading rule identify the current concept. Press feedback is immediate, keyboard focus is visible, and reduced-motion preferences disable transitions. On narrow screens, the list and detail stack in document order.
 
 ## Acceptance criteria
 

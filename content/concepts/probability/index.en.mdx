@@ -109,7 +109,7 @@ Try:
 3. preserve all ratios while scaling every weight up and see whether probabilities change;
 4. repeatedly click Sample once without changing the distribution.
 
-<InteractiveBreakout title="Probability Distribution Playground">
+<InteractiveBreakout title="From weights to probabilities">
 
 <DistributionPlayground locale="en" />
 
@@ -285,19 +285,6 @@ Probability distributions are therefore not just training mathematics. They are 
 Now we know the target object: a valid probability distribution. The Softmax chapter asks how arbitrary real-valued logits can be converted into one stably.
 
 </Aside>
-
-## Challenge
-
-<Challenge title="Check your intuition">
-
-1. Do weights `[1,2,7]` and `[10,20,70]` normalize to the same distribution? Why?
-2. Must the expectation of `[0.5,0.5]` be a possible sampled outcome? Give a counterexample.
-3. Which has higher entropy: `[0.7,0.1,0.1,0.1]` or `[0.4,0.3,0.2,0.1]`? Predict first, then calculate.
-4. Why does sampling a low-probability outcome once not mean the distribution was wrong?
-5. If a model assigns probability 0.99 to a wrong answer, is its entropy high or low? What limitation of entropy does this expose?
-6. Explain distribution, argmax, and sample in your own words.
-
-</Challenge>
 
 ## References
 

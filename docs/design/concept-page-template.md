@@ -52,12 +52,6 @@ English Title
 明确连接到 context、memory、tools、planning、runtime、
 evaluation、security 等 Agent 系统问题。
 
-## 练习
-
-1. prediction / edge case
-2. implementation
-3. architecture comparison
-
 ## 参考资料
 
 - primary source

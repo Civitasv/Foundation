@@ -90,3 +90,5 @@ pnpm check
 Never claim Green for a command that was not executed successfully. If validation cannot run, mark it pending.
 
 Use Conventional Commit messages.
+
+After each completed change, run the required validation, commit the task's changes, and push to the remote without waiting for another confirmation. Preserve unrelated pre-existing changes outside the commit. If validation or pushing is blocked, report the blocker accurately.

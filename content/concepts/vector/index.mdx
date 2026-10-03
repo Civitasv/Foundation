@@ -73,7 +73,7 @@ Agent 最终依赖语言模型，而语言模型内部几乎所有东西都会�
 2. 长度怎么变化；
 3. x、y 都乘同一个数时，方向是否变化。
 
-<InteractiveBreakout title="Vector Playground">
+<InteractiveBreakout title="向量的长度与方向">
 
 <VectorPlayground locale="zh-CN" />
 
@@ -165,17 +165,6 @@ function magnitude(v: Vec2): number {
 下一章可以继续学习点积。点积会把“两个向量的方向有多一致”压缩成一个数字，这正是理解相似度和 Attention score 的入口。
 
 </Aside>
-
-## 练习
-
-<Challenge title="检查你的直觉">
-
-1. 不计算公式：`[6, 4]` 和 `[3, 2]` 的方向是否相同？长度是什么关系？
-2. 写一个 `subtract(a, b)`。
-3. 找两个不同的二维向量，让它们的长度相同但方向不同。
-4. 思考：如果 embedding 有 1,024 维，“长度”仍然可以定义吗？
-
-</Challenge>
 
 ## 参考资料
 

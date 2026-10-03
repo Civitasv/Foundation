@@ -14,7 +14,6 @@ ChapterShell
   │    ├─ Equation
   │    ├─ Figure
   │    ├─ CodeStep
-  │    ├─ Challenge
   │    ├─ DesignNote
   │    └─ ReferenceList
   ├─ AsideRenderer

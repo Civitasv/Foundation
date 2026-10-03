@@ -1,0 +1,14 @@
+{
+  "id": "agent-engineering",
+  "title": { "zh-CN": "Agent 工程总览", "en": "Agent Engineering Overview" },
+  "summary": {
+    "zh-CN": "从一个完整任务出发，连接模型、数学基础、工具与运行时，建立从全局进入详细章节的阅读路径。",
+    "en": "Follow a complete task to connect models, mathematical foundations, tools, and runtime, with paths into the detailed chapters."
+  },
+  "domain": "systems",
+  "depth": "awareness",
+  "status": "ai-draft",
+  "prerequisites": [],
+  "interaction": { "kind": "none" },
+  "tags": ["overview", "agents", "architecture"]
+}

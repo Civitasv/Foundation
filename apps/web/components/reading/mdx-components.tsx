@@ -74,18 +74,6 @@ export function InteractiveBreakout({
   );
 }
 
-export function Challenge({
-  children,
-  title = "Challenge"
-}: Readonly<{ children: ReactNode; title?: string }>) {
-  return (
-    <section className="challenge-block">
-      <h3>{title}</h3>
-      {children}
-    </section>
-  );
-}
-
 export function ReferenceList({ children }: Readonly<{ children: ReactNode }>) {
   return <div className="reference-list">{children}</div>;
 }
@@ -97,7 +85,6 @@ export const mdxComponents = {
   Equation,
   CodeStep,
   InteractiveBreakout,
-  Challenge,
   ReferenceList,
   DotProductPlayground,
   MatrixTransformPlayground,

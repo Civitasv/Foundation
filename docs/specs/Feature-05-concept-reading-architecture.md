@@ -24,7 +24,7 @@ M1 concept pages must implement a reusable chapter runtime with:
 - generated section TOC;
 - semantic asides;
 - responsive rail/inline presentation;
-- code, equation, figure, challenge, and design-note blocks;
+- code, equation, figure, and design-note blocks;
 - breakout interactive labs;
 - prerequisite navigation;
 - previous/next navigation;
@@ -58,7 +58,6 @@ apps/web/components/reading/
   Figure
   CodeStep
   InteractiveBreakout
-  Challenge
   DesignNote
   ReferenceList
   PrevNext
@@ -67,6 +66,8 @@ apps/web/components/reading/
 Names may change during implementation, but the semantic boundaries should remain.
 
 ## Responsive requirements
+
+Chapter pages share navigation typography, spacing, separators, and focus treatment with the chapter catalog. Titles align with the prose column; body text remains high-contrast. Equations and code scroll inside their own blocks when needed. Labs use consistent native range controls, readable results, and immediate feedback; every pointer manipulation has a keyboard-accessible control. Learner-facing lab titles describe the experiment rather than the component name.
 
 ### Large
 
@@ -99,7 +100,7 @@ The first real concept page, preferably `vector`, must demonstrate:
 - one equation or formal definition;
 - one precise code/pseudocode block;
 - one interactive-lab placeholder or real visualizer;
-- challenge and references;
+- references;
 - prerequisite and previous/next navigation;
 - mobile linearization;
 - `pnpm check`;

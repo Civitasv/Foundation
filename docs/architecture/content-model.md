@@ -67,9 +67,7 @@ A concept may include semantic blocks such as:
 - code step;
 - aside;
 - interactive lab;
-- challenge;
 - design note;
-- checkpoint;
 - references.
 
 Semantic meaning belongs in content. Responsive placement belongs in the renderer.

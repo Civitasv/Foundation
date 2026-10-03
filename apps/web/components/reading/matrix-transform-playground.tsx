@@ -114,6 +114,7 @@ export function MatrixTransformPlayground({
             if (dragging) updateFromPointer(dragging, event.clientX, event.clientY);
           }}
           onPointerUp={() => setDragging(null)}
+          onPointerCancel={() => setDragging(null)}
           onPointerLeave={() => setDragging(null)}
           ref={svgRef}
           role="img"
@@ -152,8 +153,6 @@ export function MatrixTransformPlayground({
               setDragging("e1");
             }}
             r="9"
-            role="button"
-            tabIndex={0}
           />
           <circle
             aria-label={locale === "zh-CN" ? "第二基向量端点" : "Second basis vector endpoint"}
@@ -165,8 +164,6 @@ export function MatrixTransformPlayground({
               setDragging("e2");
             }}
             r="9"
-            role="button"
-            tabIndex={0}
           />
         </svg>
       </div>

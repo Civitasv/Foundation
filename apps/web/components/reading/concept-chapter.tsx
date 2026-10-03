@@ -36,15 +36,19 @@ const domainLabels = {
 
 const ui = {
   "zh-CN": {
-    map: "知识地图",
+    overview: "总览",
+    backToChapters: "浏览全部章节",
+    map: "章节",
     toc: "本章",
-    previous: "上一篇",
-    next: "下一篇",
+    previous: "上一章",
+    next: "下一章",
     noPrevious: "这是当前路径的起点",
     language: "EN"
   },
   en: {
-    map: "Knowledge map",
+    overview: "Overview",
+    backToChapters: "Browse all chapters",
+    map: "Chapters",
     toc: "On this page",
     previous: "Previous",
     next: "Next",
@@ -77,16 +81,17 @@ export async function ConceptChapter({
 
   return (
     <>
-      <header className="chapter-global-nav">
+      <header className="chapter-global-nav" lang={locale}>
         <Link className="brand" href="/">Foundation</Link>
-        <nav>
+        <nav aria-label={locale === "zh-CN" ? "主导航" : "Primary"}>
+          <Link href={conceptHref("agent-engineering", locale)} aria-current={id === "agent-engineering" ? "page" : undefined}>{text.overview}</Link>
           <Link href="/#map">{text.map}</Link>
-          <Link href={alternateHref}>{text.language}</Link>
           <a href="https://github.com/Civitasv/Foundation">GitHub</a>
+          <Link href={alternateHref} hrefLang={locale === "en" ? "zh-CN" : "en"}>{text.language}</Link>
         </nav>
       </header>
 
-      <main className="chapter-page">
+      <main className="chapter-page" lang={locale}>
         <header className="chapter-opening">
           <div className="chapter-domain">{domainLabels[locale][concept.domain]}</div>
           <h1>{localize(concept.title, locale)}</h1>
@@ -99,7 +104,7 @@ export async function ConceptChapter({
         <div className="chapter-layout">
           <aside className="chapter-toc">
             <div>{text.toc}</div>
-            <nav>
+            <nav aria-label={text.toc}>
               {headings.map((heading) => (
                 <a data-depth={heading.depth} href={`#${heading.id}`} key={heading.id}>
                   {heading.title}
@@ -110,7 +115,7 @@ export async function ConceptChapter({
 
           <details className="chapter-toc-mobile">
             <summary>{text.toc}</summary>
-            <nav>
+            <nav aria-label={text.toc}>
               {headings.map((heading) => (
                 <a data-depth={heading.depth} href={`#${heading.id}`} key={heading.id}>
                   {heading.title}
@@ -122,26 +127,32 @@ export async function ConceptChapter({
           <article className="chapter-flow">
             <MDXRemote components={mdxComponents} source={body} />
 
-            <nav className="chapter-prev-next">
-              <div>
-                <span>{text.previous}</span>
-                {neighbors.previous ? (
-                  <Link href={conceptHref(neighbors.previous.id, locale)}>
-                    {localize(neighbors.previous.title, locale)}
-                  </Link>
-                ) : (
-                  <p>{text.noPrevious}</p>
-                )}
-              </div>
+            <nav className="chapter-prev-next" aria-label={locale === "zh-CN" ? "章节导航" : "Chapter navigation"}>
+              {id === "agent-engineering" ? (
+                <Link href="/#map">{text.backToChapters} ›</Link>
+              ) : (
+                <>
+                  <div>
+                    <span>{text.previous}</span>
+                    {neighbors.previous ? (
+                      <Link href={conceptHref(neighbors.previous.id, locale)}>
+                        {localize(neighbors.previous.title, locale)}
+                      </Link>
+                    ) : (
+                      <p>{text.noPrevious}</p>
+                    )}
+                  </div>
 
-              <div>
-                <span>{text.next}</span>
-                {neighbors.next ? (
-                  <Link href={conceptHref(neighbors.next.id, locale)}>
-                    {localize(neighbors.next.title, locale)} ›
-                  </Link>
-                ) : null}
-              </div>
+                  <div>
+                    <span>{text.next}</span>
+                    {neighbors.next ? (
+                      <Link href={conceptHref(neighbors.next.id, locale)}>
+                        {localize(neighbors.next.title, locale)} ›
+                      </Link>
+                    ) : null}
+                  </div>
+                </>
+              )}
             </nav>
           </article>
         </div>

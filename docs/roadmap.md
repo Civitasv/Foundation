@@ -13,7 +13,7 @@ Implement Feature-05 and the design contracts in `docs/design/`:
 - chapter shell and stable prose measure;
 - generated heading TOC;
 - semantic aside system with responsive rail/inline presentation;
-- equation, figure, code-step, challenge, design-note, and reference blocks;
+- equation, figure, code-step, design-note, and reference blocks;
 - typed interactive component registry;
 - breakout interactive labs;
 - prerequisite navigation;
