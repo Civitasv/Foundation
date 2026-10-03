@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo, useState } from "react";
 import {
   localize,
@@ -71,13 +72,15 @@ const copy = {
     requires: "前置知识",
     unlocks: "接下来",
     interaction: "交互",
-    none: "无"
+    none: "无",
+    read: "阅读本章"
   },
   en: {
     requires: "Requires",
     unlocks: "Next",
     interaction: "Interaction",
-    none: "None"
+    none: "None",
+    read: "Read chapter"
   }
 } satisfies Record<FoundationLocale, Record<string, string>>;
 
@@ -103,6 +106,11 @@ export function KnowledgeExplorer({
   const unlocks = concepts.filter((concept) =>
     concept.prerequisites.includes(selected.id)
   );
+
+  const chapterHref =
+    locale === "en"
+      ? `/en/concepts/${selected.id}/`
+      : `/concepts/${selected.id}/`;
 
   return (
     <div className="explorer">
@@ -139,6 +147,9 @@ export function KnowledgeExplorer({
         </div>
         <h3>{localize(selected.title, locale)}</h3>
         <p className="concept-summary">{localize(selected.summary, locale)}</p>
+        <Link className="concept-read-link" href={chapterHref}>
+          {text.read} ›
+        </Link>
 
         <dl className="concept-facts">
           <div>
@@ -168,7 +179,6 @@ export function KnowledgeExplorer({
               )) : text.none}
             </dd>
           </div>
-
           <div>
             <dt>{text.interaction}</dt>
             <dd>{interactionLabels[locale][selected.interaction.kind]}</dd>

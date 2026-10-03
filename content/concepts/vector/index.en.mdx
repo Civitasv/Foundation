@@ -2,12 +2,187 @@
 
 ## Why it exists
 
-Transformers do not operate on words directly. They operate on numerical representations, and vectors are the first useful abstraction for understanding those representations.
+Agents ultimately depend on language models, and almost everything inside a language model becomes a vector: token embeddings are vectors, Query/Key/Value in attention are vectors, retrieval compares vectors, and each layer carries vector-valued hidden states.
 
-## Interactive target
+So vectors are not merely the first chapter of linear algebra. They are the smallest language for understanding how modern models represent information.
 
-Move a vector in two dimensions, inspect its coordinates, magnitude, direction, and relationships to other vectors.
+<Aside kind="context" title="Prerequisites">
 
-## Connection to agents
+You do not need calculus for this chapter. Basic arithmetic and the idea that an object can be represented by several numbers are enough.
 
-Agent behavior is produced by models whose internal state is represented numerically. Embeddings, attention, retrieval, and similarity all build on vectors.
+</Aside>
+
+## Intuition
+
+Do not begin by thinking of a vector as “a column of numbers.”
+
+In two dimensions, it is more useful to picture a vector as an **arrow starting at the origin**. It tells you:
+
+- which direction to move;
+- how far to move.
+
+The vector `[3, 2]` means: move 3 units along x and 2 units along y.
+
+<Equation label="Two-dimensional vector">
+
+**v = [x, y]**
+
+</Equation>
+
+<Aside kind="definition" title="Vector ≠ coordinates">
+
+A vector is an abstract object; `[3, 2]` is its representation in a particular coordinate system. Change the basis and the same vector can have different coordinates.
+
+You can blur this distinction on the first pass, but it becomes important again when thinking about embedding spaces.
+
+</Aside>
+
+### Magnitude and direction
+
+The two most immediate properties of an arrow are its length and its direction.
+
+The Euclidean length of `[x, y]` is:
+
+<Equation label="L2 norm">
+
+**‖v‖₂ = √(x² + y²)**
+
+</Equation>
+
+For `[3, 2]`, the magnitude is about `3.61`.
+
+Its direction can be represented by the angle from the x axis:
+
+<Equation label="Direction angle">
+
+**θ = atan2(y, x)**
+
+</Equation>
+
+<Aside kind="tip" title="Do not worry about high dimensions yet">
+
+Model vectors often have hundreds or thousands of dimensions and cannot be drawn as arrows. The geometric ideas of distance, direction, transformation, and similarity still transfer to high-dimensional spaces.
+
+</Aside>
+
+## Interactive experiment
+
+Change x and y below. Watch three things first:
+
+1. how the endpoint moves;
+2. how the magnitude changes;
+3. whether the direction changes when both coordinates are scaled by the same number.
+
+<InteractiveBreakout title="Vector Playground">
+
+<VectorPlayground locale="en" />
+
+</InteractiveBreakout>
+
+If `[3, 2]` becomes `[1.5, 1]`, its direction stays the same while its magnitude is halved. That is the key geometric intuition behind **scalar multiplication**.
+
+## Vector operations
+
+### Scalar multiplication
+
+Multiply a vector by a scalar `a`:
+
+<Equation>
+
+**a · [x, y] = [ax, ay]**
+
+</Equation>
+
+This changes magnitude. If `a < 0`, it also reverses direction.
+
+### Vector addition
+
+Add two vectors component by component:
+
+<Equation>
+
+**[x₁, y₁] + [x₂, y₂] = [x₁ + x₂, y₁ + y₂]**
+
+</Equation>
+
+Geometrically, place the second arrow at the endpoint of the first. The arrow from the original start to the final endpoint is their sum.
+
+This matters because neural networks constantly combine information from different sources.
+
+## Minimal implementation
+
+You do not need a linear-algebra library. A minimal 2D vector implementation is only data plus a few operations.
+
+<CodeStep title="vec2.ts">
+
+~~~ts
+type Vec2 = {
+  x: number;
+  y: number;
+};
+
+function add(a: Vec2, b: Vec2): Vec2 {
+  return {
+    x: a.x + b.x,
+    y: a.y + b.y
+  };
+}
+
+function scale(v: Vec2, scalar: number): Vec2 {
+  return {
+    x: v.x * scalar,
+    y: v.y * scalar
+  };
+}
+
+function magnitude(v: Vec2): number {
+  return Math.hypot(v.x, v.y);
+}
+~~~
+
+</CodeStep>
+
+The important part is not the data structure. It is the operations. When we reach matrices, we will see how one transformation can change a vector's direction and scale at once.
+
+## Connection to Agent engineering
+
+When text enters a Transformer, tokens first become embedding vectors. The model does not preserve the meaning of the string “cat” as a string; it represents it numerically in a high-dimensional space.
+
+Then:
+
+- attention compares relationships between vectors;
+- linear layers transform vectors with matrices;
+- residual connections add vectors;
+- RAG retrieves by embedding-vector similarity;
+- an Agent's context becomes a sequence of high-dimensional model states.
+
+After this chapter, the useful new intuition is:
+
+> **The world an LLM sees first is a collection of points and directions in high-dimensional space.**
+
+<Aside kind="source" title="Where this leads">
+
+The next useful concept is the dot product. It compresses directional alignment between two vectors into one number — the entry point to similarity and attention scores.
+
+</Aside>
+
+## Challenge
+
+<Challenge title="Check your intuition">
+
+1. Without calculating a formula: do `[6, 4]` and `[3, 2]` point in the same direction? How are their magnitudes related?
+2. Implement `subtract(a, b)`.
+3. Find two different 2D vectors with the same magnitude but different directions.
+4. If an embedding has 1,024 dimensions, can magnitude still be defined?
+
+</Challenge>
+
+## References
+
+<ReferenceList>
+
+- [MIT OpenCourseWare — Linear Algebra (18.06)](https://ocw.mit.edu/courses/18-06-linear-algebra-spring-2010/)
+- [Attention Is All You Need](https://arxiv.org/abs/1706.03762)
+- [3Blue1Brown — Essence of Linear Algebra](https://www.3blue1brown.com/topics/linear-algebra)
+
+</ReferenceList>
