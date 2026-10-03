@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import "./globals.css";
+import "./reading.css";
 
 export const metadata: Metadata = {
   title: "Foundation — 从第一性原理理解 Agent",

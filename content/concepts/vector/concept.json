@@ -5,12 +5,12 @@
     "en": "Vector"
   },
   "summary": {
-    "zh-CN": "把大小、方向和模型中的特征表示成可以被变换的坐标。",
-    "en": "Represent magnitude, direction, and learned features as coordinates that models can transform."
+    "zh-CN": "把方向、大小与模型中的特征表示成可以被计算和变换的坐标。",
+    "en": "Represent direction, magnitude, and learned features as coordinates that can be computed and transformed."
   },
   "domain": "foundations",
   "depth": "implementation",
-  "status": "seed",
+  "status": "complete",
   "prerequisites": [],
   "interaction": {
     "kind": "visualizer",

@@ -6,6 +6,13 @@ export {
   topologicalOrder
 } from "./graph";
 
+export {
+  extractLessonHeadings,
+  getConceptNeighbors,
+  slugifyHeading,
+  stripLeadingTitle
+} from "./lesson";
+
 export { localize } from "./localize";
 
 export {
@@ -15,6 +22,12 @@ export {
   foundationLocales,
   interactionKinds
 } from "./types";
+
+export type {
+  ConceptNeighbor,
+  ConceptNeighbors,
+  LessonHeading
+} from "./lesson";
 
 export type {
   ConceptDepth,

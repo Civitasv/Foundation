@@ -9,7 +9,7 @@ const nextConfig: NextConfig = {
   images: {
     unoptimized: true
   },
-  transpilePackages: ["@foundation/knowledge"]
+  transpilePackages: ["@foundation/knowledge", "next-mdx-remote"]
 };
 
 export default nextConfig;

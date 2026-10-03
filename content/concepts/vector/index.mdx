@@ -2,12 +2,187 @@
 
 ## 为什么需要它
 
-Transformer 并不是直接对“词”进行计算。模型真正处理的是数值表示，而向量是理解这些表示的第一层抽象。
+Agent 最终依赖语言模型，而语言模型内部几乎所有东西都会落到“向量”上：token 的 embedding 是向量，Attention 中的 Query、Key、Value 是向量，RAG 检索会比较向量，模型每一层的 hidden state 也是向量。
 
-## 交互目标
+所以向量不是为了学线性代数而学的第一章。它是理解现代模型如何表示信息的最小语言。
 
-在二维空间中拖动向量，观察它的坐标、长度、方向以及与其他向量的关系。
+<Aside kind="context" title="前置知识">
+
+这章不要求微积分。你只需要会基本四则运算，并接受“一个对象可以用一组数字描述”这个想法。
+
+</Aside>
+
+## 直觉
+
+先不要把向量理解成“一列数字”。
+
+在二维空间中，向量更像一支**从原点出发的箭头**。它同时表达两个信息：
+
+- 指向哪里；
+- 走了多远。
+
+例如向量 `[3, 2]` 表示：沿 x 方向走 3，沿 y 方向走 2。
+
+<Equation label="二维向量">
+
+**v = [x, y]**
+
+</Equation>
+
+<Aside kind="definition" title="向量 ≠ 坐标">
+
+向量是抽象对象；`[3, 2]` 是它在某个坐标系中的表示。换一组基底，同一个向量可以有不同坐标。
+
+第一遍学习时可以先把两者近似看成一回事，但以后理解 embedding space 时，这个区别会重新出现。
+
+</Aside>
+
+### 长度和方向
+
+一支箭头最直接的两个属性就是长度和方向。
+
+二维向量 `[x, y]` 的欧氏长度是：
+
+<Equation label="L2 norm">
+
+**‖v‖₂ = √(x² + y²)**
+
+</Equation>
+
+对于 `[3, 2]`，长度约为 `3.61`。
+
+方向可以用与 x 轴的夹角表示：
+
+<Equation label="方向角">
+
+**θ = atan2(y, x)**
+
+</Equation>
+
+<Aside kind="tip" title="先不用担心高维">
+
+模型中的向量通常有几百到几千维，无法画成箭头。但二维图里的“距离、方向、变换、相似度”直觉仍然会迁移到高维空间。
+
+</Aside>
+
+## 交互实验
+
+改变下面向量的 x、y 坐标。先只观察三件事：
+
+1. 坐标变化时，箭头怎么移动；
+2. 长度怎么变化；
+3. x、y 都乘同一个数时，方向是否变化。
+
+<InteractiveBreakout title="Vector Playground">
+
+<VectorPlayground locale="zh-CN" />
+
+</InteractiveBreakout>
+
+如果把 `[3, 2]` 变成 `[1.5, 1]`，方向不变，但长度变成一半。这就是**标量乘法**最重要的几何直觉。
+
+## 向量运算
+
+### 标量乘法
+
+用一个数 `a` 乘向量：
+
+<Equation>
+
+**a · [x, y] = [ax, ay]**
+
+</Equation>
+
+它会改变长度；当 `a < 0` 时，还会翻转方向。
+
+### 向量加法
+
+两个向量相加：
+
+<Equation>
+
+**[x₁, y₁] + [x₂, y₂] = [x₁ + x₂, y₁ + y₂]**
+
+</Equation>
+
+几何上，你可以把第二支箭头接到第一支箭头末端，最终从起点指向终点的箭头就是它们的和。
+
+这个操作非常重要，因为神经网络一直在组合不同来源的信息。
+
+## 最小实现
+
+代码不需要任何线性代数库。二维向量最小实现只有一组数据和几个操作。
+
+<CodeStep title="vec2.ts">
+
+~~~ts
+type Vec2 = {
+  x: number;
+  y: number;
+};
+
+function add(a: Vec2, b: Vec2): Vec2 {
+  return {
+    x: a.x + b.x,
+    y: a.y + b.y
+  };
+}
+
+function scale(v: Vec2, scalar: number): Vec2 {
+  return {
+    x: v.x * scalar,
+    y: v.y * scalar
+  };
+}
+
+function magnitude(v: Vec2): number {
+  return Math.hypot(v.x, v.y);
+}
+~~~
+
+</CodeStep>
+
+这里值得注意的是：**数据结构不是重点，运算才是重点。** 后面学习矩阵时，我们会看到矩阵如何一次性改变一个向量的方向和尺度。
 
 ## 与 Agent 的关系
 
-Agent 的行为最终来自模型内部的数值表示。Embedding、Attention、检索与相似度，都建立在向量之上。
+当文本进入 Transformer，token 会先变成 embedding vector。模型并不保存“cat”这个字符串的语义，而是在一个高维向量空间里保存它的数值表示。
+
+之后：
+
+- Attention 比较不同向量之间的关系；
+- 线性层用矩阵变换向量；
+- residual connection 把向量相加；
+- RAG 用 embedding vector 做相似度检索；
+- Agent 的 context 最终也会被模型编码成一连串高维状态。
+
+所以理解向量以后，你应该形成一个新的直觉：
+
+> **LLM 看到的世界，首先是高维空间中的点和方向。**
+
+<Aside kind="source" title="接下来会发生什么">
+
+下一章可以继续学习点积。点积会把“两个向量的方向有多一致”压缩成一个数字，这正是理解相似度和 Attention score 的入口。
+
+</Aside>
+
+## 练习
+
+<Challenge title="检查你的直觉">
+
+1. 不计算公式：`[6, 4]` 和 `[3, 2]` 的方向是否相同？长度是什么关系？
+2. 写一个 `subtract(a, b)`。
+3. 找两个不同的二维向量，让它们的长度相同但方向不同。
+4. 思考：如果 embedding 有 1,024 维，“长度”仍然可以定义吗？
+
+</Challenge>
+
+## 参考资料
+
+<ReferenceList>
+
+- [MIT OpenCourseWare — Linear Algebra (18.06)](https://ocw.mit.edu/courses/18-06-linear-algebra-spring-2010/)
+- [Attention Is All You Need](https://arxiv.org/abs/1706.03762)
+- [3Blue1Brown — Essence of Linear Algebra](https://www.3blue1brown.com/topics/linear-algebra)
+
+</ReferenceList>

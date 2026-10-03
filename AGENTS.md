@@ -53,6 +53,19 @@ Chat history, issue discussion, generated summaries, and UI state are context, n
 9. Motion must communicate state, causality, or continuity and must support reduced motion.
 10. User-facing pages must not expose internal implementation names such as component class names.
 
+## Pull request completion policy
+
+Unless the user explicitly asks to hold a pull request open, automatically squash-merge when all of the following are true:
+
+1. all required CI checks have completed successfully;
+2. the PR is mergeable and not a draft;
+3. there are no blocking reviews or unresolved blocking review threads;
+4. the requested scope and applicable acceptance criteria are complete.
+
+Do not wait for a second approval message after these conditions are satisfied.
+
+If any condition is not satisfied, keep the PR open and fix or report the blocker. Never merge based on an assumed or pending CI result.
+
 ## Completion checklist
 
 Run:
