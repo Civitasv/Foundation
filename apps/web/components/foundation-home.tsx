@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import type { ConceptMetadata, FoundationLocale } from "@foundation/knowledge";
 import { KnowledgeExplorer } from "./knowledge-explorer";
+import { CatalogStressHarness } from "./dev/catalog-stress-harness";
 
 const copy = {
   "zh-CN": {
@@ -25,20 +26,37 @@ export function FoundationHome({
   concepts
 }: Readonly<{ concepts: ConceptMetadata[] }>) {
   const [locale, setLocale] = useState<FoundationLocale>("zh-CN");
+  const [localeReady, setLocaleReady] = useState(false);
   const text = copy[locale];
   const overviewHref = locale === "en"
     ? "/en/concepts/agent-engineering/"
     : "/concepts/agent-engineering/";
 
   useEffect(() => {
-    const saved = window.localStorage.getItem("foundation-locale");
+    let saved = new URLSearchParams(window.location.search).get("lang");
+    try {
+      saved ??= window.localStorage.getItem("foundation-locale");
+    } catch { /* Reading remains available when storage is disabled. */ }
     if (saved === "en" || saved === "zh-CN") setLocale(saved);
+    setLocaleReady(true);
   }, []);
 
   useEffect(() => {
+    if (!localeReady) return;
     document.documentElement.lang = locale;
-    window.localStorage.setItem("foundation-locale", locale);
-  }, [locale]);
+    try {
+      window.localStorage.setItem("foundation-locale", locale);
+    } catch { /* Saving the language preference is optional. */ }
+  }, [locale, localeReady]);
+
+  function selectLocale(next: FoundationLocale) {
+    setLocale(next);
+    const url = new URL(window.location.href);
+    if (url.searchParams.has("lang")) {
+      url.searchParams.set("lang", next);
+      window.history.replaceState(null, "", url);
+    }
+  }
 
   return (
     <main id="top">
@@ -54,14 +72,14 @@ export function FoundationHome({
         <div className="language-switch" aria-label="Language">
           <button
             aria-pressed={locale === "zh-CN"}
-            onClick={() => setLocale("zh-CN")}
+            onClick={() => selectLocale("zh-CN")}
             type="button"
           >
             中文
           </button>
           <button
             aria-pressed={locale === "en"}
-            onClick={() => setLocale("en")}
+            onClick={() => selectLocale("en")}
             type="button"
           >
             EN
@@ -75,7 +93,9 @@ export function FoundationHome({
           <p>{text.mapCopy}</p>
           <a className="overview-read-link" href={overviewHref}>{text.overviewRead} ›</a>
         </div>
-        <KnowledgeExplorer concepts={concepts} locale={locale} />
+        {process.env.NODE_ENV === "development"
+          ? <CatalogStressHarness concepts={concepts} locale={locale} />
+          : <KnowledgeExplorer concepts={concepts} locale={locale} />}
       </section>
 
       <footer>

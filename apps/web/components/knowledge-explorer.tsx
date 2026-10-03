@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { Fragment, useMemo, useState } from "react";
 import {
   localize,
   type ConceptDomain,
@@ -73,14 +73,22 @@ const copy = {
     unlocks: "接下来",
     interaction: "交互",
     none: "无",
-    read: "阅读本章"
+    read: "阅读本章",
+    empty: "暂无章节。内容准备好后会出现在这里。",
+    previousPage: "上一页",
+    nextPage: "下一页",
+    page: "页"
   },
   en: {
     requires: "Requires",
     unlocks: "Next",
     interaction: "Interaction",
     none: "None",
-    read: "Read chapter"
+    read: "Read chapter",
+    empty: "No chapters yet. They will appear here when available.",
+    previousPage: "Previous page",
+    nextPage: "Next page",
+    page: "Page"
   }
 } satisfies Record<FoundationLocale, Record<string, string>>;
 
@@ -88,6 +96,7 @@ export function KnowledgeExplorer({
   concepts,
   locale
 }: Readonly<{ concepts: ConceptMetadata[]; locale: FoundationLocale }>) {
+  const [page, setPage] = useState(0);
   const [selectedId, setSelectedId] = useState(concepts[0]?.id ?? "");
   const text = copy[locale];
   const selected = concepts.find((concept) => concept.id === selectedId) ?? concepts[0];
@@ -97,7 +106,23 @@ export function KnowledgeExplorer({
     [concepts]
   );
 
-  if (!selected) return null;
+  if (!selected) return <p className="catalog-empty" role="status">{text.empty}</p>;
+
+  const pageSize = 40;
+  const pageCount = Math.ceil(concepts.length / pageSize);
+  const currentPage = Math.min(page, pageCount - 1);
+  const visibleConcepts = concepts.slice(currentPage * pageSize, (currentPage + 1) * pageSize);
+
+  function selectConcept(id: string) {
+    setSelectedId(id);
+    const index = concepts.findIndex(concept => concept.id === id);
+    if (index >= 0) setPage(Math.floor(index / pageSize));
+  }
+
+  function selectPage(next: number) {
+    setPage(next);
+    setSelectedId(concepts[next * pageSize]?.id ?? "");
+  }
 
   const prerequisites = selected.prerequisites
     .map((id) => byId.get(id))
@@ -112,41 +137,14 @@ export function KnowledgeExplorer({
       ? `/en/concepts/${selected.id}/`
       : `/concepts/${selected.id}/`;
 
-  return (
-    <div className="explorer">
-      <div className="concept-browser">
-        {domainOrder.map((domain) => {
-          const nodes = concepts.filter((concept) => concept.domain === domain);
-          if (nodes.length === 0) return null;
-
-          return (
-            <section className="concept-group" key={domain}>
-              <h2>{domainLabels[locale][domain]}</h2>
-              <div className="concept-list">
-                {nodes.map((concept) => (
-                  <button
-                    className="concept-row"
-                    aria-controls="concept-detail"
-                    aria-pressed={concept.id === selected.id}
-                    key={concept.id}
-                    onClick={() => setSelectedId(concept.id)}
-                    type="button"
-                  >
-                    <span>{localize(concept.title, locale)}</span>
-                    <span aria-hidden="true">›</span>
-                  </button>
-                ))}
-              </div>
-            </section>
-          );
-        })}
-      </div>
-
-      <aside className="concept-detail" id="concept-detail" aria-labelledby="concept-title" aria-live="polite">
+  function renderDetail(id: string, className: string) {
+    if (!selected) return null;
+    return (
+      <aside className={className} id={id} aria-labelledby={`${id}-title`}>
         <div className="concept-meta">
           {domainLabels[locale][selected.domain]} · {depthLabels[locale][selected.depth]}
         </div>
-        <h2 id="concept-title">{localize(selected.title, locale)}</h2>
+        <h2 id={`${id}-title`} aria-live="polite">{localize(selected.title, locale)}</h2>
         <p className="concept-summary">{localize(selected.summary, locale)}</p>
         <Link className="concept-read-link" href={chapterHref}>
           {text.read} ›
@@ -158,7 +156,7 @@ export function KnowledgeExplorer({
             <dd>
               {prerequisites.length > 0 ? prerequisites.map((concept, index) => (
                 <span key={concept.id}>
-                  <button type="button" onClick={() => setSelectedId(concept.id)}>
+                  <button type="button" onClick={() => selectConcept(concept.id)}>
                     {localize(concept.title, locale)}
                   </button>
                   {index < prerequisites.length - 1 ? "、" : ""}
@@ -172,7 +170,7 @@ export function KnowledgeExplorer({
             <dd>
               {unlocks.length > 0 ? unlocks.map((concept, index) => (
                 <span key={concept.id}>
-                  <button type="button" onClick={() => setSelectedId(concept.id)}>
+                  <button type="button" onClick={() => selectConcept(concept.id)}>
                     {localize(concept.title, locale)}
                   </button>
                   {index < unlocks.length - 1 ? "、" : ""}
@@ -186,6 +184,47 @@ export function KnowledgeExplorer({
           </div>
         </dl>
       </aside>
+    );
+  }
+
+  return (
+    <div className="explorer">
+      <div className="concept-browser">
+        {domainOrder.map((domain) => {
+          const nodes = visibleConcepts.filter((concept) => concept.domain === domain);
+          if (nodes.length === 0) return null;
+
+          return (
+            <section className="concept-group" key={domain}>
+              <h2>{domainLabels[locale][domain]}</h2>
+              <div className="concept-list">
+                {nodes.map((concept) => (
+                  <Fragment key={concept.id}>
+                    <button
+                      className="concept-row"
+                      aria-controls="concept-detail concept-detail-mobile"
+                      aria-pressed={concept.id === selected.id}
+                      onClick={() => selectConcept(concept.id)}
+                      type="button"
+                    >
+                      <span>{localize(concept.title, locale)}</span>
+                      <span aria-hidden="true">›</span>
+                    </button>
+                    {concept.id === selected.id ? renderDetail("concept-detail-mobile", "concept-detail concept-detail-mobile") : null}
+                  </Fragment>
+                ))}
+              </div>
+            </section>
+          );
+        })}
+        {pageCount > 1 ? <nav className="catalog-pagination" aria-label={locale === "zh-CN" ? "章节分页" : "Chapter pages"}>
+          <button type="button" disabled={currentPage === 0} onClick={() => selectPage(currentPage - 1)}>{text.previousPage}</button>
+          <span>{locale === "zh-CN" ? `${currentPage + 1} / ${pageCount} ${text.page}` : `${text.page} ${currentPage + 1} / ${pageCount}`}</span>
+          <button type="button" disabled={currentPage === pageCount - 1} onClick={() => selectPage(currentPage + 1)}>{text.nextPage}</button>
+        </nav> : null}
+      </div>
+
+      {renderDetail("concept-detail", "concept-detail concept-detail-desktop")}
     </div>
   );
 }

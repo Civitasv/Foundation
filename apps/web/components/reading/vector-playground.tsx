@@ -120,17 +120,21 @@ export function VectorPlayground({
             y1={ORIGIN_Y}
             y2={endpointY}
           />
-          <circle
-            aria-label={locale === "zh-CN" ? "向量端点" : "Vector endpoint"}
-            className="vector-handle"
-            cx={endpointX}
-            cy={endpointY}
+          <g className="lab-drag-handle"
             onPointerDown={(event) => {
               event.currentTarget.setPointerCapture(event.pointerId);
               setDragging(true);
             }}
-            r="9"
-          />
+          >
+            <circle aria-label={locale === "zh-CN" ? "向量端点" : "Vector endpoint"} cx={endpointX} cy={endpointY} r="9" fill="transparent" stroke="transparent" strokeWidth="36" vectorEffect="non-scaling-stroke" />
+            <circle
+              aria-label={locale === "zh-CN" ? "向量端点" : "Vector endpoint"}
+              className="vector-handle"
+              cx={endpointX}
+              cy={endpointY}
+              r="9"
+            />
+          </g>
         </svg>
       </div>
 

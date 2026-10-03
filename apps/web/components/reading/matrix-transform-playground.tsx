@@ -143,28 +143,36 @@ export function MatrixTransformPlayground({
           <line className="matrix-basis-e1" x1={ORIGIN_X} x2={e1.x} y1={ORIGIN_Y} y2={e1.y} />
           <line className="matrix-basis-e2" x1={ORIGIN_X} x2={e2.x} y1={ORIGIN_Y} y2={e2.y} />
 
-          <circle
-            aria-label={locale === "zh-CN" ? "第一基向量端点" : "First basis vector endpoint"}
-            className="matrix-handle-e1"
-            cx={e1.x}
-            cy={e1.y}
+          <g className="lab-drag-handle"
             onPointerDown={(event) => {
               event.currentTarget.setPointerCapture(event.pointerId);
               setDragging("e1");
             }}
-            r="9"
-          />
-          <circle
-            aria-label={locale === "zh-CN" ? "第二基向量端点" : "Second basis vector endpoint"}
-            className="matrix-handle-e2"
-            cx={e2.x}
-            cy={e2.y}
+          >
+            <circle aria-label={locale === "zh-CN" ? "第一基向量端点" : "First basis vector endpoint"} cx={e1.x} cy={e1.y} r="9" fill="transparent" stroke="transparent" strokeWidth="36" vectorEffect="non-scaling-stroke" />
+            <circle
+              aria-label={locale === "zh-CN" ? "第一基向量端点" : "First basis vector endpoint"}
+              className="matrix-handle-e1"
+              cx={e1.x}
+              cy={e1.y}
+              r="9"
+            />
+          </g>
+          <g className="lab-drag-handle"
             onPointerDown={(event) => {
               event.currentTarget.setPointerCapture(event.pointerId);
               setDragging("e2");
             }}
-            r="9"
-          />
+          >
+            <circle aria-label={locale === "zh-CN" ? "第二基向量端点" : "Second basis vector endpoint"} cx={e2.x} cy={e2.y} r="9" fill="transparent" stroke="transparent" strokeWidth="36" vectorEffect="non-scaling-stroke" />
+            <circle
+              aria-label={locale === "zh-CN" ? "第二基向量端点" : "Second basis vector endpoint"}
+              className="matrix-handle-e2"
+              cx={e2.x}
+              cy={e2.y}
+              r="9"
+            />
+          </g>
         </svg>
       </div>
 

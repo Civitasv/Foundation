@@ -206,29 +206,37 @@ export function DotProductPlayground({
             y2={bEnd.y}
           />
 
-          <circle
-            aria-label={text.vectorA}
-            className="dot-handle-a"
-            cx={aEnd.x}
-            cy={aEnd.y}
+          <g className="lab-drag-handle"
             onPointerDown={(event) => {
               event.currentTarget.setPointerCapture(event.pointerId);
               setDragging("a");
             }}
-            r="9"
-          />
+          >
+            <circle aria-label={text.vectorA} cx={aEnd.x} cy={aEnd.y} r="9" fill="transparent" stroke="transparent" strokeWidth="36" vectorEffect="non-scaling-stroke" />
+            <circle
+              aria-label={text.vectorA}
+              className="dot-handle-a"
+              cx={aEnd.x}
+              cy={aEnd.y}
+              r="9"
+            />
+          </g>
 
-          <circle
-            aria-label={text.vectorB}
-            className="dot-handle-b"
-            cx={bEnd.x}
-            cy={bEnd.y}
+          <g className="lab-drag-handle"
             onPointerDown={(event) => {
               event.currentTarget.setPointerCapture(event.pointerId);
               setDragging("b");
             }}
-            r="9"
-          />
+          >
+            <circle aria-label={text.vectorB} cx={bEnd.x} cy={bEnd.y} r="9" fill="transparent" stroke="transparent" strokeWidth="36" vectorEffect="non-scaling-stroke" />
+            <circle
+              aria-label={text.vectorB}
+              className="dot-handle-b"
+              cx={bEnd.x}
+              cy={bEnd.y}
+              r="9"
+            />
+          </g>
         </svg>
       </div>
 

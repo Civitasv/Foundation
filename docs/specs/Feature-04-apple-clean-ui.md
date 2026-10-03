@@ -44,7 +44,9 @@ Concept groups       Detail
 
 Concepts are rows, not cards. Detail is separated by a single rule rather than a floating inspector card.
 
-The map uses a white canvas, a shared alignment grid, and responsive system typography. Hairline separators distinguish rows; a pale blue selection and a leading rule identify the current concept. Press feedback is immediate, keyboard focus is visible, and reduced-motion preferences disable transitions. On narrow screens, the list and detail stack in document order.
+The map uses a white canvas, a shared alignment grid, and responsive system typography. Hairline separators distinguish rows; a pale blue selection and a leading rule identify the current concept. Press feedback is immediate, keyboard focus is visible, and reduced-motion preferences disable transitions. On narrow screens, detail follows the selected row so readers can reach it without crossing the whole list. Identifying titles wrap in full, empty catalogs explain their state, and catalogs larger than 40 items paginate without redefining graph relationships.
+
+Navigation remains available on mobile. Hover styles require a fine pointer with hover capability; taps provide immediate feedback. Safe-area insets and viewport metadata protect navigation and content while preserving zoom and document scrolling. Labs keep native sliders and allow page scrolling outside enlarged drag handles. See [interaction audit](../design/interaction-audit.md) for pressure fixtures, motion decisions, verification, and real-device limitations.
 
 ## Acceptance criteria
 

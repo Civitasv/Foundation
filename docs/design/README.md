@@ -85,5 +85,6 @@ A beautiful layout that weakens comprehension is incorrect.
 - [Visual system](./visual-system.md)
 - [Content blocks](./content-blocks.md)
 - [Concept page template](./concept-page-template.md)
+- [Interaction and resilience audit](./interaction-audit.md)
 
 Any non-trivial concept-page UI change must read these documents before implementation.

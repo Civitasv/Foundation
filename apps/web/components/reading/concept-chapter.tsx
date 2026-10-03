@@ -78,6 +78,7 @@ export async function ConceptChapter({
   const neighbors = getConceptNeighbors(concepts, id);
   const text = ui[locale];
   const alternateHref = locale === "en" ? `/concepts/${id}/` : `/en/concepts/${id}/`;
+  const catalogHref = locale === "en" ? "/?lang=en#map" : "/?lang=zh-CN#map";
 
   return (
     <>
@@ -85,7 +86,7 @@ export async function ConceptChapter({
         <Link className="brand" href="/">Foundation</Link>
         <nav aria-label={locale === "zh-CN" ? "主导航" : "Primary"}>
           <Link href={conceptHref("agent-engineering", locale)} aria-current={id === "agent-engineering" ? "page" : undefined}>{text.overview}</Link>
-          <Link href="/#map">{text.map}</Link>
+          <Link href={catalogHref}>{text.map}</Link>
           <a href="https://github.com/Civitasv/Foundation">GitHub</a>
           <Link href={alternateHref} hrefLang={locale === "en" ? "zh-CN" : "en"}>{text.language}</Link>
         </nav>
@@ -129,7 +130,7 @@ export async function ConceptChapter({
 
             <nav className="chapter-prev-next" aria-label={locale === "zh-CN" ? "章节导航" : "Chapter navigation"}>
               {id === "agent-engineering" ? (
-                <Link href="/#map">{text.backToChapters} ›</Link>
+                <Link href={catalogHref}>{text.backToChapters} ›</Link>
               ) : (
                 <>
                   <div>

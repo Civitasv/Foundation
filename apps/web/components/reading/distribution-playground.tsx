@@ -22,7 +22,8 @@ const labels = {
     bimodal: "双峰",
     reset: "重置",
     bits: "bits",
-    outcome: "结果"
+    outcome: "结果",
+    zeroWeights: "权重总和为零，无法归一化。实验暂用均匀分布；增加任一权重即可恢复。"
   },
   en: {
     instruction: "Adjust four raw weights. They are normalized automatically into a probability distribution.",
@@ -40,7 +41,8 @@ const labels = {
     bimodal: "Bimodal",
     reset: "Reset",
     bits: "bits",
-    outcome: "Outcome"
+    outcome: "Outcome",
+    zeroWeights: "Zero weights cannot be normalized. This lab temporarily uses a uniform distribution; increase any weight to resume."
   }
 } as const;
 
@@ -118,6 +120,7 @@ export function DistributionPlayground({
 
       <div className="distribution-controls">
         <p>{text.instruction}</p>
+        {weights.every(weight => weight === 0) ? <p role="status">{text.zeroWeights}</p> : null}
 
         <div className="distribution-sliders">
           {weights.map((weight, index) => (

@@ -7,13 +7,11 @@
   font-size: 0.875rem;
 }
 
-.concept-read-link:hover {
-  text-decoration: underline;
-  text-underline-offset: 3px;
+@media (hover: hover) and (pointer: fine) {
+  .concept-read-link:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
 }
-
-.chapter-global-nav {
-  grid-template-columns: 1fr auto;
 }
 
 .chapter-global-nav nav a:last-child {
@@ -24,12 +22,13 @@
 }
 
 .chapter-page {
-  width: min(calc(100% - 96px), 74rem);
+  width: min(calc(100% - 96px - var(--safe-inline) - var(--safe-inline)), 74rem);
   margin-inline: auto;
   padding-bottom: 6rem;
 }
 
 .chapter-opening {
+  overflow-wrap: anywhere;
   width: min(100%, 44rem);
   margin-left: 13rem;
   padding: 6rem 0 4rem;
@@ -106,9 +105,11 @@
   padding-left: 0.75rem;
 }
 
-.chapter-toc a:hover,
-.chapter-toc-mobile a:hover {
-  color: var(--accent);
+@media (hover: hover) and (pointer: fine) {
+  .chapter-toc a:hover,
+  .chapter-toc-mobile a:hover {
+    color: var(--accent);
+}
 }
 
 .chapter-toc-mobile {
@@ -202,8 +203,10 @@
   text-underline-offset: 3px;
 }
 
-.chapter-flow a:hover {
-  text-decoration: underline;
+@media (hover: hover) and (pointer: fine) {
+  .chapter-flow a:hover {
+    text-decoration: underline;
+}
 }
 
 .semantic-aside {
@@ -345,7 +348,12 @@
   display: block;
   width: 100%;
   height: auto;
+  touch-action: pan-y pinch-zoom;
+}
+
+.lab-drag-handle circle {
   touch-action: none;
+  cursor: grab;
 }
 
 .vector-grid-line,
@@ -514,15 +522,17 @@
   color: var(--accent);
   font-size: 0.875rem;
   cursor: pointer;
-  transition: background-color 140ms ease;
+  transition: background-color var(--color-duration) ease, opacity var(--feedback-duration) var(--ease-out);
 }
 
 .vector-reset {
   margin: 1rem 0 0 -0.5rem;
 }
 
-:is(.vector-reset, .matrix-presets button, .distribution-presets button):hover {
-  background: #eef5fc;
+@media (hover: hover) and (pointer: fine) {
+  :is(.vector-reset, .matrix-presets button, .distribution-presets button):hover {
+    background: #eef5fc;
+}
 }
 
 :is(.vector-reset, .matrix-presets button, .distribution-presets button):active {
@@ -534,7 +544,7 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  width: fit-content;
+  width: min(100%, 12rem);
   margin-bottom: 1rem;
 }
 
@@ -547,7 +557,9 @@
 
 .matrix-display > div {
   display: grid;
-  grid-template-columns: repeat(2, 3.5rem);
+  flex: 1;
+  min-width: 0;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.5rem 0.75rem;
 }
 
@@ -641,8 +653,10 @@
   cursor: pointer;
 }
 
-.distribution-sample:hover {
-  background: var(--subtle);
+@media (hover: hover) and (pointer: fine) {
+  .distribution-sample:hover {
+    background: var(--subtle);
+}
 }
 
 .distribution-sample:active {
@@ -702,19 +716,19 @@
   }
 
   .interactive-breakout {
-    width: min(calc(100vw - 96px), 61rem);
+    width: min(calc(100vw - 96px - var(--safe-inline) - var(--safe-inline)), 61rem);
     margin-left: 50%;
     transform: translateX(-50%);
   }
 }
 
 @media (max-width: 820px) {
-  .chapter-page {
-    width: calc(100% - 48px);
+.chapter-page {
+    width: calc(100% - 48px - var(--safe-inline) - var(--safe-inline));
   }
 
   .interactive-breakout {
-    width: calc(100vw - 48px);
+    width: calc(100vw - 48px - var(--safe-inline) - var(--safe-inline));
   }
 
   .vector-playground,
@@ -726,6 +740,15 @@
 }
 
 @media (max-width: 640px) {
+  :is(.vector-controls, .dot-sliders, .matrix-sliders, .distribution-sliders) label {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.25rem 0.75rem;
+  }
+
+  .interactive-breakout input[type="range"] {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
   .chapter-global-nav nav {
     gap: 1rem;
   }
@@ -735,7 +758,7 @@
   }
 
   .chapter-page {
-    width: calc(100% - 32px);
+    width: calc(100% - 32px - var(--safe-inline) - var(--safe-inline));
     padding-bottom: 4rem;
   }
 
