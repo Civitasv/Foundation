@@ -1,0 +1,23 @@
+{
+  "id": "foundations-introduction",
+  "title": {
+    "zh-CN": "章节引言：为什么学习这些基础",
+    "en": "Introduction: Why These Foundations Matter"
+  },
+  "summary": {
+    "zh-CN": "从表示、变换、比较与不确定性出发，理解向量、矩阵、点积和概率如何帮助我们读懂模型、分析 Agent 的行为。",
+    "en": "See how representation, transformation, comparison, and uncertainty connect vectors, matrices, dot products, and probability to models and agent behavior."
+  },
+  "domain": "foundations",
+  "depth": "awareness",
+  "status": "ai-draft",
+  "prerequisites": [],
+  "interaction": {
+    "kind": "none"
+  },
+  "tags": [
+    "introduction",
+    "linear-algebra",
+    "probability"
+  ]
+}

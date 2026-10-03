@@ -1,0 +1,37 @@
+# Introduction: Why These Foundations Matter
+
+## From calling a model to explaining its behavior
+
+Calling a model API rarely requires knowing matrix multiplication. You can send a question, receive an answer, connect a few tools, and start building an agent. Why pause to study vectors, dot products, and probability?
+
+The need often appears when a result is unexpected. Retrieval returns a passage with similar wording that does not answer the question. Repeating a prompt produces different answers. A model assigns a high probability to an incorrect continuation. Understanding these cases takes more than knowing the API. We need to know what the numbers represent, which operations act on them, and what conclusions those operations support.
+
+This part of the course introduces mathematical tools that recur in the model and agent chapters, explaining them through concrete problems. It assumes no completed course in linear algebra or probability. Formulas appear as they become useful, with notation explained where it is used.
+
+## How the concepts connect
+
+Suppose we want to find passages relevant to a question. One common approach encodes the question and passages as vectors and compares them. [Vectors](/en/concepts/vector/) are the first piece: how coordinates carry features, and what length and direction describe. Geometry helps build intuition, though coordinates learned by a model often have no individually named meanings. Distinguishing a numerical representation from our interpretation of it is a first step toward understanding models.
+
+Next comes changing a representation. [Matrices](/en/concepts/matrix/) express transformations as computations. Understanding matrix–vector multiplication gives a neural network's linear layer a concrete meaning: how input components combine and where output dimensions come from. Later, queries, keys, and values in attention become representations whose construction we can examine.
+
+Representations also need to be compared. A [dot product](/en/concepts/dot-product/) turns a relationship between two vectors into a number. It appears in similarity calculations and attention scores, but depends on both direction and length. That explains why normalization changes a comparison and why a larger score alone is insufficient evidence of closer meaning.
+
+[Probability distributions](/en/concepts/probability/) address a different question: how to describe possibilities when several outcomes can occur. A language model faces a set of candidates for the next token; sampling selects an outcome from a distribution. Probability, expectation, and entropy help describe these choices and their variability. A high probability assigned to a continuation is a prediction about that continuation, not the probability that its factual claims are true.
+
+[Softmax](/en/concepts/softmax/) connects these topics by converting scores into positive weights that sum to one. In language generation, those values can serve as probabilities over candidate tokens. In attention, they weight information from different positions. The same operation serves different purposes, so a formula needs to be read together with the meaning of its inputs and outputs.
+
+A common computation in later chapters can now be unpacked: represent inputs as vectors, transform them with matrices, calculate scores through dot products, and use Softmax to obtain weights for combining information. This is only part of attention, but it already gives a string of symbols a concrete interpretation.
+
+## How the foundations inform engineering decisions
+
+These ideas help with specific decisions. Comparing retrieval methods requires understanding their similarity measures and normalization. Adjusting generation parameters calls for observing how the output distribution changes. Reading model code involves checking whether matrix and vector dimensions agree. Each provides a reason for a decision beyond trying another parameter value.
+
+Mathematical explanations also have limits. A highly similar passage can be outdated, a fluent answer can be false, and a generated tool request can fail during execution. Vectors and probability explain local computations within these systems. Establishing whether a source is trustworthy or a task is complete still requires examining sources, tool results, and evaluation evidence. Later model and agent chapters take up those questions.
+
+## Reading this part
+
+Start with vectors, then explore matrices and dot products. Probability distributions can be studied independently, followed by Softmax. If a topic is familiar, look at its examples and connections to models before deciding whether to read it in detail.
+
+On a first pass, aim to identify an operation's inputs and outputs, calculate a small example, and explain why changing an input changes the result. Memorizing every formula can wait. With interactive experiments, predict before manipulating: what happens to a dot product when a vector rotates, or to uncertainty when probability concentrates on one outcome? A result that differs from your expectation is a useful place to return to the explanation.
+
+By the end of this part, you should be able to follow vectors, matrices, scores, and probabilities through a computation, and recognize which conclusions the numbers support. Later chapters will deepen that understanding. Begin with [Vector](/en/concepts/vector/) and turn a set of coordinates into something you can inspect and calculate.
