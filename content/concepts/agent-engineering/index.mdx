@@ -1,111 +1,189 @@
-# Agent 工程总览
+# 从图灵机到大模型
 
-## 从一个任务看整个系统
+## 摘要与阅读框架
 
-假设你让一个 Agent 修改项目中的一处错误，并确认修改有效。它需要理解要求、找到相关代码、做出修改、运行检查，再根据结果决定继续修复还是结束。如果检查失败，下一步必须依据新的错误信息调整；如果缺少权限，系统需要停下来，而不是把猜测当作成功。
+大语言模型的形成，是计算理论、统计学习、网络基础设施和并行计算长期共同演进的结果。本文选取从 1936 年可计算性研究到 2020 年代初大模型与 Agent 的关键节点，讨论一个问题如何引出另一个问题：计算如何被形式化，程序如何从数据中学习，数据如何变得可获得，表示如何被学习，以及语言预测如何成为可复用的模型能力。
 
-这件事把 Agent 工程的几个层次放在了同一条线上：**目标规定要达到什么，模型提出下一步，工具接触外部世界，运行时执行并保留状态，反馈让下一步有据可依。** 上下文决定模型能看到什么，权限决定系统能做什么，评测决定我们如何判断它做得怎样。
+这里按关键成果出现的时间组织叙述，但不把历史理解为单一路线。机器学习早于互联网普及；神经网络、统计方法与符号方法长期并存；互联网增加了数据供给，却没有自动解决学习算法的问题。下文所说的“为后续提供条件”，是对这些技术关系的综合解释，而不是声称某项发明必然导致了下一项发明。
 
-本文沿着这个任务打开系统，再向下连接模型和数学。你可以先读完建立全局图景，也可以在遇到具体问题时进入对应章节，读完后回到这里确认它在整体中的位置。
+文章在每一阶段先界定问题，再介绍机制与局限，最后连接后续发展。新术语在首次出现时解释；数学细节和系统细节则链接到本站的对应章节。本文不是完整的计算机史，也不以某个模型的最新排名为组织原则。
 
-## 循环：让行动的结果进入下一次决定
+## 1936：计算成为可以讨论的数学对象
 
-一次模型回答只能给出当时条件下的输出。要完成一个需要探索的任务，系统需要反复取得信息、做决定、采取行动，并把结果写回状态。这里用下面的流程概括一个常见的模型驱动 Agent：
+在 1936 年提交并宣读的《论可计算数及其在判定问题上的应用》中，Alan Turing 用一种抽象机器描述按规则执行的计算。这一工作通常以 1936 年为历史节点，原论文的期刊出版信息也常记作 1937 年。机器具有有限控制状态，读取和写入带上的符号，并依照规则移动读写位置。所谓**图灵机**首先是数学模型，而非某一台实际制造的计算机。[Turing，1936/1937](https://londmathsoc.onlinelibrary.wiley.com/doi/abs/10.1112/plms/s2-42.1.230)。
 
-```text
-目标与当前状态
-      ↓
-构造上下文 → 模型提出下一步
-                  ↓
-          检查请求与执行条件
-                  ↓
-              执行工具
-                  ↓
-        记录结果、更新状态
-                  ↓
-       继续 / 完成 / 暂停 / 失败
-```
+其中重要的一步，是把机器的规则本身编码成可被另一台机器读取的描述。**通用图灵机**由此说明，同一个通用计算装置可以依据不同描述执行不同计算。程序与数据能够在同一形式系统中被表示，为讨论通用计算及其边界提供了基础。
 
-在修改代码的例子中，读取文件产生观察，修改文件改变环境，测试结果又产生新的观察。循环中的关键不是多调用几次模型，而是每次调用都能接上前一次行动造成的变化。停止也需要依据：检查通过、预算耗尽、用户中断和权限不足，是不同的结束或暂停原因。
+这并没有回答如何让机器学习语言，也没有给出实际计算的速度、内存或能耗预算。对大模型而言，可计算性规定了一个理论背景；可行的学习过程仍需要算法、数据与硬件。区分“原则上能计算”和“在有限资源中有效完成”，是理解后续发展的起点。
 
-[Agent 循环](/concepts/agent-loop/)展开这一控制结构。读它时关注三个问题：哪些状态需要保留，什么事件允许进入下一步，以及如何确定任务已经结束。ReAct 是将推理与环境行动交替组织起来的一项研究；这里的运行时视角还需要考虑执行、状态和终止条件。
+## 1948：从符号序列到概率与信息
 
-任务路径完全确定时，固定工作流可能已经足够；需要根据运行中获得的信息调整路径时，才有理由把更多决定交给模型。自主程度是设计选择。
+计算可以操作符号，但自然语言中的下一个符号通常无法由一条确定规则唯一决定。Claude Shannon 在 1948 年的信息论工作中，用概率刻画消息源，并用**熵**度量其平均不确定性；他还通过不同阶的统计近似讨论英语序列的结构。[Shannon，1948](https://people.math.harvard.edu/~ctm/home/text/others/shannon/entropy/entropy.pdf)。
 
-## 工具：把一个提议变成实际的行动
+例如，“今天天气很”之后可能出现“好”“冷”或其他续写。给每一种续写分配概率，就把语言中的不确定性转化为可计算对象。考虑更长的历史，可以改变下一符号的条件概率。这里的概率模型关注序列的统计规律；统计可预测性与语义理解之间仍有距离。
 
-模型说“我已经运行测试”，不等于测试真的执行过。只有执行系统调用测试工具、拿到进程结果并记录下来，这句话才有外部证据。
+这一思路为语言建模提供了重要的数学背景。**语言模型**的核心任务，是为语言序列或其续写分配概率，而不是直接建立一个保证事实正确的知识库。[概率分布](/concepts/probability/)一章解释归一化、期望、熵与采样；这些概念随后会进入模型训练、输出选择和评估。
 
-工具调用可以看成有明确名称、参数和返回值的请求。例如，模型提出读取某个文件，执行层先验证参数与访问范围，再读取文件，把内容或错误返回给循环。**模型负责提出请求，执行层负责决定请求能否执行并报告实际结果。** 参数符合格式也不意味着行动一定被授权。
+## 1958–1959：从手写规则到机器学习
 
-[工具调用](/concepts/tool-calling/)解释这条边界。它连接模型侧的结构化输出与系统侧的能力、校验、权限和错误处理。放回完整任务中，工具是获得新证据、改变项目状态的接口；工具返回值则是下一次决定的输入。
+对于边界清楚的任务，人可以直接编写判定规则；对于图像、语言或复杂博弈，穷举规则往往困难。**机器学习（Machine Learning）**改变了获得规则的方式：设计者规定模型形式与评价目标，再利用经验或数据调整模型，使它在任务上的表现改善。
 
-## 模型：在给定上下文中生成下一步
+Frank Rosenblatt 在 1958 年发表的感知机研究，是早期可学习模型的重要代表；Arthur Samuel 在 1959 年的跳棋研究中讨论了机器学习过程。它们展示了从经验调整行为的研究方向，而非现代大模型已经具备的能力。[Rosenblatt，1958](https://doi.org/10.1037/h0042519)，[Samuel，1959](https://ieeexplore.ieee.org/document/5392560)。
 
-在许多基于语言模型的 Agent 中，模型接收任务说明、相关材料和工具结果，生成回答或工具请求。常见的自回归语言模型按 token 逐步生成：把已有序列变成内部表示，计算下一个 token 的分数，再通过选择策略得到输出。完整行为依赖许多步生成，单个 token 的概率不能直接解释成任务成功的概率。
+以文本分类为例，人可以先把词频等信息转换成**特征**，再让模型学习如何把特征映射成类别。模型中的可调整数值叫作**参数**；衡量预测与目标之间差异的量叫作**损失**；利用数据调整参数的过程叫作**训练**。训练后在新输入上计算输出，叫作**推理**。判断一个方法是否学到了可复用规律，还要看它在未用于训练的数据上是否能够**泛化**，而不只是记住训练样本。
 
-对于 Transformer 模型，[自注意力](/concepts/self-attention/)是理解上下文如何参与表示计算的重要入口。一个 token 可以依据其他位置的信息更新自己的表示；在因果语言模型中，mask 限制它不能读取未来位置。Attention 是模型中的一个机制，完整模型还包含前馈层、残差连接、归一化等部分。
+机器学习不等于神经网络，也不等于后来出现的深度学习。线性模型、决策树及其他统计方法各有适用范围。这里形成的核心问题是：模型能学到什么，受到输入表示、假设空间、训练目标和数据分布共同制约。
 
-这也解释了上下文为何是工程问题：相关代码没有进入输入，模型就无法直接依据它做决定；工具错误被遗漏，后续生成可能建立在过时的信息上。把信息放进上下文只表示它可被处理，不保证模型会正确理解或使用它。
+## 1969–1983：计算机开始组成互联网络
 
-要看清这个机制，可以继续向下打开数学层。
+学习方法需要数据，计算系统也需要交换信息。ARPANET 在 1969 年开始运行；1983 年 1 月 1 日，ARPANET 切换到 TCP/IP，是互联网发展中的重要节点。由多位互联网参与者撰写的历史回顾记录了这一过程。[Leiner 等，互联网史回顾](https://www.internetsociety.org/resources/doc/2017/brief-history-internet/)。
 
-## 数学：表示、变换、比较与分配权重
+**分组交换**把通信内容拆成可以在网络中传送的数据包；**协议**规定设备如何解释消息并完成通信。互联网络使分散的计算机能够交换文件、运行服务并共享资源，但此时的互联网还不等于后来以网页为主要体验的万维网。
 
-这些基础概念各自承担一项具体工作。把它们放回 Attention，就能理解它们为什么一起出现。
+从大模型的角度看，网络是一条基础设施脉络：它使资料获取、数据交换和服务协作逐步具备更广的范围。它与学习算法的进展并行发展；联网本身不会使一个模型获得更强的统计学习能力。
 
-**向量描述表示。** 模型中的 token 表示通常是一组数。它们提供可以计算的坐标，而每个坐标不必对应一个人类可命名的语义。[向量](/concepts/vector/)从长度、方向和坐标建立直觉，为后面的变换与比较提供对象。
+## 1986：多层网络与表示学习
 
-**矩阵描述线性变换。** 同一份表示可以经过不同的投影，形成用于查询、匹配和提供内容的 Q、K、V。[矩阵](/concepts/matrix/)解释如何把一组向量变换成另一组，以及矩阵乘法如何组织这种计算。
+早期学习系统常由人决定输入特征，再由模型学习输出关系。**表示学习**进一步把特征构造纳入学习过程：模型不仅学习怎样使用已有特征，还学习哪些中间表示有助于降低任务损失。
 
-**点积给出比较分数。** 在缩放点积 Attention 中，query 与 key 的点积参与计算匹配分数。分数受方向和长度共同影响，因此不能把它简单等同于纯粹的方向相似度。[点积](/concepts/dot-product/)连接坐标计算、夹角和投影。
+1986 年，David Rumelhart、Geoffrey Hinton 和 Ronald Williams 发表了关于反向传播与内部表示的代表性论文。**反向传播**沿计算图应用链式法则，计算损失对各参数的导数；优化器再利用这些导数更新参数。反向传播是梯度计算方法，与执行参数更新的梯度下降应当区分；这一论文也是历史节点，而不是声称所有相关思想都首次出现于 1986 年。[Rumelhart 等，1986](https://www.nature.com/articles/323533a0)。
 
-**Softmax 把分数变成归一化权重。** 原始分数可以为负，也不要求总和为一；经过 Softmax 后，可以用它们对 value 加权求和。[Softmax](/concepts/softmax/)讨论分数尺度怎样改变权重分配。Attention 权重用于混合表示，而输出端的 token 概率用于生成选择，两者处在不同的计算位置。
+一个常见的前馈层可以写成下面的形式：
 
-**概率分布描述不确定的选择。** 归一化、期望、熵和采样帮助我们理解输出分布及选择策略。[概率分布](/concepts/probability/)是阅读 Softmax 和生成过程的基础。概率较高表示模型在当前条件下更倾向于某个输出，并不保证输出真实，也不保证行动安全。
+<Equation label="一个前馈层的表示变换">
 
-两条基础路径在自注意力中汇合：
+**h = σ(Wx + b)**
 
-```text
-向量 → 矩阵 ─────┐
-  └──→ 点积 ────┼→ 自注意力
-概率分布 → Softmax ┘
-```
+</Equation>
 
-这表示概念之间的依赖。你可以先理解系统如何使用模型，再按需要沿这些路径补足计算细节，无需把全部数学学完才开始观察一个 Agent。
+这里 x 是输入向量，W 是权重矩阵，b 是偏置向量，σ 是逐分量作用的非线性函数，h 是输出表示。把这样的层复合起来，可以让后一层继续变换前一层学到的表示。
 
-## 系统：让一次成功变成可重复的行为
+当神经网络通过多个可学习层构造表示时，就进入了通常所说的**深度学习（Deep Learning）**范畴。层数提供了组合变换的能力，但训练更深的网络仍受到优化、数据规模与计算成本的限制。多层网络的概念已经出现，并不意味着它当时就能在所有任务上实用地胜出。
 
-模型和工具接上循环后，还需要回答一些贯穿任务的问题。这些主题目前尚未有独立的详细章节，但它们属于全局图景的一部分。
+数值表示与变换构成了后续模型的计算基础：[向量](/concepts/vector/)表示特征，[矩阵](/concepts/matrix/)组织线性变换；非线性函数再使多层网络能够表达比单纯线性变换更复杂的关系。
 
-**上下文与记忆。** 当前上下文是这一次调用能够读取的输入；运行状态和长期记忆可以保存在外部，并在需要时被选择进入上下文。在代码任务中，已修改哪些文件、哪些检查失败、用户有哪些约束，都可能需要保留。保存、检索和放入输入，是不同的步骤。
+## 1989–1993：万维网扩展了数字内容的生产与获取
 
-**检索与证据。** 文件搜索、文档检索和数据库查询帮助系统取得所需材料。拿到材料后仍要保留来源、确认适用范围，并处理互相矛盾的结果。检索负责提供候选证据，模型的回答不能替代对证据的核对。
+Tim Berners-Lee 于 1989 年在 CERN 提出万维网方案。1990 年已有浏览器与服务器的早期实现；1993 年 4 月 30 日，CERN 将相关软件置于公有领域，推动其开放传播。[CERN，万维网历史](https://home.cern/science/computing/the-birth-of-the-web/)。
 
-**运行时与恢复。** 超时、重试、取消、并发和持久化决定循环能否稳定运行。读取文件失败通常可以重试；写入、提交或付款等有副作用的操作，则需要先确认是否已经执行，避免重复动作。这些问题应由明确的状态与执行规则处理。
+**互联网（Internet）**是互联网络基础设施；**万维网（World Wide Web）**是在其上通过地址、超文本和访问协议组织文档的一种系统。两者不能混称。网页把出版、链接和访问结合起来，随后不断增长的文本、图像与其他数字内容成为许多学习任务的数据来源。
 
-**安全与权限。** 读取到的文件、网页和工具结果可能包含指令式文字，但它们是任务材料。执行系统需要区分材料与用户授权，并在能力边界上检查请求。风险越高的行动，越需要清晰的许可条件和可追溯记录。
+数据可以被获取，不等于它适合训练。重复内容、错误信息、语言分布不均、隐私与使用权利都需要处理。网络改善的是数据可获得性，而训练数据的选择与质量仍属于独立的研究和工程问题。
 
-**评测与可观测性。** 在这个例子中，最终修改是否正确、测试是否真的运行、是否改动无关文件，比回答听起来是否自信更能说明结果。任务评测检查目标是否达成；执行轨迹帮助定位是哪一步、哪份输入或哪个工具导致失败。成本和延迟也属于系统表现。
+## 2003：神经语言模型连接离散词与连续表示
 
-这些约束横跨整个循环。研究模型能力时可以聚焦局部；交付一个系统时，需要把它们一起放回任务中检查。
+传统 **n-gram 模型**根据有限长度的邻近词统计续写概率。其困难之一是组合稀疏性：可能的词序列很多，训练语料不可能覆盖每一种组合。2003 年，Yoshua Bengio 等提出神经概率语言模型，同时学习词的连续表示和序列概率，使不同上下文能够通过共享表示相互影响。[Bengio 等，2003](https://www.jmlr.org/papers/v3/bengio03a.html)。
 
-## 如何在总览与章节之间阅读
+把离散词映射到数值向量的过程称为**嵌入（embedding）**。它让后续网络可以通过数值计算学习词之间的关系，而不必把每一种组合都作为互不相关的条目处理。坐标是模型学习的表示，不要求每一维都能对应一个人类命名的含义。
 
-如果你想先理解 Agent 怎样工作，从[工具调用](/concepts/tool-calling/)进入，再读[Agent 循环](/concepts/agent-loop/)。前者说明一次动作怎样跨过执行边界，后者说明多个动作怎样通过状态与反馈连成任务。
+这一节点连接了两条此前的脉络：语言可以用概率描述，表示可以从数据学习。现代模型通常先把文本分解成 **token**；token 可能是词、子词或其他编码单位，因此“预测下一个 token”不应总被理解成“预测下一个完整单词”。
 
-如果你想理解模型内部怎样计算，先读[向量](/concepts/vector/)，再分别进入[矩阵](/concepts/matrix/)与[点积](/concepts/dot-product/)；另一条线从[概率分布](/concepts/probability/)进入[Softmax](/concepts/softmax/)。准备好这些基础后，在[自注意力](/concepts/self-attention/)把它们合起来。
+## 2004–2009：大数据需要组织与计算方法
 
-目前向量、矩阵、点积和概率分布已有展开的解释与交互实验；Softmax、自注意力、工具调用和 Agent 循环仍是章节提纲，会继续补充。本文承担全局索引的作用，不意味着每个局部已经写完。
+数字内容的增加带来新的瓶颈：单机处理能力有限，原始内容也未必具有一致的结构和标签。2004 年，Jeffrey Dean 与 Sanjay Ghemawat 的 MapReduce 工作展示了在大型计算集群上组织数据处理的一种方法；2009 年，ImageNet 论文展示了收集和组织大规模标注图像数据的研究实践。[Dean 与 Ghemawat，2004](https://research.google/pubs/mapreduce-simplified-data-processing-on-large-clusters/)，[Deng 等，2009](https://www-cs.stanford.edu/groups/vision/pdf/ImageNet_CVPR2009.pdf)。
 
-当你读完一个局部章节，可以回到前面的代码任务：这个概念改变了哪一步的理解？它解释的是模型中的计算，还是系统中的行动与约束？这两个尺度之间的来回，正是这篇总览与详细章节的连接方式。
+**大数据（Big Data）**在这里不是某个统一的字节阈值，而是数据规模、类型和处理需求共同带来的系统问题。**分布式计算**把工作分配给多个计算节点；数据管线则处理采集、清洗、去重、标注和组织。MapReduce 是这段基础设施历史中的代表，并不是后来所有神经网络训练所采用的计算方式。
 
-## 参考资料
+对于学习系统，更多数据可以扩大经验覆盖范围，但重复、偏差和污染也可能随规模增长。数据量、有效信息量和数据质量必须区分。大数据提供了扩大训练的条件；模型是否能够利用这些数据，还取决于表示、算法与计算资源。
+
+## 2012：深度学习、数据与 GPU 的汇合
+
+2012 年，Alex Krizhevsky、Ilya Sutskever 和 Geoffrey Hinton 在 ImageNet 图像分类任务上展示了深度卷积网络的显著效果，其训练使用了 GPU。[Krizhevsky 等，2012](https://papers.nips.cc/paper/4824-imagenet-classification-with-deep-convolutional-neural-networks)。
+
+**卷积神经网络（CNN）**使用适合图像局部结构的运算组织表示；**GPU**能够并行执行大量数值运算。此处的重要变化，是较大数据集、可训练的深层表示与可用算力在具体任务上的结合。它不是深度学习的发明日期，也不是语言大模型的直接架构来源。
+
+这一结果推动了人们进一步研究端到端学习：从输入到输出的多个处理环节，可以围绕共同目标一起训练。图像任务的成功表明表示学习在适当条件下具有很强的实用价值，但迁移到语言还需要处理顺序、可变长度与远距离依赖。
+
+## 2014–2015：序列建模与注意力
+
+语言输入和输出都是序列，长度通常不同。2014 年的序列到序列学习工作使用循环网络构造编码器与解码器：编码器读取输入，解码器生成输出。循环网络通过依次更新状态处理序列，LSTM 是其中一种用于改善信息保留的结构。[Sutskever 等，2014](https://arxiv.org/abs/1409.3215)。
+
+把整个输入压入固定长度表示，会给信息保留带来压力。Bahdanau 等在 2014 年公开、并于 ICLR 2015 发表的工作中，引入了翻译时对输入不同位置进行软对齐的机制。生成不同目标词时，模型可以对不同输入位置分配不同权重。[Bahdanau 等，2014/2015](https://arxiv.org/abs/1409.0473)。
+
+这类**注意力（attention）**把“哪些输入位置与当前输出更相关”变成了可学习的计算。它是后续架构的重要前驱，但不能把这种跨输入与输出的注意力直接等同于 Transformer 中的自注意力。
+
+## 2017：Transformer 改变上下文计算的组织方式
+
+2017 年，Vaswani 等提出 Transformer，以注意力机制组织序列建模，而不以循环或卷积作为其主体。**自注意力（self-attention）**在同一序列内部计算位置之间的关联；原始 Transformer 则同时包含编码器与解码器。[Vaswani 等，2017](https://arxiv.org/abs/1706.03762)。
+
+从数学上打开这一机制：输入[向量](/concepts/vector/)通过[矩阵](/concepts/matrix/)投影成为查询 Q、键 K 与值 V。Q 与 K 的[点积](/concepts/dot-product/)计算匹配分数，经过缩放和[Softmax](/concepts/softmax/)形成权重，再组合 V 中的内容。自回归模型还使用因果掩码，防止当前位置读取未来位置。完整的模型还包含位置处理、前馈网络、残差连接与归一化。详细推导见[自注意力](/concepts/self-attention/)。
+
+相比依赖逐位置状态更新的循环计算，Transformer 使训练中更多位置的计算能够并行组织。不过，标准全注意力的计算与内存需求会随序列长度快速增长；自回归生成通常仍需逐个生成 token。架构改善了扩大训练的条件，同时也带来了新的资源约束。
+
+## 2018：从专用模型到预训练与迁移
+
+如果每个语言任务都单独收集标签、训练模型，会反复支付昂贵的数据与计算成本。**预训练**先从较广泛的数据中学习可复用表示或生成能力；**微调**再利用后续数据更新参数，使模型适应目标任务。这种思路早有前驱，2018 年的 GPT 与 BERT 是 Transformer 预训练的重要代表。
+
+GPT 的生成式预训练使用语言预测目标，再针对下游任务进行调整；BERT 使用包括掩码语言建模在内的目标学习双向上下文表示。二者的目标与使用方式不同，不能把所有预训练语言模型都当作采用同一方式续写的聊天模型。[Radford 等，2018](https://cdn.openai.com/research-covers/language-unsupervised/language_understanding_paper.pdf)，[Devlin 等，2018](https://arxiv.org/abs/1810.04805)。
+
+所谓**自监督学习**，是从数据自身构造监督信号。例如，文本中的后续 token 可以成为预测目标，不必为每一段文本人工标注“正确回答”。它仍然有明确训练目标，也仍然依赖数据选择。下面的式子概括自回归语言建模，并不适用于所有预训练目标：
+
+<Equation label="自回归序列概率">
+
+**Pθ(x₁, …, xₜ) = ∏ᵢ₌₁ᵗ Pθ(xᵢ | x₁, …, xᵢ₋₁)**
+
+</Equation>
+
+其中，xᵢ 是第 i 个 token，θ 表示模型参数，序列起点可以包含约定的起始符号。概率链式法则把序列概率分解为条件概率；模型的学习任务，是利用上下文估计这些条件分布。
+
+## 2020–2022：规模化与大语言模型
+
+2020 年的 GPT-3 工作展示了扩大语言模型规模后，通过上下文中的任务说明和示例完成多种任务的能力。**上下文学习（in-context learning）**在一次输入中提供说明或示例；通常的推理过程中不因这些示例而更新模型参数，因此它不同于微调。[Brown 等，2020](https://arxiv.org/abs/2005.14165)。
+
+同年，Kaplan 等研究语言模型损失与参数、数据和计算规模之间的经验关系。2022 年的 Chinchilla 研究进一步讨论固定计算预算下模型规模与训练数据量的配置。这些**缩放规律（scaling laws）**帮助安排训练资源，但它们来自特定实验范围；较低预测损失不等于所有任务能力都同比改善，也不构成无限扩大规模必然奏效的证明。[Kaplan 等，2020](https://arxiv.org/abs/2001.08361)，[Hoffmann 等，2022](https://arxiv.org/abs/2203.15556)。
+
+**大语言模型（Large Language Model，LLM）**通常指在大规模文本及相关数据上训练、具有较大参数规模的语言模型，没有跨时代固定不变的参数门槛。它属于深度学习中的一类模型；“大模型”则还可以指视觉或其他模态的模型。2021 年提出的**基础模型（foundation model）**概念，强调广泛训练后可以适应多种下游任务，关注的是复用范式，而不只是尺寸。[Bommasani 等，2021](https://arxiv.org/abs/2108.07258)。
+
+至此，大模型的形成条件可以合起来理解：网络与数据工程提供语料，表示学习提供参数化模型，自监督目标提供训练信号，Transformer 与并行硬件改善训练组织，规模化研究帮助配置资源。这是多条技术脉络的汇合。
+
+## 2020 年代初：从语言预测到可交互系统
+
+一个擅长续写的预训练模型，并不自动擅长遵循用户要求。2022 年的 InstructGPT 研究结合示范数据、偏好比较与基于人类反馈的强化学习（RLHF），改善了模型遵循指令的行为。**指令微调**利用任务与期望回答训练模型；**偏好优化**则使模型更倾向于被评价为合适的输出。它们调整行为目标，不提供事实正确性的保证。[Ouyang 等，2022](https://arxiv.org/abs/2203.02155)。
+
+另一个并行问题是知识的获取。2020 年的**检索增强生成（RAG）**工作把外部检索与生成模型结合。模型可以在生成时利用检索出的材料；这与把所有信息编码进参数不同，也不意味着每次检索都可靠。当前上下文、参数中学到的统计信息，以及可检索的外部记录，是三个需要区分的层次。[Lewis 等，2020](https://arxiv.org/abs/2005.11401)。
+
+当系统进一步把模型输出连接到外部行动，语言模型就成为更大系统的一个组成部分。2022 年公开的 ReAct 工作研究推理与行动交替组织的方式；Agent 的研究历史远早于大语言模型，这里讨论的是模型驱动系统的一条现代路线。[Yao 等，2022](https://arxiv.org/abs/2210.03629)。
+
+[工具调用](/concepts/tool-calling/)解释结构化请求如何跨过执行边界；[Agent 循环](/concepts/agent-loop/)解释观察、决定、行动与状态更新如何组织成多步任务。运行时负责记录实际结果、处理超时与重试，并管理权限和停止条件。一个模型提出的请求仍需要验证与授权；一段看似合理的回答也不能替代执行证据。
+
+## 从历史总览进入详细章节
+
+这段历史形成了三个相互连接的阅读层次。
+
+**数学层**解释模型如何计算。[概率分布](/concepts/probability/)连接不确定性、熵与采样，[向量](/concepts/vector/)连接特征与嵌入，[矩阵](/concepts/matrix/)连接参数化变换，[点积](/concepts/dot-product/)连接表示之间的比较，[Softmax](/concepts/softmax/)连接分数与归一化权重。
+
+**模型层**解释这些计算如何组织成上下文处理。现有入口是[自注意力](/concepts/self-attention/)。分词、优化、循环网络、完整 Transformer、预训练、缩放规律与指令对齐，都已在本文中界定其位置，但目前尚未各自形成完整的详细章节。
+
+**系统层**解释模型如何与环境协作。入口是[工具调用](/concepts/tool-calling/)和[Agent 循环](/concepts/agent-loop/)。上下文与记忆、检索、故障恢复、权限、评测和可观测性还需要继续展开。评测也有层次之分：预测损失检查语言建模目标，任务指标检查具体能力，系统评测检查实际执行结果与代价。
+
+目前向量、矩阵、点积与概率分布已有展开的解释和交互实验；Softmax、自注意力、工具调用与 Agent 循环仍是提纲。本文以历史和概念关系提供全局索引，已有章节承接局部推导。历史顺序帮助解释问题的来历；实际学习顺序则可以沿章节之间的前置知识关系安排。
+
+## 参考文献
 
 <ReferenceList>
 
-- [ReAct: Synergizing Reasoning and Acting in Language Models](https://arxiv.org/abs/2210.03629)：推理与环境行动交替组织的研究。
-- [Attention Is All You Need](https://arxiv.org/abs/1706.03762)：Transformer 与缩放点积 Attention 的原始论文。
-- [Building effective agents](https://www.anthropic.com/engineering/building-effective-agents)：工作流、Agent 与工程复杂度的实践讨论。
+- Turing, A. M. (1936/1937). [On Computable Numbers, with an Application to the Entscheidungsproblem](https://londmathsoc.onlinelibrary.wiley.com/doi/abs/10.1112/plms/s2-42.1.230). *Proceedings of the London Mathematical Society*, s2-42, 230–265.
+- Shannon, C. E. (1948). [A Mathematical Theory of Communication](https://people.math.harvard.edu/~ctm/home/text/others/shannon/entropy/entropy.pdf). *Bell System Technical Journal*, 27, 379–423, 623–656.
+- Rosenblatt, F. (1958). [The Perceptron: A Probabilistic Model for Information Storage and Organization in the Brain](https://doi.org/10.1037/h0042519). *Psychological Review*, 65(6), 386–408.
+- Samuel, A. L. (1959). [Some Studies in Machine Learning Using the Game of Checkers](https://ieeexplore.ieee.org/document/5392560). *IBM Journal of Research and Development*, 3(3), 210–229.
+- Leiner, B. M., et al. (1997; 网页版本 2017). [A Brief History of the Internet](https://www.internetsociety.org/resources/doc/2017/brief-history-internet/). Internet Society.
+- Rumelhart, D. E., Hinton, G. E., & Williams, R. J. (1986). [Learning Representations by Back-propagating Errors](https://www.nature.com/articles/323533a0). *Nature*, 323, 533–536.
+- CERN. [The Birth of the Web](https://home.cern/science/computing/the-birth-of-the-web/). 机构历史资料。
+- Bengio, Y., et al. (2003). [A Neural Probabilistic Language Model](https://www.jmlr.org/papers/v3/bengio03a.html). *Journal of Machine Learning Research*, 3, 1137–1155.
+- Dean, J., & Ghemawat, S. (2004). [MapReduce: Simplified Data Processing on Large Clusters](https://research.google/pubs/mapreduce-simplified-data-processing-on-large-clusters/). *OSDI*, 137–150.
+- Deng, J., et al. (2009). [ImageNet: A Large-Scale Hierarchical Image Database](https://www-cs.stanford.edu/groups/vision/pdf/ImageNet_CVPR2009.pdf). *CVPR*.
+- Krizhevsky, A., Sutskever, I., & Hinton, G. E. (2012). [ImageNet Classification with Deep Convolutional Neural Networks](https://papers.nips.cc/paper/4824-imagenet-classification-with-deep-convolutional-neural-networks). *NeurIPS*.
+- Sutskever, I., Vinyals, O., & Le, Q. V. (2014). [Sequence to Sequence Learning with Neural Networks](https://arxiv.org/abs/1409.3215). *NeurIPS*.
+- Bahdanau, D., Cho, K., & Bengio, Y. (2014/2015). [Neural Machine Translation by Jointly Learning to Align and Translate](https://arxiv.org/abs/1409.0473). 2014 年预印本；*ICLR 2015*。
+- Vaswani, A., et al. (2017). [Attention Is All You Need](https://arxiv.org/abs/1706.03762). *NeurIPS*.
+- Radford, A., et al. (2018). [Improving Language Understanding by Generative Pre-Training](https://cdn.openai.com/research-covers/language-unsupervised/language_understanding_paper.pdf). OpenAI 技术报告。
+- Devlin, J., et al. (2018/2019). [BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding](https://arxiv.org/abs/1810.04805). 2018 年预印本；*NAACL 2019*。
+- Brown, T. B., et al. (2020). [Language Models Are Few-Shot Learners](https://arxiv.org/abs/2005.14165). *NeurIPS*.
+- Kaplan, J., et al. (2020). [Scaling Laws for Neural Language Models](https://arxiv.org/abs/2001.08361). arXiv:2001.08361.
+- Hoffmann, J., et al. (2022). [Training Compute-Optimal Large Language Models](https://arxiv.org/abs/2203.15556). *NeurIPS*.
+- Bommasani, R., et al. (2021). [On the Opportunities and Risks of Foundation Models](https://arxiv.org/abs/2108.07258). arXiv:2108.07258.
+- Ouyang, L., et al. (2022). [Training Language Models to Follow Instructions with Human Feedback](https://arxiv.org/abs/2203.02155). *NeurIPS*.
+- Lewis, P., et al. (2020). [Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks](https://arxiv.org/abs/2005.11401). *NeurIPS*.
+- Yao, S., et al. (2022/2023). [ReAct: Synergizing Reasoning and Acting in Language Models](https://arxiv.org/abs/2210.03629). 2022 年预印本；*ICLR 2023*。
 
 </ReferenceList>

@@ -1,111 +1,189 @@
-# Agent Engineering Overview
+# From Turing Machines to Large Language Models
 
-## See the system through a task
+## Abstract and reading framework
 
-Suppose you ask an agent to fix a bug in a project and verify the change. It needs to interpret the request, find the relevant code, edit it, run checks, and use the results to decide whether to continue or finish. A failed check must inform the next attempt. Missing permission should cause a pause, rather than a guess presented as success.
+Large language models emerged through the joint development of computation theory, statistical learning, network infrastructure, and parallel computing. This article selects milestones from computability research in 1936 to large models and agents in the early 2020s. It follows successive questions: how computation can be formalized, how programs learn from data, how data becomes accessible, how representations are learned, and how language prediction becomes reusable model capability.
 
-This task connects several layers: **the goal defines the outcome, the model proposes the next step, tools reach the outside world, the runtime executes and retains state, and feedback informs the next decision.** Context determines what the model can see, permissions determine what the system can do, and evaluation determines how we judge the result.
+Milestones organize the chronology, without implying a single historical route. Machine learning predates widespread Internet access. Neural, statistical, and symbolic methods have long coexisted. Networks expanded the supply of data without solving learning algorithms. Descriptions of one development enabling another are a synthesis of technical relationships, rather than claims of inevitable causation.
 
-This article opens up that system, then connects it to models and mathematics. Read it through for the overall picture, or follow a link when a specific question arises. Return afterward to place the detail within the whole.
+Each stage introduces a problem, explains the mechanism and its limits, and connects it to later developments. Terms are defined on introduction, with links to detailed mathematical and systems chapters. This is a selective account, rather than a complete history of computing or a ranking of recent models.
 
-## The loop: feed action results into the next decision
+## 1936: computation as a mathematical object
 
-One model response produces output under the conditions of that call. A task that requires exploration needs repeated observation, decision, action, and state updates. This flow summarizes a common model-driven agent:
+In a paper submitted and read in 1936, Alan Turing described rule-governed computation using an abstract machine. The work is commonly associated with 1936, although journal publication records also date it to 1937. A **Turing machine** has finite control states, reads and writes symbols on a tape, and moves its reading position according to rules. It is a mathematical model, rather than a particular manufactured computer. [Turing, 1936/1937](https://londmathsoc.onlinelibrary.wiley.com/doi/abs/10.1112/plms/s2-42.1.230).
 
-```text
-Goal and current state
-          ↓
-Build context → Model proposes the next step
-                            ↓
-              Check request and execution conditions
-                            ↓
-                      Execute tool
-                            ↓
-               Record result, update state
-                            ↓
-             Continue / Finish / Pause / Fail
-```
+Encoding a machine's rules as a description that another machine can read leads to the **universal Turing machine**: one general apparatus can perform different computations from different descriptions. Programs and data can be represented within the same formal system, providing a basis for discussing universal computation and its limits.
 
-In the code task, reading files yields observations, editing changes the environment, and tests yield new observations. What matters is that each call can incorporate the changes caused by the previous action. Passing checks, exhausting a budget, user cancellation, and missing permission are distinct reasons to finish or pause.
+This does not explain how a machine learns language or establish a practical budget for time, memory, or energy. Computability supplies theoretical background; effective learning still needs algorithms, data, and hardware. The distinction between possible computation and useful computation under finite resources underlies the later story.
 
-[Agent Loop](/en/concepts/agent-loop/) opens up this control structure. Look for the state that must survive, the events that permit a transition, and the conditions for completion. ReAct studies interleaving reasoning and environmental actions; the runtime perspective here also considers execution, state, and termination.
+## 1948: symbols, probability, and information
 
-A fixed workflow may suffice when the task path is known. Delegating more decisions to a model becomes useful when information obtained during execution must change that path. The degree of autonomy is a design choice.
+Computation operates on symbols, but natural language rarely determines its next symbol through a unique explicit rule. Claude Shannon's 1948 information theory describes message sources probabilistically and measures average uncertainty through **entropy**. His discussion also considers statistical approximations of English sequences. [Shannon, 1948](https://people.math.harvard.edu/~ctm/home/text/others/shannon/entropy/entropy.pdf).
 
-## Tools: turn a proposal into an action
+After “The weather is very,” several continuations are possible. Assigning probabilities makes this uncertainty computable. A longer history can change the conditional distribution over the next symbol. These models describe statistical structure; predictability and semantic understanding remain distinct questions.
 
-A model saying “I ran the tests” does not establish that tests ran. External evidence comes from an execution system invoking the tool, collecting the process result, and recording it.
+This supplies mathematical background for language modeling. A **language model** assigns probabilities to language sequences or continuations; that objective does not make it a knowledge store guaranteed to be correct. [Probability Distribution](/en/concepts/probability/) explains normalization, expectation, entropy, and sampling, concepts that later enter training, output selection, and evaluation.
 
-A tool call is a request with a name, arguments, and a result. For a file read, the execution layer checks arguments and access scope, reads the file, and returns its contents or an error. **The model proposes the request; the execution layer decides whether it can run and reports what actually happened.** Valid argument syntax alone does not authorize an action.
+## 1958–1959: from explicit rules to machine learning
 
-[Tool Calling](/en/concepts/tool-calling/) explains this boundary between structured model output and capabilities, validation, permissions, and error handling. In the complete task, tools obtain evidence and change project state. Their results become inputs to the next decision.
+People can directly program rules for well-defined tasks. Exhaustive rules become difficult for images, language, and complex games. **Machine learning** changes how a system obtains its behavior: designers specify a model and an evaluation objective, then use data or experience to improve its task performance.
 
-## Models: generate the next step from context
+Frank Rosenblatt's 1958 perceptron paper represents an early learnable model. Arthur Samuel's 1959 checkers work investigates machine-learning procedures. These illustrate learning from experience, without implying that their systems already possessed modern large-model capabilities. [Rosenblatt, 1958](https://doi.org/10.1037/h0042519), [Samuel, 1959](https://ieeexplore.ieee.org/document/5392560).
 
-In many language-model agents, a model receives task instructions, relevant material, and tool results, then generates an answer or a tool request. Common autoregressive language models generate token by token: represent the existing sequence, compute scores for the next token, and select an output. A complete behavior involves many generation steps; a single token probability is not the probability of task success.
+For text classification, a designer might convert word counts into **features**, then learn a mapping from features to categories. Adjustable model values are **parameters**. A **loss** measures disagreement between predictions and a target. **Training** adjusts parameters from data; **inference** computes outputs for new inputs afterward. **Generalization** asks whether useful patterns transfer to data not used for training, beyond memorizing examples.
 
-For Transformer models, [Self Attention](/en/concepts/self-attention/) explains how context participates in computing representations. A token can update its representation using information at other positions. In a causal language model, a mask prevents access to future positions. Attention is one mechanism within a larger model that also includes feed-forward layers, residual connections, normalization, and other parts.
+Machine learning includes more than neural networks or deep learning. Linear models, decision trees, and other statistical approaches serve different purposes. What a model learns depends jointly on its input representation, hypothesis space, objective, and data distribution.
 
-Context therefore becomes an engineering concern. Code absent from the input cannot directly inform the decision; an omitted tool error can leave subsequent generation relying on outdated information. Including material makes it available for processing, but does not guarantee correct interpretation or use.
+## 1969–1983: computers form interconnected networks
 
-To understand this mechanism more precisely, open the mathematical layer.
+Learning requires data, and computing systems need to exchange information. ARPANET began operating in 1969. Its transition to TCP/IP on 1 January 1983 marks a major event in Internet history, recorded in a retrospective by several participants in that development. [Leiner et al., Internet history](https://www.internetsociety.org/resources/doc/2017/brief-history-internet/).
 
-## Mathematics: represent, transform, compare, and weight
+**Packet switching** divides communications into packets carried through a network. **Protocols** define how devices interpret messages and communicate. Interconnected networks enable file exchange, services, and resource sharing, without yet being equivalent to the later Web-based experience.
 
-Each foundation has a specific job. Placing them within attention explains why they appear together.
+Networks constitute an infrastructure strand in the history of large models: they widen the reach of material, data exchange, and service cooperation. This progresses alongside learning algorithms. Connecting a model to a network alone does not improve its statistical learning method.
 
-**Vectors describe representations.** A token representation is typically a collection of numbers: coordinates that support computation. Individual coordinates need not correspond to named human concepts. [Vector](/en/concepts/vector/) develops intuition for length, direction, and coordinates, providing the objects that later operations transform and compare.
+## 1986: multilayer networks and representation learning
 
-**Matrices describe linear transformations.** Different projections of the same representation produce Q, K, and V for querying, matching, and supplying content. [Matrix](/en/concepts/matrix/) explains transformations of vectors and how matrix multiplication organizes the computation.
+Early learning systems often used features designed by people. **Representation learning** brings feature construction into the learning process: a model learns useful intermediate representations as well as how to use inputs to reduce task loss.
 
-**Dot products provide comparison scores.** In scaled dot-product attention, a query–key dot product contributes to the matching score. Both direction and magnitude affect it, so it is not simply a measure of direction alone. [Dot Product](/en/concepts/dot-product/) connects coordinate arithmetic, angles, and projection.
+In 1986, David Rumelhart, Geoffrey Hinton, and Ronald Williams published an influential paper on backpropagation and internal representations. **Backpropagation** applies the chain rule through a computation graph to calculate derivatives of loss with respect to parameters. An optimizer uses those derivatives to update parameters. Gradient calculation and gradient descent are distinct operations; the paper is a milestone, not a claim that every related idea originated in 1986. [Rumelhart et al., 1986](https://www.nature.com/articles/323533a0).
 
-**Softmax turns scores into normalized weights.** Raw scores can be negative and need not sum to one. Softmax produces weights for a weighted sum of values. [Softmax](/en/concepts/softmax/) explores how score scale changes this allocation. Attention weights mix representations, whereas output token probabilities support generation choices; these occur at different points in the computation.
+A common feed-forward layer takes this form:
 
-**Probability distributions describe uncertain choices.** Normalization, expectation, entropy, and sampling help explain output distributions and selection strategies. [Probability Distribution](/en/concepts/probability/) provides a foundation for Softmax and generation. A higher probability expresses a model's preference under current conditions, without guaranteeing truth or safe action.
+<Equation label="A feed-forward representation transformation">
 
-Two foundational paths meet in self-attention:
+**h = σ(Wx + b)**
 
-```text
-Vector → Matrix ──────────┐
-   └───→ Dot Product ────┼→ Self Attention
-Probability → Softmax ───┘
-```
+</Equation>
 
-These are conceptual dependencies. You can first understand how a system uses its model, then follow these paths into the computation as needed. Observing an agent does not require completing every mathematical chapter first.
+Here x is an input vector, W a weight matrix, b a bias vector, σ a component-wise nonlinear function, and h the output representation. Composing layers lets later layers transform representations learned by earlier ones.
 
-## Systems: make success repeatable
+Learning representations through multiple trainable neural-network layers falls within what is commonly called **deep learning**. Layered computation composes transformations, but deeper networks still face optimization difficulties, data requirements, and computational costs. Their existence did not mean practical superiority on every task at that time.
 
-Connecting model, tools, and loop leaves questions that span the task. These topics do not yet have independent detailed chapters, but they belong in the overall picture.
+Numerical representations and transformations underlie later models: [Vector](/en/concepts/vector/) describes features; [Matrix](/en/concepts/matrix/) organizes linear transformations. Nonlinear functions let layered networks express relationships beyond a purely linear transformation.
 
-**Context and memory.** Current context is the input available to this call. Runtime state and long-term memory can be stored externally and selected into context when needed. Modified files, failed checks, and user constraints may all need to survive. Storage, retrieval, and inclusion in input are separate steps.
+## 1989–1993: the Web expands digital content
 
-**Retrieval and evidence.** File search, document retrieval, and database queries obtain relevant material. The system still needs to retain sources, check applicability, and handle conflicting results. Retrieval supplies candidate evidence; a model answer cannot replace checking that evidence.
+Tim Berners-Lee proposed the World Wide Web at CERN in 1989. Early browser and server implementations existed in 1990. On 30 April 1993, CERN placed the software in the public domain, supporting its open dissemination. [CERN, history of the Web](https://home.cern/science/computing/the-birth-of-the-web/).
 
-**Runtime and recovery.** Timeouts, retries, cancellation, concurrency, and persistence determine whether the loop operates reliably. A failed read can often be retried. Writes, commits, payments, and other side effects require checking whether execution already happened before repeating it. Explicit state and execution rules should handle these cases.
+The **Internet** is interconnected network infrastructure. The **World Wide Web** organizes documents over it using addresses, hypertext, and access protocols. They are different systems. Web pages combine publication, linking, and access; growing collections of text, images, and other digital material subsequently supply data for many learning tasks.
 
-**Safety and permissions.** Files, web pages, and tool results may contain text phrased as instructions, but they are task material. The execution system must distinguish that material from user authorization and check requests at capability boundaries. Higher-risk actions require clear permission conditions and traceable records.
+Accessibility does not establish suitability for training. Duplicates, misinformation, uneven language coverage, privacy, and usage rights require attention. Networks improve availability; selection and quality remain separate research and engineering concerns.
 
-**Evaluation and observability.** Correct changes, actual test execution, and avoiding unrelated edits reveal more about this task than a confident answer. Task evaluation checks the outcome; execution traces help locate the step, input, or tool that caused a failure. Cost and latency are also aspects of system performance.
+## 2003: neural language models connect words to representations
 
-These constraints span the loop. Studying a model can focus on one mechanism; delivering a system requires bringing them together around the task.
+An **n-gram model** estimates continuations from a limited window of adjacent words. One difficulty is sparse coverage: there are too many possible sequences for a corpus to contain them all. In 2003, Yoshua Bengio and colleagues proposed a neural probabilistic language model that jointly learns continuous word representations and sequence probabilities, allowing contexts to share statistical information through representations. [Bengio et al., 2003](https://www.jmlr.org/papers/v3/bengio03a.html).
 
-## Read between the overview and the chapters
+An **embedding** maps a discrete item into a numerical vector. Subsequent networks can learn relationships through computation rather than treating every combination as unrelated. These learned coordinates do not require a named human meaning for each dimension.
 
-To understand how an agent works, begin with [Tool Calling](/en/concepts/tool-calling/), then [Agent Loop](/en/concepts/agent-loop/). The first explains how an action crosses the execution boundary; the second connects actions into a task through state and feedback.
+This connects two strands: language can be modeled probabilistically, and representations can be learned from data. Modern models typically divide text into **tokens**, which may be words, subwords, or other encoded units. Next-token prediction is therefore not always next-word prediction.
 
-To understand the model's computation, begin with [Vector](/en/concepts/vector/), then branch into [Matrix](/en/concepts/matrix/) and [Dot Product](/en/concepts/dot-product/). Another path runs from [Probability Distribution](/en/concepts/probability/) to [Softmax](/en/concepts/softmax/). Bring these foundations together in [Self Attention](/en/concepts/self-attention/).
+## 2004–2009: big data requires organization and computation
 
-Vector, matrix, dot product, and probability currently have developed explanations and interactive labs. Softmax, self-attention, tool calling, and agent loop remain chapter outlines to be expanded. This overview is a global index; it does not imply that every detail is already written.
+Increasing digital content creates bottlenecks: one machine has limited capacity, and raw material lacks consistent structure or labels. Jeffrey Dean and Sanjay Ghemawat's 2004 MapReduce work describes organizing data processing on large clusters. The 2009 ImageNet paper illustrates collecting and organizing large-scale annotated image data. [Dean and Ghemawat, 2004](https://research.google/pubs/mapreduce-simplified-data-processing-on-large-clusters/), [Deng et al., 2009](https://www-cs.stanford.edu/groups/vision/pdf/ImageNet_CVPR2009.pdf).
 
-After reading a detailed chapter, return to the code task: which step does this concept help explain? Does it describe computation inside the model, or actions and constraints in the surrounding system? Moving between these scales connects the overview to the chapters.
+**Big data** here describes systems challenges arising from scale, variety, and processing requirements, without one universal byte threshold. **Distributed computing** assigns work to multiple nodes. Data pipelines collect, clean, deduplicate, annotate, and organize material. MapReduce is representative infrastructure history, rather than the training method used by all later neural networks.
+
+More data can broaden experience, while also expanding duplication, bias, and contamination. Data volume, useful information, and quality are distinct. Larger datasets enable expanded training; representations, algorithms, and compute determine whether a model can use them.
+
+## 2012: deep learning, data, and GPUs converge
+
+In 2012, Alex Krizhevsky, Ilya Sutskever, and Geoffrey Hinton demonstrated strong ImageNet classification results with a deep convolutional network trained using GPUs. [Krizhevsky et al., 2012](https://papers.nips.cc/paper/4824-imagenet-classification-with-deep-convolutional-neural-networks).
+
+A **convolutional neural network (CNN)** uses operations suited to local image structure. A **GPU** executes many numerical operations in parallel. This milestone combines substantial data, trainable deep representations, and available compute in a specific task. It is neither the invention date of deep learning nor the direct architecture of language models.
+
+The result supported further research into end-to-end learning, where multiple processing stages train together around an objective. Representation learning proved useful under suitable conditions. Language nevertheless required handling order, variable sequence length, and distant dependencies.
+
+## 2014–2015: sequence modeling and attention
+
+Language inputs and outputs are sequences, often of different lengths. Sequence-to-sequence work in 2014 used recurrent networks as an encoder and decoder: one reads an input, the other generates an output. Recurrent networks process sequences by updating state in order; LSTM is one structure designed to improve information retention. [Sutskever et al., 2014](https://arxiv.org/abs/1409.3215).
+
+Compressing a complete input into a fixed-length representation places pressure on information retention. Work by Bahdanau and colleagues, released in 2014 and presented at ICLR 2015, introduced a soft-alignment mechanism for translation. Different output words can assign different weights to source positions. [Bahdanau et al., 2014/2015](https://arxiv.org/abs/1409.0473).
+
+This **attention** mechanism makes input relevance a learnable computation. It is an important predecessor, without being identical to the self-attention later used in Transformers.
+
+## 2017: Transformer reorganizes context computation
+
+Vaswani and colleagues introduced the Transformer in 2017, organizing sequence modeling around attention without recurrent or convolutional structure as its backbone. **Self-attention** computes relationships within one sequence; the original Transformer contains both an encoder and a decoder. [Vaswani et al., 2017](https://arxiv.org/abs/1706.03762).
+
+The mathematical components connect the detailed chapters: input [vectors](/en/concepts/vector/) undergo [matrix](/en/concepts/matrix/) projections into queries Q, keys K, and values V. Q–K [dot products](/en/concepts/dot-product/) produce matching scores. Scaling and [Softmax](/en/concepts/softmax/) yield weights for combining the content in V. Autoregressive models also apply a causal mask to prevent access to future positions. Position handling, feed-forward networks, residual connections, and normalization complete the larger architecture. [Self Attention](/en/concepts/self-attention/) is the detailed entry point.
+
+Compared with recurrent updates, Transformer training can organize more position-wise computation in parallel. Standard full attention nevertheless increases computation and memory rapidly with sequence length, while autoregressive generation typically still emits tokens sequentially. Architecture improves the conditions for scaling and introduces resource constraints of its own.
+
+## 2018: pretraining and transfer beyond specialized models
+
+Collecting labels and training a separate model for every language task repeatedly incurs substantial cost. **Pretraining** learns reusable representations or generation capabilities from broader data. **Fine-tuning** updates parameters using subsequent data for a target task. This approach has earlier precedents; GPT and BERT are important examples of Transformer pretraining in 2018.
+
+GPT combines generative language pretraining with downstream adaptation. BERT learns bidirectional contextual representations using objectives including masked language modeling. Their objectives and applications differ; pretrained language models are not all continuation-based chat systems. [Radford et al., 2018](https://cdn.openai.com/research-covers/language-unsupervised/language_understanding_paper.pdf), [Devlin et al., 2018](https://arxiv.org/abs/1810.04805).
+
+**Self-supervised learning** constructs supervision from the data itself. Subsequent tokens can provide prediction targets without manually annotating a correct answer for every passage. There is still an explicit objective and a dependence on data selection. This equation summarizes autoregressive modeling, rather than every pretraining objective:
+
+<Equation label="Autoregressive sequence probability">
+
+**Pθ(x₁, …, xₜ) = ∏ᵢ₌₁ᵗ Pθ(xᵢ | x₁, …, xᵢ₋₁)**
+
+</Equation>
+
+Here xᵢ is token i and θ denotes model parameters; the sequence start may include an agreed start symbol. The probability chain rule decomposes a sequence distribution into conditional distributions. Learning estimates these distributions from context.
+
+## 2020–2022: scaling and large language models
+
+The 2020 GPT-3 work demonstrated that expanded language models could perform a range of tasks using task descriptions and examples in context. **In-context learning** supplies examples or instructions within the input. Ordinary inference does not update parameters from these examples, distinguishing it from fine-tuning. [Brown et al., 2020](https://arxiv.org/abs/2005.14165).
+
+Kaplan and colleagues studied empirical relationships between language-model loss, parameters, data, and compute in 2020. The 2022 Chinchilla work further examined how to allocate model size and training data under a fixed compute budget. These **scaling laws** help allocate resources, but depend on their experimental scope. Lower prediction loss does not establish proportional improvement on every task or prove that unlimited scaling will always succeed. [Kaplan et al., 2020](https://arxiv.org/abs/2001.08361), [Hoffmann et al., 2022](https://arxiv.org/abs/2203.15556).
+
+A **large language model (LLM)** generally means a language model with substantial parameters trained on large-scale text and related data, without one timeless parameter threshold. LLMs are a class of deep-learning models; large models can also concern vision or other modalities. The **foundation model** concept introduced in 2021 emphasizes broad training followed by adaptation to many downstream tasks: a reuse paradigm, beyond size alone. [Bommasani et al., 2021](https://arxiv.org/abs/2108.07258).
+
+The enabling strands now meet: networks and data engineering supply corpora; representation learning supplies parameterized models; self-supervised objectives supply training signals; Transformers and parallel hardware improve training organization; scaling research helps allocate resources.
+
+## Early 2020s: from prediction to interactive systems
+
+A pretrained model that continues text well does not automatically follow user requests well. InstructGPT research in 2022 combines demonstrations, preference comparisons, and reinforcement learning from human feedback (**RLHF**) to improve instruction following. **Instruction fine-tuning** trains on tasks and desired responses. **Preference optimization** encourages outputs evaluated as appropriate. These modify behavioral objectives without guaranteeing factual correctness. [Ouyang et al., 2022](https://arxiv.org/abs/2203.02155).
+
+Knowledge access is a parallel concern. **Retrieval-augmented generation (RAG)** work in 2020 connects external retrieval to generation, allowing retrieved material to inform outputs. This differs from encoding everything in parameters and does not guarantee retrieval reliability. Current context, statistical information learned in parameters, and retrievable external records are distinct layers. [Lewis et al., 2020](https://arxiv.org/abs/2005.11401).
+
+Connecting model outputs to external actions makes the language model part of a larger system. ReAct, released in 2022, studies interleaving reasoning and action. Agent research substantially predates LLMs; this is one modern route to model-driven systems. [Yao et al., 2022](https://arxiv.org/abs/2210.03629).
+
+[Tool Calling](/en/concepts/tool-calling/) explains how structured requests cross an execution boundary. [Agent Loop](/en/concepts/agent-loop/) explains how observation, decision, action, and state updates form multistep tasks. Runtime records actual results, handles timeouts and retries, and manages permissions and stopping conditions. Requests require validation and authorization; plausible text cannot replace execution evidence.
+
+## From the historical overview to detailed chapters
+
+The history produces three connected reading levels.
+
+**Mathematics** explains computation. [Probability Distribution](/en/concepts/probability/) connects uncertainty, entropy, and sampling. [Vector](/en/concepts/vector/) connects features and embeddings. [Matrix](/en/concepts/matrix/) covers parameterized transformations. [Dot Product](/en/concepts/dot-product/) compares representations. [Softmax](/en/concepts/softmax/) connects scores to normalized weights.
+
+**Models** organize these calculations into context processing, with [Self Attention](/en/concepts/self-attention/) as the current entry. Tokenization, optimization, recurrent networks, complete Transformers, pretraining, scaling laws, and instruction alignment have positions in this overview, but not complete independent chapters yet.
+
+**Systems** connect models to environments through [Tool Calling](/en/concepts/tool-calling/) and [Agent Loop](/en/concepts/agent-loop/). Context and memory, retrieval, recovery, permissions, evaluation, and observability need further development. Evaluation itself has levels: prediction loss assesses the language-model objective, task metrics assess particular capabilities, and system evaluation assesses executed outcomes and costs.
+
+Vector, matrix, dot product, and probability currently have developed explanations and interactive labs. Softmax, self-attention, tool calling, and agent loop remain outlines. This article provides a historical and conceptual index, while chapters develop local mechanisms. Historical order explains where problems came from; learning order can follow prerequisite relationships between chapters.
 
 ## References
 
 <ReferenceList>
 
-- [ReAct: Synergizing Reasoning and Acting in Language Models](https://arxiv.org/abs/2210.03629): research on interleaving reasoning and environmental actions.
-- [Attention Is All You Need](https://arxiv.org/abs/1706.03762): the original paper on Transformers and scaled dot-product attention.
-- [Building effective agents](https://www.anthropic.com/engineering/building-effective-agents): practical discussion of workflows, agents, and engineering complexity.
+- Turing, A. M. (1936/1937). [On Computable Numbers, with an Application to the Entscheidungsproblem](https://londmathsoc.onlinelibrary.wiley.com/doi/abs/10.1112/plms/s2-42.1.230). *Proceedings of the London Mathematical Society*, s2-42, 230–265.
+- Shannon, C. E. (1948). [A Mathematical Theory of Communication](https://people.math.harvard.edu/~ctm/home/text/others/shannon/entropy/entropy.pdf). *Bell System Technical Journal*, 27, 379–423, 623–656.
+- Rosenblatt, F. (1958). [The Perceptron: A Probabilistic Model for Information Storage and Organization in the Brain](https://doi.org/10.1037/h0042519). *Psychological Review*, 65(6), 386–408.
+- Samuel, A. L. (1959). [Some Studies in Machine Learning Using the Game of Checkers](https://ieeexplore.ieee.org/document/5392560). *IBM Journal of Research and Development*, 3(3), 210–229.
+- Leiner, B. M., et al. (1997; webpage version 2017). [A Brief History of the Internet](https://www.internetsociety.org/resources/doc/2017/brief-history-internet/). Internet Society.
+- Rumelhart, D. E., Hinton, G. E., & Williams, R. J. (1986). [Learning Representations by Back-propagating Errors](https://www.nature.com/articles/323533a0). *Nature*, 323, 533–536.
+- CERN. [The Birth of the Web](https://home.cern/science/computing/the-birth-of-the-web/). Institutional historical account.
+- Bengio, Y., et al. (2003). [A Neural Probabilistic Language Model](https://www.jmlr.org/papers/v3/bengio03a.html). *Journal of Machine Learning Research*, 3, 1137–1155.
+- Dean, J., & Ghemawat, S. (2004). [MapReduce: Simplified Data Processing on Large Clusters](https://research.google/pubs/mapreduce-simplified-data-processing-on-large-clusters/). *OSDI*, 137–150.
+- Deng, J., et al. (2009). [ImageNet: A Large-Scale Hierarchical Image Database](https://www-cs.stanford.edu/groups/vision/pdf/ImageNet_CVPR2009.pdf). *CVPR*.
+- Krizhevsky, A., Sutskever, I., & Hinton, G. E. (2012). [ImageNet Classification with Deep Convolutional Neural Networks](https://papers.nips.cc/paper/4824-imagenet-classification-with-deep-convolutional-neural-networks). *NeurIPS*.
+- Sutskever, I., Vinyals, O., & Le, Q. V. (2014). [Sequence to Sequence Learning with Neural Networks](https://arxiv.org/abs/1409.3215). *NeurIPS*.
+- Bahdanau, D., Cho, K., & Bengio, Y. (2014/2015). [Neural Machine Translation by Jointly Learning to Align and Translate](https://arxiv.org/abs/1409.0473). 2014 preprint; *ICLR 2015*.
+- Vaswani, A., et al. (2017). [Attention Is All You Need](https://arxiv.org/abs/1706.03762). *NeurIPS*.
+- Radford, A., et al. (2018). [Improving Language Understanding by Generative Pre-Training](https://cdn.openai.com/research-covers/language-unsupervised/language_understanding_paper.pdf). OpenAI technical report.
+- Devlin, J., et al. (2018/2019). [BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding](https://arxiv.org/abs/1810.04805). 2018 preprint; *NAACL 2019*.
+- Brown, T. B., et al. (2020). [Language Models Are Few-Shot Learners](https://arxiv.org/abs/2005.14165). *NeurIPS*.
+- Kaplan, J., et al. (2020). [Scaling Laws for Neural Language Models](https://arxiv.org/abs/2001.08361). arXiv:2001.08361.
+- Hoffmann, J., et al. (2022). [Training Compute-Optimal Large Language Models](https://arxiv.org/abs/2203.15556). *NeurIPS*.
+- Bommasani, R., et al. (2021). [On the Opportunities and Risks of Foundation Models](https://arxiv.org/abs/2108.07258). arXiv:2108.07258.
+- Ouyang, L., et al. (2022). [Training Language Models to Follow Instructions with Human Feedback](https://arxiv.org/abs/2203.02155). *NeurIPS*.
+- Lewis, P., et al. (2020). [Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks](https://arxiv.org/abs/2005.11401). *NeurIPS*.
+- Yao, S., et al. (2022/2023). [ReAct: Synergizing Reasoning and Acting in Language Models](https://arxiv.org/abs/2210.03629). 2022 preprint; *ICLR 2023*.
 
 </ReferenceList>

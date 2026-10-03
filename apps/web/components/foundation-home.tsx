@@ -8,14 +8,14 @@ import { CatalogStressHarness } from "./dev/catalog-stress-harness";
 const copy = {
   "zh-CN": {
     navOverview: "总览",
-    overviewRead: "先读 Agent 工程总览",
+    overviewRead: "先读总览：从图灵机到大模型",
     navMap: "章节",
     mapTitle: "章节",
     mapCopy: "选择一个章节，查看前置知识与后续学习路径。"
   },
   en: {
     navOverview: "Overview",
-    overviewRead: "Start with the Agent Engineering Overview",
+    overviewRead: "Start with the overview: from Turing machines to LLMs",
     navMap: "Chapters",
     mapTitle: "Chapters",
     mapCopy: "Choose a chapter to explore its prerequisites and where to go next."

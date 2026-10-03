@@ -76,6 +76,10 @@
 .chapter-toc {
   position: sticky;
   top: 2rem;
+  max-height: calc(100dvh - 4rem);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
   padding: 0.5rem;
 }
 
@@ -666,6 +670,8 @@
 @media (max-height: 740px) {
   .chapter-toc {
     position: static;
+    max-height: none;
+    overflow: visible;
   }
 }
 
