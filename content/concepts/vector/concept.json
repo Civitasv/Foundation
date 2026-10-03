@@ -10,7 +10,7 @@
   },
   "domain": "foundations",
   "depth": "implementation",
-  "status": "complete",
+  "status": "ai-draft",
   "prerequisites": [],
   "interaction": {
     "kind": "visualizer",
