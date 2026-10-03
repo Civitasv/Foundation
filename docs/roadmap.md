@@ -2,15 +2,25 @@
 
 ## M0 — Foundation
 
-Repository contracts, content schema, graph validation, CI, seed concepts, and a first interactive graph projection.
+Repository contracts, content schema, graph validation, bilingual seed concepts, CI/Pages deployment, and a first Explore projection.
 
-## M1 — Concept runtime
+## M1 — Concept reading runtime
 
-- dynamic concept routes;
-- MDX rendering;
+Implement Feature-05 and the design contracts in `docs/design/`:
+
+- static `/concepts/[id]/` routes;
+- bilingual MDX rendering;
+- chapter shell and stable prose measure;
+- generated heading TOC;
+- semantic aside system with responsive rail/inline presentation;
+- equation, figure, code-step, challenge, design-note, and reference blocks;
 - typed interactive component registry;
-- references and prerequisite navigation;
-- static generation for concept pages.
+- breakout interactive labs;
+- prerequisite navigation;
+- previous/next navigation;
+- static generation compatible with GitHub Pages.
+
+The first acceptance concept should be `vector`.
 
 ## M2 — Learn / Explore
 
@@ -18,7 +28,8 @@ Repository contracts, content schema, graph validation, CI, seed concepts, and a
 - prerequisite-aware learning paths;
 - search;
 - curriculum progress model;
-- concept completion semantics.
+- concept completion semantics;
+- transition between Learn / Read / Explore without duplicating knowledge state.
 
 ## M3 — Interactive foundations
 

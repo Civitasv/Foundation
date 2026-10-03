@@ -3,62 +3,106 @@
 Foundation separates durable knowledge from its presentations.
 
 ```text
-             content/concepts
-                   |
-                   v
-          concept metadata + MDX
-                   |
-                   v
-        @foundation/knowledge
-       /         |           \
-validation   graph rules    ordering
-       \         |           /
-                   v
-                apps/web
-        Learn / Explore / Build
-                   |
-                   v
-            static export
-                   |
-                   v
-             GitHub Pages
+                    content/concepts
+                          |
+                          v
+                 bilingual metadata + MDX
+                          |
+                          v
+               @foundation/knowledge
+              /          |            \
+      validation      graph rules     ordering
+              \          |            /
+                          v
+                   presentation layer
+              /           |             \
+             v            v              v
+          Learn          Read          Explore
+        pathways       chapters         graph
+                          |
+                     interactive
+                        blocks
+                          |
+                          v
+                       apps/web
+                          |
+                     static export
+                          |
+                          v
+                    GitHub Pages
 ```
 
 ## Why this boundary exists
 
-A linear website navigation is only one view of the curriculum. Foundation eventually needs guided paths, free graph exploration, progress-aware recommendations, interactive labs, search, and possible AI tutoring. None of those should redefine the underlying knowledge relationships.
+A linear chapter, a guided curriculum, and a free knowledge graph are different projections of the same underlying knowledge system.
 
-The content graph therefore exists independently of React or Next.js.
+None of them should redefine concept identity or dependency relationships.
 
 ## Runtime boundaries
 
 ### Content
 
-Human-readable lessons plus machine-readable metadata.
+Human-readable bilingual lessons plus machine-readable metadata.
+
+Content owns meaning, not viewport presentation.
+
+A lesson may express semantic blocks such as an aside, challenge, equation, code step, or interactive lab. It must not encode assumptions like "show this in the permanent right sidebar".
 
 ### Knowledge
 
-Deterministic graph semantics. This layer validates IDs, prerequisites, cycles, ordering, and future readiness/progress rules.
+Deterministic graph semantics.
+
+This layer validates IDs, prerequisites, cycles, ordering, and future readiness/progress rules.
+
+Relationships such as prerequisites, unlocks, and guided previous/next navigation are derived here or in a curriculum projection built on top of it.
+
+### Presentation
+
+Foundation has multiple presentation modes.
+
+#### Read
+
+Long-form concept chapters.
+
+Structure follows the Foundation reading architecture:
+- stable prose measure;
+- headings and generated TOC;
+- adaptive semantic asides;
+- code, formula, diagrams, challenges, and labs;
+- sequential navigation.
+
+#### Explore
+
+Knowledge graph or list/detail views for nonlinear discovery.
+
+#### Learn
+
+Prerequisite-aware guided paths.
 
 ### Web
 
-The first product surface. It can render any projection of the graph but does not own the graph.
+The first product surface.
 
-The current hosting contract is a Next.js static export. Repository-backed content is compiled at build time and the generated `apps/web/out` artifact is deployed to GitHub Pages.
+The web layer renders the projections above but does not own curriculum truth.
+
+Current hosting is a Next.js static export deployed to GitHub Pages.
 
 ### Future adapters
 
-AI tutors, search indexes, export tools, or alternate front ends should consume the same knowledge boundary rather than scraping UI code.
+AI tutors, search indexes, exports, or alternate clients should consume the same content/knowledge boundaries.
 
 If a future capability genuinely requires request-time server execution, change the deployment contract explicitly instead of quietly introducing server-only behavior into the web layer.
 
-## Non-goals for M0
+## Design architecture
 
-- authentication;
-- cloud persistence;
-- LLM provider integration;
-- a full MDX component runtime;
-- personalized progress;
-- hundreds of concepts.
+Design contracts live in `docs/design/`.
 
-M0 optimizes for a clean boundary that can grow safely.
+The key distinction is:
+
+```text
+structure      Crafting Interpreters-inspired technical reading
+appearance     Apple-inspired visual hierarchy and restraint
+capabilities   Foundation-specific graph and interaction system
+```
+
+These layers should stay conceptually separate.
