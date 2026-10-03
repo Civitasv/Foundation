@@ -4,14 +4,14 @@ export {
   buildKnowledgeGraph,
   getReadyConcepts,
   topologicalOrder
-} from "./graph.js";
+} from "./graph";
 
 export {
   conceptDepths,
   conceptDomains,
   conceptStatuses,
   interactionKinds
-} from "./types.js";
+} from "./types";
 
 export type {
   ConceptDepth,
@@ -21,4 +21,4 @@ export type {
   ConceptStatus,
   InteractionKind,
   KnowledgeNode
-} from "./types.js";
+} from "./types";

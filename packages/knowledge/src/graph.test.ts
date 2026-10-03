@@ -3,8 +3,8 @@ import {
   buildKnowledgeGraph,
   getReadyConcepts,
   topologicalOrder
-} from "./graph.js";
-import type { ConceptMetadata } from "./types.js";
+} from "./graph";
+import type { ConceptMetadata } from "./types";
 
 function concept(id: string, prerequisites: string[] = []): ConceptMetadata {
   return {

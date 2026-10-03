@@ -1,7 +1,7 @@
 import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
-import { assertConceptCatalog, topologicalOrder } from "./graph.js";
-import type { ConceptMetadata } from "./types.js";
+import { assertConceptCatalog, topologicalOrder } from "./graph";
+import type { ConceptMetadata } from "./types";
 
 export async function loadConceptCatalog(
   contentRoot: string

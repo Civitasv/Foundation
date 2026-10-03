@@ -5,7 +5,7 @@ import {
   interactionKinds,
   type ConceptMetadata,
   type KnowledgeNode
-} from "./types.js";
+} from "./types";
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
