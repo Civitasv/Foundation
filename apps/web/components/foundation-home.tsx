@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import type { ConceptMetadata, FoundationLocale } from "@foundation/knowledge";
 import { KnowledgeExplorer } from "./knowledge-explorer";
 import { CatalogStressHarness } from "./dev/catalog-stress-harness";
@@ -66,6 +67,7 @@ export function FoundationHome({
         <nav aria-label={locale === "zh-CN" ? "主导航" : "Primary"}>
           <a href={overviewHref}>{text.navOverview}</a>
           <a href="#map">{text.navMap}</a>
+          <Link href={locale === "en" ? "/en/courses/cs336-2026/" : "/courses/cs336-2026/"}>CS336 · 2026</Link>
           <a href="https://github.com/Civitasv/Foundation">GitHub</a>
         </nav>
 

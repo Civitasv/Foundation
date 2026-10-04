@@ -1,0 +1,13 @@
+{
+  "id": "cs336-2026",
+  "year": 2026,
+  "officialUrl": "https://cs336.stanford.edu/",
+  "title": {
+    "zh-CN": "CS336 · 2026 学习记录",
+    "en": "CS336 · 2026 Learning journal"
+  },
+  "description": {
+    "zh-CN": "跟随 Stanford CS336《从零构建语言模型》，用自己的话讲清每一节的理解，记录实验、感悟与尚未解决的问题。",
+    "en": "Following Stanford CS336: Language Modeling from Scratch, explaining each lecture in my own words and recording experiments, reflections, and open questions."
+  }
+}

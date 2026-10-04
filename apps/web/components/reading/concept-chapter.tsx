@@ -88,6 +88,7 @@ export async function ConceptChapter({
         <nav aria-label={locale === "zh-CN" ? "主导航" : "Primary"}>
           <Link href={conceptHref("agent-engineering", locale)} aria-current={id === "agent-engineering" ? "page" : undefined}>{text.overview}</Link>
           <Link href={catalogHref}>{text.map}</Link>
+          <Link href={locale === "en" ? "/en/courses/cs336-2026/" : "/courses/cs336-2026/"}>CS336 · 2026</Link>
           <a href="https://github.com/Civitasv/Foundation">GitHub</a>
           <Link href={alternateHref} hrefLang={locale === "en" ? "zh-CN" : "en"}>{text.language}</Link>
         </nav>

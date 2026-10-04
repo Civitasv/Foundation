@@ -504,3 +504,49 @@ footer {
   }
 
 }
+
+.course-journal {
+  width: min(calc(100% - 32px - var(--safe-inline) - var(--safe-inline)), 44rem);
+  margin-inline: auto;
+  padding: clamp(3rem, 8vw, 6rem) 0;
+  font-size: 1.0625rem;
+  line-height: 1.8;
+  overflow-wrap: anywhere;
+}
+
+.course-journal h1 {
+  margin: 1rem 0 1.5rem;
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  line-height: 1.2;
+  letter-spacing: -0.035em;
+  font-weight: 650;
+}
+
+.course-journal .course-lead {
+  color: var(--secondary);
+  font-size: 1.125rem;
+}
+
+.course-journal section {
+  margin-top: 4rem;
+}
+
+.course-journal h2 {
+  font-size: 1.75rem;
+  line-height: 1.3;
+  font-weight: 600;
+}
+
+.course-journal ol {
+  padding-inline-start: 1.5rem;
+}
+
+.course-journal li + li {
+  margin-top: 0.75rem;
+}
+
+.course-journal a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
