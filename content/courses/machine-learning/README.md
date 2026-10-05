@@ -34,6 +34,22 @@
 
 ## 运行与构建
 
+在 Foundation 根目录执行本地预览脚本：
+
+```bash
+./scripts/preview-machine-learning.sh
+```
+
+脚本首次运行会创建本课程的 `.venv` 并安装 Python 依赖，然后运行数学检查、重新构建课件，并启动仅监听本机的 HTTP 服务。打开终端输出的地址即可查看，按 `Ctrl+C` 停止服务。默认端口为 5180；可用 `PREVIEW_PORT=5181 ./scripts/preview-machine-learning.sh` 换端口。
+
+修改 Python 后，如果服务仍在运行，在另一个终端执行：
+
+```bash
+./scripts/preview-machine-learning.sh --build-only
+```
+
+构建成功后刷新浏览器。保存文件不会自动重建。脚本只做本地检查和预览，不提交、推送或部署 Pages。可通过 `EDTRACE_PYTHON` 指定已有的 Python 环境。
+
 在本目录准备 Python 3.11+ 环境；edtrace 自身依赖 PyTorch，首次安装需要下载依赖，不需要 GPU：
 
 ```bash

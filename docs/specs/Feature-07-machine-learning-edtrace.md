@@ -35,4 +35,6 @@ The canonical public directory is `https://civitasv.github.io/Foundation/courses
 
 ## Known dependency
 
+Local authoring uses `scripts/preview-machine-learning.sh`: prepare the course Python environment, reuse the existing numerical checks and static presentation build, then serve the export on loopback under `/Foundation`. `--build-only` rebuilds for an already running server. The script does not watch files, publish, or alter canonical content.
+
 The pinned official frontend loads MathJax from its CDN. The presentation code and text are hosted on Pages; formula rendering requires access to that CDN. The frontend is not copied into Foundation's knowledge model.
