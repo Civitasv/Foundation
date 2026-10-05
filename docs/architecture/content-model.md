@@ -104,4 +104,4 @@ The catalog is the source of truth for the section directory and presentation id
 
 AI-assisted presentations remain `ai-draft`. Generating a working player does not record learning progress, imply a video recording, or promote the maturity of any concept chapter. The machine-learning presentation is Chinese; its English course directory identifies that language explicitly.
 
-The Python source and deterministic numerical experiments live alongside the catalog and do not depend on Next.js. The web layer presents the directory; the build generates its independent static player. See [Feature-07](../specs/Feature-07-machine-learning-edtrace.md).
+The Python source and background mathematical checks live alongside the catalog and do not depend on Next.js. The web layer presents the directory; the build generates its independent static player. See [Feature-07](../specs/Feature-07-machine-learning-edtrace.md).

@@ -2,17 +2,17 @@
 
 ## Outcome
 
-Publish one continuous Chinese Python presentation in Foundation, distilled from the author's seven weeks of older machine-learning notes. A single noisy classification experiment connects foundations, backpropagation, kernels, and generalization. The presentation develops like a technical discussion rather than preserving the weekly divisions. It prepares for CS224N and CS336 without claiming either course has been completed.
+Publish one continuous Chinese Python presentation in Foundation, distilled from the author's seven weeks of older machine-learning notes. A theoretical argument connects foundations, backpropagation, kernels, and generalization through definitions, derivations and explicit assumptions. There are no application cases, datasets, training demonstrations or empirical model comparisons in the presentation. The presentation develops like a technical discussion rather than preserving the weekly divisions. It prepares for CS224N and CS336 without claiming either course has been completed.
 
 The course is available at `/courses/machine-learning/`, with an English directory that clearly identifies the presentation as Chinese. One entry opens the complete `machine_learning` trace. The home page exposes the course alongside the existing CS336 journal.
 
 ## Content boundary
 
-`content/courses/machine-learning/course.json` owns the presentation identity and discussion outline. The single Python presentation, deterministic experiments, and mathematical tests live in that directory. They do not depend on Next.js.
+`content/courses/machine-learning/course.json` owns the presentation identity and discussion outline. The single Python presentation and background mathematical checks live in that directory. They do not depend on Next.js.
 
 This is an `ai-draft` presentation, not an author-written concept chapter or a completed learning record. No graph dependencies, concept maturity, recorded videos, or learning progress are inferred. The original notes remain in the source repository.
 
-The discussion covers problem assumptions, model/loss/update, matrix shapes, probabilities, learned representations, backpropagation, kernel feature maps, and generalization. Kernels include an explicit polynomial map, the sample-span argument, kernel-space norms, RBF logistic regression, and SVM as another objective. Supplementary softmax and stable numerical evaluation are identified.
+The discussion develops population and empirical risk, likelihood-derived losses, gradient descent and its step-size conditions, representations, complete layerwise backpropagation, positive semidefinite kernels and the sample-span argument, kernel regularization, SVM primal/dual forms, and generalization. Each derivation states notation and assumptions. Python organizes progressive exposition; numerical audit fixtures remain exclusively in tests. A final probability-chain discussion connects the framework to language models.
 
 ## Static publication
 
@@ -25,12 +25,12 @@ The canonical public directory is `https://civitasv.github.io/Foundation/courses
 ## Acceptance
 
 - The complete Python presentation generates one valid edtrace trace.
-- Numerical checks verify stable classification loss, the noisy XOR comparison, model-selection isolation, complete network gradients, and kernel gradients against independent references.
+- Background numerical checks audit regression, softmax, multilayer BP, kernel norm regularization and SVM primal/dual consistency against independent calculations. They do not appear as teaching examples or substitute for mathematical arguments.
 - The directory uses canonical ordered course metadata and preserves Chinese-first, bilingual navigation.
 - `pnpm check` passes with the Pages base path.
 - The Pages workflow successfully publishes the resulting artifact.
-- Public course links, presentation assets, Chinese text, formulas, and a plotted experiment are checked in the browser.
+- Public course links, presentation assets, Chinese text, formulas, and forward/backward exposition are checked in the browser.
 
 ## Known dependency
 
-The pinned official frontend loads MathJax from its CDN. The presentation code and plot data are hosted on Pages; formula rendering requires access to that CDN. The frontend is not copied into Foundation's knowledge model.
+The pinned official frontend loads MathJax from its CDN. The presentation code and text are hosted on Pages; formula rendering requires access to that CDN. The frontend is not copied into Foundation's knowledge model.

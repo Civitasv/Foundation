@@ -1,38 +1,34 @@
-# 从数据到可泛化的程序
+# 机器学习的理论脉络
 
-一份连续的中文 Python 课件，用 [edtrace](https://github.com/percyliang/edtrace) 展示代码、公式、中间变量与实验结果。材料源于 [Civitasv/machine-learning 的前七周笔记](https://github.com/Civitasv/machine-learning)，但不沿用周次划分，而围绕一个问题逐步发展：**怎样从有限的带噪样本，得到一个能预测新样本的程序？**
+一份连续的中文理论课件，用 [edtrace](https://github.com/percyliang/edtrace) 逐步展示定义、公式、推导与讨论。材料源于 [作者前七周笔记](https://github.com/Civitasv/machine-learning)，不沿用周次划分。主问题是：**如何用有限观测确定一个在未知数据上仍然有效的函数？**
 
-这是一份 `ai-draft` 讲解初稿，供作者验证、改写和录制；工程测试与发布不代表已经学会。原始笔记保持不变。
+课件不包含应用用例、合成数据、数值演示、训练实验或模型排名。Python 用来组织讲解顺序；后台数学审校不进入播放流程。内容保持 `ai-draft`，供作者审阅、改写与录制，不代表已经完成学习。原始笔记保持不变。
 
-## 讨论如何展开
+## 论证顺序
 
-| 追问 | 建立的概念与证据 |
-| --- | --- |
-| 机器看到了什么，要预测什么？ | 输入、标签、监督学习、数据划分、分布假设与噪声。 |
-| 用什么程序表达预测？ | 参数、偏置、矩阵运算、shape、表示能力与尺度。 |
-| 怎样衡量预测质量？ | logit、概率、决策；从似然推导交叉熵；稳定数值计算。 |
-| 一个目标怎样改变参数？ | 导数、局部近似、梯度下降、学习率、矩阵梯度与优化诊断。 |
-| 直线为什么失败，怎样改进表示？ | XOR、交互特征、非线性、可学习隐藏层。 |
-| 怎样给每层参数计算梯度？ | 链式法则、路径求和、完整两层网络 BP、梯度检查与初始化。 |
-| 可否不展开特征，也完成非线性计算？ | 多项式特征映射、核技巧、RBF、Gram 矩阵、核空间正则、核逻辑回归；SVM 作为另一种目标。 |
-| 怎样选择方案并检验泛化？ | 比较八个候选、正则化、验证选模、独立测试、噪声上限与实验局限。 |
-| 怎样迁移到后续深度学习？ | softmax、下一个 token 的负对数概率，以及不变的训练骨架。 |
+从输入、目标、分布与假设空间定义学习问题，区分总体风险、经验风险和正则化目标。接着从条件似然导出平方误差与交叉熵，再由一阶近似和下降引理说明梯度下降为何采用减法、何时能下降。
 
-贯穿数据是在二维区域均匀采样的带噪 XOR：两个坐标异号时干净标签为 1，再以 8% 概率独立翻转。它是用于拆解机制的合成任务，不冒充真实应用。模型依次从线性逻辑回归发展为交互特征、神经网络和核模型，始终使用同一数据与可比较的评价指标。
+表示部分说明固定特征与可学习特征的区别。BP 从计算图的链式法则出发，通过微分推导仿射层的转置与外积，再给出激活层、完整逐层递推、批量平均与参数共享的梯度累计。明确区分求导和优化。
 
-softmax、稳定计算、tanh 与核逻辑回归实验、自动求导对照是补充。旧笔记中的 Octave 操作、fminunc API、按特征数量硬选算法的阈值不作为重点。教学节奏参考 CS336 的代码驱动方式，但这是独立入门讨论稿，不是官方课程或同等覆盖范围的替代品。
+核方法从特征内积及半正定性出发，用正交分解解释为什么可以采用训练样本展开，推导核空间范数与核逻辑回归梯度。随后由几何间隔走到 SVM 的软间隔、hinge loss、对偶和支持向量，说明核方法与 SVM 的关系。
+
+最后回到泛化，区分逼近、估计与优化的影响，用条件性一致偏差界说明它们如何相连。结尾通过 softmax 与概率链式分解连接语言模型。推导始终说明符号约定与成立条件，不把经验观察当作定理。
 
 ## 播放与改写
 
-从 [Foundation 课程入口](https://civitasv.github.io/Foundation/courses/machine-learning/)打开完整课件。按 **→** 前进、**←** 后退、**Shift + →** 跳过函数细节；**E** 切换变量面板。代码、说明、图表和 trace 均静态托管，播放不需要 Python 服务。官方播放器通过 CDN 加载 MathJax，公式渲染需要联网。
+[课程入口](https://civitasv.github.io/Foundation/courses/machine-learning/) · [完整课件](https://civitasv.github.io/Foundation/courses/machine-learning/presentation/?trace=machine_learning)
 
-[machine_learning.py](machine_learning.py) 的 main() 是讨论的阅读顺序，所有逐行展示的教学函数都在同一文件里。text() 写中文叙述与公式，@inspect 展示变量，plot() 插入图表。长训练循环在 [classification.py](classification.py)；[experiments.py](experiments.py) 提供稳定 sigmoid/BCE；[charts.py](charts.py) 只处理图表样式。
+- `→` / `←`：逐步前进与后退。
+- `Shift + →`：跳过当前函数细节；`u`：跳出当前函数。
+- `Shift + R`：切换底层源码；`Shift + A`：切换逐步展示动画。
 
-目录以 [course.json](course.json) 为准，不在网页组件或构建脚本另建一套课件清单。英文入口说明内容为中文，不声称已有英文讲稿或视频。
+[machine_learning.py](machine_learning.py) 的 `main()` 是讲解顺序，各函数组织连续论证，`text()` 提供中文正文和 LaTeX 公式。[course.json](course.json) 是双语目录的唯一来源。英文入口明确标注课件为中文。
+
+播放器与内容静态托管，不需 Python 服务。官方播放器通过 CDN 加载 MathJax，公式渲染需要联网。教学组织参考 CS336 的 Python 讲稿形式，不声称覆盖范围或质量与官方课程等同。
 
 ## 运行与构建
 
-实验使用 CPU、固定种子与本地生成的数据，不需要 GPU 或数据下载。edtrace 自身依赖 PyTorch，首次安装需要下载依赖。在本目录准备 Python 3.11+ 环境：
+在本目录准备 Python 3.11+ 环境；edtrace 自身依赖 PyTorch，首次安装需要下载依赖，不需要 GPU：
 
 ```bash
 python3 -m venv .venv
@@ -42,27 +38,17 @@ python -m unittest -v
 python -m edtrace.execute -m machine_learning
 ```
 
-在 Foundation 根目录执行完整检查与构建：
+在 Foundation 根目录运行完整验证与静态构建：
 
 ```bash
 EDTRACE_PYTHON="$PWD/content/courses/machine-learning/.venv/bin/python" \
 PAGES_BASE_PATH=/Foundation pnpm check
 ```
 
-Windows 可用 `.venv\Scripts\python.exe`，环境变量按终端语法设置。站点生成到 apps/web/out，播放器位于其 courses/machine-learning/presentation/ 子目录。单独执行 Python 命令只更新 trace，不部署网站。Pages 工作流执行相同检查，再发布静态产物。
+输出位于 `apps/web/out`。单独生成 trace 不会部署网站；Pages 工作流执行相同检查并发布。Python edtrace 固定为 0.1.17，前端固定提交 `d14a5f525de0aca2bd249ca6c36f1af252cddab2`。生成文件不作为内容源提交。
 
-Python edtrace 固定为 0.1.17，前端固定提交 d14a5f525de0aca2bd249ca6c36f1af252cddab2。生成文件与依赖缓存不作为内容源提交。
+## 数学审校与参考
 
-## 讲解时怎样检验理解
+[test_theory.py](test_theory.py) 在后台把讲稿中的关键公式转写为数值运算，与 PyTorch 自动微分核对回归、softmax、完整多层 BP 和核正则梯度，并核对 SVM 原始/对偶目标及互补松弛。这些检查能发现符号、形状和归一化错误，但有限数值检查不是普遍性证明。测试也执行完整讲稿，确保无实验图表进入播放器。
 
-每次揭示结果前，先说出输出的符号、shape 或趋势。遇到反直觉结果，先解释再改代码。合上讲稿，重建三条解释链：线性模型为什么失败、BP 怎样把梯度传回隐藏层、核怎样替代显式特征的内积。
-
-换一组噪声、特征或超参数，先写预测再运行；记录原先预测、实际结果、错误原因和现在的解释。次日与一周后从空文件重写关键步骤，再核对。录制时保留自己的推理，不需要照读整篇文字。
-
-## 校正与参考
-
-新稿校正了旧笔记中梯度残差/转置、argmax 与 max、L2 平方项、BP 与参数更新的区别、初始化根号、验证集联合调参、hinge 输入与 C 含义等问题。最小二乘矩阵不可逆也不意味着无解；优先使用数值求解器而非显式求逆。
-
-参考：[CS229 回归与分类](https://cs229.stanford.edu/summer2023/cs229-notes1.pdf)、[CS229 反向传播](https://cs229.stanford.edu/notes_archive/cs229-notes-all/cs229-notes-backprop.pdf)、[CS229 核方法与 SVM](https://cs229.stanford.edu/summer2022/cs229-notes3.pdf)、[Glorot–Bengio 初始化](https://proceedings.mlr.press/v9/glorot10a.html)、[NumPy 最小二乘](https://numpy.org/doc/stable/reference/generated/numpy.linalg.lstsq.html)。
-
-配套测试以中心差分与 PyTorch 核对完整网络梯度，检查核正则梯度、极值稳定性和验证/测试隔离，并实际执行课件和图表序列化。固定种子的教学实验不能建立算法在现实任务上的普遍排名。
+参考：[CS229 回归与分类](https://cs229.stanford.edu/summer2023/cs229-notes1.pdf)、[CS229 反向传播](https://cs229.stanford.edu/notes_archive/cs229-notes-all/cs229-notes-backprop.pdf)、[CS229 核方法与 SVM](https://cs229.stanford.edu/summer2022/cs229-notes3.pdf)。softmax、光滑目标的下降条件与条件性泛化界是为连贯解释增补的内容。

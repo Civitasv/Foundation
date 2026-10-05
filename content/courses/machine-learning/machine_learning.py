@@ -1,360 +1,176 @@
-"""从数据到可泛化的程序：一份连续的中文机器学习讨论稿。
+"""机器学习的理论脉络：定义、推导、条件与联系。
 
-来源：吴恩达课程前七周旧笔记。用同一个带噪分类问题连接基本概念、
-优化、表示学习、反向传播、核方法与泛化。AI 辅助初稿，供作者改写讲解。
+Python 只组织 edtrace 的讲解顺序；课件不运行数据用例或训练实验。
+来源为作者前七周笔记及 README 中的参考资料。AI 辅助讲解初稿。
 """
-import numpy as np
-from edtrace import text, plot
-from experiments import sigmoid, binary_loss_from_logits
-from classification import (
-    make_dataset, fit_logistic, fit_network, fit_kernel,
-    predict_logits, report, select_model, rbf_kernel,
-)
-from charts import line, scatter
+from edtrace import text
 
 
 def main():
-    text("# 从数据到可泛化的程序")
-    text("机器学习基础、反向传播与核方法\n\n**核心问题：我们怎样把有限的带噪样本，变成一个能预测新样本的程序？**")
-    text("下面是一项逐步展开的实验。我们会先提出最简单的模型，让它失败，再根据失败的证据改进表示与算法。公式、代码和结果始终解释同一个问题。")
-    data = make_dataset()  # @stepover
-    problem_and_assumptions(data)
-    models_and_representations(data)
-    probability_and_objective()
-    linear = optimization_and_evidence(data)
-    learned_representations(data, linear)
-    backpropagation(data)
-    kernel_methods(data)
-    result = generalization_and_experiment(data)
-    discussion_and_next_steps(result)
+    text("# 机器学习的理论脉络")
+    text("机器学习基础 · 反向传播 · 核方法")
+    text("**核心问题：如何用有限的观测，确定一个在未知数据上仍然有效的函数？**")
+    text("先定义学习的对象与目标，再推导优化与求导方法，随后讨论两条构造非线性表示的路线，最后回到泛化。全程沿数学问题展开，区分定义、结论及其成立条件。")
+    learning_problem()
+    models_and_risk()
+    probability_and_loss()
+    optimization()
+    representations()
+    backpropagation()
+    kernel_methods()
+    margins_and_svm()
+    generalization()
+    synthesis()
 
 
-def problem_and_assumptions(data):
-    text("## 问题：给出两个测量值，预测一个类别")
-    text("设每个样本有两个输入 x₁、x₂，标签 y∈{0,1}。它们是合成信号，没有医学、金融等现实含义。先观察点的分布，再猜测什么规则可能有效。")
-    X = data["train_x"][:6]  # @inspect X X.shape
-    y = data["train_y"][:6]  # @inspect y y.shape
-    rows = sample_rows(data["train_x"], data["train_y"])  # @stepover
-    plot(scatter(rows, "x₁", "x₂", "标签", "训练样本：颜色表示观察到的标签"))  # @clear X X.shape y y.shape
-    text("为了能检查算法，我们知道人工数据的生成规则：x₁ 与 x₂ 异号时干净标签为 1，否则为 0；之后以 8% 的概率独立翻转标签。训练算法只得到输入与带噪标签，不读取这个规则。")
-    text("这就是监督学习：已有输入—标签样本，想预测未见样本的标签。‘有标签’不等于‘已知真实规律’。这个实验还假设训练与未来数据来自同一分布；现实任务需要验证这个假设。")
-    text("预测连续数值（例如温度）通常称为回归，预测离散类别称为分类。本课以分类为主线；两者都需要选择模型、损失、优化方法与评价方式。无监督学习没有同样的标签信号，暂不在这里展开。")
-    counts = {"训练": len(data["train_y"]), "验证": len(data["val_y"]), "测试": len(data["test_y"])}  # @inspect counts
-    text("从一开始就分好三组独立样本。训练集拟合参数；验证集比较方案；测试集留到方案确定之后。现在先不看测试成绩。")
-    text("**先作预测：**一条直线能把四个象限里的两类点分开吗？若不能，增加训练轮数是否一定有用？")
+def learning_problem():
+    text("## 学习问题：未知的是规律，已知的是有限样本")
+    text(r"设输入为 $x\in\mathcal X$，目标为 $y\in\mathcal Y$，二者服从未知联合分布 $P(x,y)$。训练集记作 $D=\lbrace (x_i,y_i)\rbrace_{i=1}^m$；先采用样本独立同分布的假设。")
+    text("监督学习从输入与目标的配对观测中学习预测关系。回归的输出通常是连续值，分类的输出是离散类别；二者共享模型、目标、优化与泛化这套结构。无监督学习不要求同样的目标标签，不在这里展开。")
+    text(r"模型 $f_\theta:\mathcal X\to\mathcal Y$ 用参数 $\theta$ 指定一个函数。更一般地，模型也可以先输出分数或条件概率，再通过决策规则生成预测。")
+    text(r"输入 $x$ 是模型接收的信息，标签 $y$ 是监督信号，参数 $\theta$ 是从训练数据中确定的量。假设空间 $\mathcal H=\lbrace f_\theta:\theta\in\Theta\rbrace$ 则规定了允许选择哪些函数。")
+    text("学习之前就必须作出某些限制：允许的函数结构、平滑性、正则化或算法偏好。有限样本通常能被许多不同函数解释；这些限制构成归纳偏置，影响模型怎样延伸到未见数据。")
+    text("因此，学习不是唯一地还原一个隐藏公式。它是在给定信息、模型限制和评价目标下，选择预测规则。若未来分布与训练分布不同，原来的泛化论证需要重新审视。")
 
 
-def models_and_representations(data):
-    text("## 模型：先规定允许学习什么，再寻找参数")
-    text(r"最简单的打分模型是 $z=w_1x_1+w_2x_2+b$。输入 $x$ 来自样本；参数 $w,b$ 由学习调整。先把分数与类别分开：$z$ 可以是任意实数。")
-    x = np.array([1., 2.])  # @inspect x
-    w = np.array([2., -1.])  # @inspect w
-    b = 0.5
-    score = w[0] * x[0] + w[1] * x[1] + b  # @inspect score
-    text("改变 w 会改变各特征的贡献；改变 b 会整体平移分数。边界 z=0 在二维输入空间是一条直线。模型限制了可表达的规则，优化器不会自动突破这个限制。")
-    text("### 从一个样本到一批样本")
-    X = np.array([[1., 2.], [2., 0.], [3., 1.]])  # @inspect X X.shape
-    scores = X @ w + b  # @inspect scores scores.shape
-    by_loop = np.array([sum(X[i, j] * w[j] for j in range(2)) + b for i in range(3)])  # @inspect by_loop
-    by_einsum = np.einsum("mn,n->m", X, w) + b  # @inspect by_einsum
-    assert np.allclose(scores, by_loop) and np.allclose(scores, by_einsum)
-    text("X 的每行是一个样本，每列是一个特征：(m,n) @ (n,) → (m,)。三个写法的数学相同；einsum 中 n 不在输出里，表示沿特征维求和。先写 shape，能避免很多实现错误。")
-    text("### 参数不是特征，特征也不是标签")
-    text("特征是提供给模型的描述；参数决定怎样使用描述；标签是训练时想解释的答案。把标签误放进输入，会产生看似惊人的成绩，却无法用于真实预测。")
-    text("输入也有量纲。若一列是米、另一列是毫米，同一个学习率可能很难兼顾。标准化常改善优化条件，但均值与标准差只能用训练集估计。")
-    train_mean = data["train_x"].mean(axis=0)  # @inspect train_mean
-    train_std = data["train_x"].std(axis=0)  # @inspect train_std
-    text("本实验的两个输入已经处于相近尺度，因此直接使用。不要把‘所有任务必须标准化’当作不需要思考的规则。")
+def models_and_risk():
+    text("## 从模型到风险：到底在最小化什么？")
+    text(r"线性模型的分数为 $f_{w,b}(x)=w^\top x+b$，其中 $x,w\in\mathbb R^d$，$b\in\mathbb R$。含偏置时严格说是仿射函数；通常仍归入线性模型。")
+    text(r"把样本按行放入 $X\in\mathbb R^{m\times d}$，整批分数为 $z=Xw+b\mathbf1\in\mathbb R^m$。矩阵乘法中的特征维被求和，样本维被保留。")
+    text(r"损失 $\ell(f_\theta(x),y)$ 衡量单次预测的代价。真正关心的是总体风险：$$R(\theta)=\mathbb E_{(x,y)\sim P}[\ell(f_\theta(x),y)].$$它对未知分布取期望，通常无法直接计算。")
+    text(r"用观测平均替代期望，得到经验风险：$$\widehat R_D(\theta)=\frac1m\sum_{i=1}^m\ell(f_\theta(x_i),y_i).$$经验风险最小化是求 $\hat\theta\in\arg\min_\theta\widehat R_D(\theta)$。")
+    text("固定模型下，样本平均可在适当条件下逼近期望；但训练选出的模型依赖于同一批样本。不能把‘固定函数的平均会收敛’直接当成‘挑出来的任何模型都会泛化’。")
+    text(r"常用训练目标再加入正则项：$$J(\theta)=\widehat R_D(\theta)+\lambda\Omega(\theta),\qquad\lambda\ge0.$$损失描述拟合要求，正则项表达对候选函数或参数的偏好。训练目标与纯预测风险要分清。")
+    text("模型、目标、算法是三个独立选择：模型规定能表示什么；目标规定什么算好；算法规定如何寻找参数。算法收敛只说明优化取得了某种进展，不能单独证明模型合适或总体风险低。")
 
 
-def probability_and_objective():
-    text("## 目标：怎样定义‘预测得更好’？")
-    text("若只统计分类是否正确，分数从 0.01 变到 10 可能不改变类别，目标函数会出现大片平坦区。我们需要能反映置信程度、方便优化的损失。")
-    logits = np.array([-2., 0., 2.])  # @inspect logits
-    probabilities = sigmoid(logits)  # @inspect probabilities
-    decisions = (probabilities >= 0.5).astype(int)  # @inspect decisions
-    text(r"令 $p=\sigma(z)=1/(1+e^{-z})$。logit 是分数，$p$ 是模型给出的 $P(y=1\mid x)$，阈值才产生决策。阈值可随误判成本改变，0.5 只是本实验的选择。")
-    text("### 从概率假设推导交叉熵")
-    text(r"对二元标签，$P(y\mid x)=p^y(1-p)^{1-y}$。若训练样本独立，整组数据的似然是这些概率的乘积。最大化乘积等价于最大化对数和，也等价于最小化平均负对数似然。")
-    text(r"于是单样本损失为 $\ell=-y\log p-(1-y)\log(1-p)$，训练目标为 $J=\frac1m\sum_i\ell_i$。这就是二元交叉熵，不是凭空指定的惩罚表。")
-    p_for_true_one = np.array([0.49, 0.001])  # @inspect p_for_true_one
-    losses = -np.log(p_for_true_one)  # @inspect losses
-    text("真实标签为 1 时，这两个预测都会被判错，但自信地猜错受到更大惩罚。准确率衡量决策；交叉熵还关心分配给真实标签的概率，两者回答不同问题。")
-    text("平方误差也可用于概率预测。这里选择交叉熵，是因为上述概率模型与良好的优化性质；不能把它解释成其他损失一概无效。")
-    text("### 数学等价，不保证浮点计算同样可靠")
-    extreme_logits = np.array([-1000., 0., 1000.])  # @inspect extreme_logits
-    targets = np.array([1., 1., 0.])
-    stable_losses = np.logaddexp(0., extreme_logits) - targets * extreme_logits  # @inspect stable_losses
-    text("从 logit 直接计算 logaddexp(0,z)−yz，可避免先算 sigmoid 再 log 时出现 log(0)。实现损失时，数值稳定性也是正确性的一部分。")
+def probability_and_loss():
+    text("## 损失的来源：从概率模型到负对数似然")
+    text(r"若模型指定条件分布 $p_\theta(y\mid x)$，条件似然为 $L(\theta)=\prod_i p_\theta(y_i\mid x_i)$。条件独立假设把联合概率写成乘积；取对数后成为和。")
+    text(r"最大似然等价于最小化平均负对数似然：$$J_{\mathrm{ML}}(\theta)=-\frac1m\sum_i\log p_\theta(y_i\mid x_i).$$损失由概率假设导出；概率假设本身仍需要判断。")
+    text("### 回归：高斯假设与平方误差")
+    text(r"若 $y\mid x\sim\mathcal N(f_\theta(x),\sigma^2)$ 且 $\sigma^2$ 为固定常数，负对数似然等于 $\frac{(f_\theta(x)-y)^2}{2\sigma^2}$ 加与参数无关的常数。因此优化等价于最小化平方误差。")
+    text(r"对线性回归，取 $J=\frac1{2m}\VertXw+b\mathbf1-y\Vert_2^2$，记残差 $r=Xw+b\mathbf1-y$。则 $$\nabla_wJ=\frac1mX^\top r,\qquad\partial_bJ=\frac1m\mathbf1^\top r.$$这里的残差是预测减真实值。")
+    text(r"将偏置并入增广矩阵 $\widetilde X$，驻点满足 $\widetilde X^\top\widetilde X\theta=\widetilde X^\top y$。只有满列秩时才能使用对应的逆矩阵表达唯一解；秩不足不等于最小二乘无解。数值计算通常直接求解最小二乘问题。")
+    text("### 分类：伯努利假设与交叉熵")
+    text(r"对 $y\in\lbrace 0,1\rbrace$，令 $z=w^\top x+b$，$p=\sigma(z)=1/(1+e^{-z})$，并设 $p_\theta(y\mid x)=p^y(1-p)^{1-y}$。分数 $z$、概率 $p$ 与最终类别是三个不同对象。")
+    text(r"取负对数得到二元交叉熵：$$\ell(z,y)=-y\log p-(1-y)\log(1-p).$$分类阈值属于决策规则，可以由误判代价决定；它不是交叉熵定义的一部分。")
+    text(r"先对概率求导：$\partial\ell/\partial p=(p-y)/(p(1-p))$。再利用 $\mathrm dp/\mathrm dz=p(1-p)$，链式法则给出 $$\frac{\partial\ell}{\partial z}=p-y.$$抵消来自 sigmoid 与交叉熵的组合，不适用于任意输出层和损失。")
+    text(r"对整批样本，$$\nabla_wJ=\frac1mX^\top(p-y),\qquad\partial_bJ=\frac1m\mathbf1^\top(p-y).$$它与平方误差的线性回归具有相似形式，但预测函数、损失和统计假设不同。")
+    text(r"交叉熵也可写成 $\ell(z,y)=\log(1+e^z)-yz$。数学等价不保证浮点实现同样稳定；计算时应使用稳定的 softplus / log-sum-exp，而非直接求巨大指数。")
+    text("最小二乘和逻辑回归已经给出共同结构：先规定函数与概率假设，再推导标量目标，最后求目标对参数的梯度。接下来讨论如何使用这个梯度。")
 
 
-def optimization_and_evidence(data):
-    text("## 优化：损失怎样改变参数？")
-    text("先暂时只看一个参数，设 J(θ)=(θ−3)²/2。导数表示 θ 增加一点时，损失局部变化有多快。")
-    theta, alpha = 0., 0.2
-    derivative = theta - 3  # @inspect derivative
-    theta_new = theta - alpha * derivative  # @inspect theta_new
-    text(r"一阶近似是 $J(\theta+\Delta)\approx J(\theta)+\nabla J^\top\Delta$。取 $\Delta=-\alpha\nabla J$，变化近似为 $-\alpha\|\nabla J\|^2$。非零梯度处，足够小的正步长会让损失下降。")
-    rows = learning_rate_rows()  # @stepover
-    plot(line(rows, "轮次", "损失", "学习率", "方向由梯度决定，步子大小仍然重要", log_y=True))  # @clear derivative theta_new
-    text("这是 J(θ)=θ²/2 的对照实验。α=1.2 跨过谷底但仍收敛；α=2.2 则发散。减号不保证任意学习率都有效，也不保证复杂模型达到全局最优。")
-    text("### 回到分类：完整推导一次更新")
-    text(r"链式法则给出 $\frac{\partial\ell}{\partial p}=-y/p+(1-y)/(1-p)$，而 $\frac{\partial p}{\partial z}=p(1-p)$。相乘并化简，得到 $\frac{\partial\ell}{\partial z}=p-y$。")
-    X, y = data["train_x"][:6], data["train_y"][:6]
-    w, b = np.zeros(2), 0.
-    logits = X @ w + b  # @inspect logits
-    probabilities = sigmoid(logits)  # @inspect probabilities
-    dlogits = (probabilities - y) / len(y)  # @inspect dlogits
-    dw = X.T @ dlogits  # @inspect dw dw.shape
-    db = dlogits.sum()  # @inspect db
-    text("平均损失中的 1/m 只除一次。X.T 的作用是让每个特征汇总来自所有样本的贡献；偏置对每个分数的局部导数都是 1，所以直接求和。")
-    before = binary_loss_from_logits(logits, y)  # @inspect before
-    w, b = w - 0.2 * dw, b - 0.2 * db  # @inspect w b
-    after = binary_loss_from_logits(X @ w + b, y)  # @inspect after
-    text("两个梯度都在同一组旧参数上计算，然后一起更新。这里展示一个小批次；本课实验为方便观察使用全批量更新。大数据训练常对随机小批次重复同样的计算。")
-    text("### 当损失下降，问题是否已经解决？")
-    linear = fit_logistic(data["train_x"], data["train_y"])  # @stepover
-    training = report(linear, data["train_x"], data["train_y"])  # @inspect training
-    validation = report(linear, data["val_x"], data["val_y"])  # @inspect validation
-    plot(history_plot(linear, "线性分类器的训练目标"))  # @stepover @clear logits probabilities dlogits dw dw.shape db before w b after training validation
-    plot(boundary_plot(linear, data, "线性边界：优化收敛，不代表表示足够"))  # @stepover
-    text("模型能把自己的目标优化得更好，却仍受直线边界的限制。继续减小学习率、增加轮数，不能让一条直线突然表达 XOR。诊断时要区分优化问题与表示能力问题。")
-    return linear
+def optimization():
+    text("## 优化：为什么沿负梯度更新？")
+    text(r"梯度 $\nabla J(\theta)$ 把所有偏导数组合为向量。对小位移 $\Delta$，可微性给出 $$J(\theta+\Delta)=J(\theta)+\nabla J(\theta)^\top\Delta+o(\Vert\Delta\Vert).$$梯度描述局部一阶变化。")
+    text(r"在欧氏长度固定为 $\varepsilon$ 的方向中，由柯西—施瓦茨不等式，$\nabla J^\top\Delta\ge-\varepsilon\Vert\nabla J\Vert$。非零梯度时，沿负梯度取等号，因此它是一阶近似下下降最快的方向。")
+    text(r"于是梯度下降采用 $$\theta_{t+1}=\theta_t-\eta_t\nabla J(\theta_t),\qquad\eta_t>0.$$减号来自下降方向，学习率控制距离。全部分量的梯度必须基于同一个旧参数向量计算。")
+    text(r"梯度的 $L$-Lipschitz 条件是 $\Vert\nabla J(u)-\nabla J(v)\Vert\le L\Vert u-v\Vert$，其中 $L>0$。它限制局部斜率变化的速度，使一阶近似的误差可以被二次项控制。")
+    text(r"若梯度是 $L$-Lipschitz 连续的，下降引理进一步给出 $$J(\theta-\eta\nabla J)\le J(\theta)-\eta(1-L\eta/2)\Vert\nabla J\Vert^2.$$所以 $0<\eta<2/L$ 时，非零梯度带来严格下降。这个结论需要光滑性与步长条件。")
+    text("凸目标的局部最小值也是全局最小值；非凸目标通常没有这样的保证。梯度为零只表示驻点，也可能是鞍点。损失逐步下降、算法收敛和找到全局最优，是不同命题。")
+    text("### 从全批量梯度到随机梯度")
+    text(r"经验风险是样本损失的平均。均匀抽取小批量 $B$ 时，可以用 $$g_B=\frac1{|B|}\sum_{i\in B}\nabla_\theta\ell_i+\lambda\nabla\Omega(\theta)$$代替全批量梯度。在抽样与当前参数满足相应条件时，它是目标梯度的无偏估计。")
+    text("小批量降低单次更新成本，也引入梯度噪声，所以每一步不必让全数据目标下降。学习率调度、动量和自适应方法改变更新策略；它们仍需要先获得梯度。")
+    text("表示能力不足无法只靠更多优化步骤补齐。要扩大允许的函数集合，需要改变表示；而复杂表示又提出了高效求导的问题。")
 
 
-def learned_representations(data, linear):
-    text("## 表示：改变模型看到的空间")
-    text("先看无噪声的四个原型：(−1,−1) 与 (1,1) 属于 0，另外两个属于 1。两个正例的平均位置与两个负例的平均位置都在原点，因此不存在能严格分开两类的线性分数。")
-    X = np.array([[-1., -1.], [-1., 1.], [1., -1.], [1., 1.]])  # @inspect X
-    product = X[:, 0] * X[:, 1]  # @inspect product
-    engineered_scores = -product  # @inspect engineered_scores
-    text("乘积特征把同号与异号直接区分出来。在原始空间中，规则是非线性的；在包含 x₁x₂ 的特征空间里，一个线性模型就能使用它。")
-    interaction = fit_logistic(data["train_x"], data["train_y"], interaction=True)  # @stepover
-    comparison = {"线性": report(linear, data["val_x"], data["val_y"]), "加入乘积特征": report(interaction, data["val_x"], data["val_y"])}  # @inspect comparison
-    plot(boundary_plot(interaction, data, "相同损失与优化方法，更换输入表示"))  # @stepover @clear X product engineered_scores comparison
-    text("我们只改变了表示，仍然使用交叉熵与梯度下降。但现实问题里，谁来告诉我们该造什么特征？这引出了可学习的表示。")
-    text("### 神经网络把特征变换也设为参数")
-    text(r"定义 $A=XW_1+b_1$，$H=\tanh(A)$，$z=HW_2+b_2$。隐藏层 $H$ 不直接给出标签，它给输出层提供一组由数据学习的新特征。")
-    text(r"非线性不可省略：若去掉 tanh，$(XW_1+b_1)W_2+b_2=X(W_1W_2)+(b_1W_2+b_2)$，整体仍然只是一个仿射变换。")
-    text("现在要学习的参数更多了，但目标没有换：让真实标签得到更高概率。剩下的问题是，怎样为每一层都算出正确梯度？")
+def representations():
+    text("## 表示：非线性来自哪里？")
+    text(r"把输入先变换为特征 $\phi(x)$，再作线性组合：$$f(x)=w^\top\phi(x)+b.$$它对特征是线性的，对原始输入未必线性。‘线性’必须说明相对于哪个空间。")
+    text(r"神经网络把特征变换也参数化。采用列向量约定，令 $h^{(0)}=x$，逐层计算 $$a^{(l)}=W^{(l)}h^{(l-1)}+b^{(l)},\qquad h^{(l)}=\sigma_l(a^{(l)}).$$其中 $W^{(l)}\in\mathbb R^{d_l\times d_{l-1}}$。")
+    text("前面的批量公式按行存样本；这里为便于推导，把单样本激活写成列向量。改变记号时必须一起改变矩阵方向，不能只凭熟悉的转置位置记公式。")
+    text(r"如果每层都不使用非线性，多个仿射变换可合并为一个：$W_2(W_1x+b_1)+b_2=(W_2W_1)x+(W_2b_1+b_2)$。单纯叠加线性层不会扩大到非线性函数。")
+    text("非线性激活使复合函数能表达更丰富的关系；隐藏层成为可学习的表示。参数数目和表示能力增加后，优化难度与泛化要求也可能改变，不能由表达能力直接推出可训练性。")
+    text("每层都影响最终损失，但不需要为每个参数独立重算一遍整个推导。计算图中的中间结果可以共享，这正是反向传播的出发点。")
 
 
-def backpropagation(data):
-    text("## 反向传播：复用链式法则，而不是逐个参数重新试")
-    text("先前向算出每个中间量，再反向计算损失对中间量的导数。一个量通向损失的路径若有多条，就把各条路径的贡献相加。这是求导规则，不是训练的另一种目标。")
-    text("### 先用一个标量把‘上游梯度 × 局部导数’算明白")
-    x, y, w = 2., 3., 1.
-    z = w * x  # @inspect z
-    loss = (z - y) ** 2 / 2  # @inspect loss
-    upstream = z - y  # @inspect upstream
-    dw = upstream * x  # @inspect dw
-    text("dJ/dz=−1，dz/dw=2，因此 dJ/dw=−2。若 w 被多条分支重复使用，各分支算出的梯度要相加。自动微分系统记录计算关系，自动完成这种反向累计。")
-    text("### 同一条规则，推广到一个两层网络")
-    X, y = data["train_x"][:4], data["train_y"][:4]
-    rng = np.random.default_rng(11)
-    w1 = rng.uniform(-1., 1., size=(2, 4))
-    b1 = np.zeros(4)
-    w2 = rng.uniform(-1., 1., size=4)
-    b2 = 0.
-    loss, gradients = network_loss_and_gradients(X, y, w1, b1, w2, b2)
-    text("前向保存 H，反向就能直接使用它的导数 1−H²。每个参数得到的是损失的局部敏感度，不是‘它犯了多少错’或唯一的因果责任。")
-    before = loss  # @inspect before
-    w1, b1 = w1 - 0.1 * gradients["w1"], b1 - 0.1 * gradients["b1"]
-    w2, b2 = w2 - 0.1 * gradients["w2"], b2 - 0.1 * gradients["b2"]
-    after = binary_loss_from_logits(np.tanh(X @ w1 + b1) @ w2 + b2, y)  # @inspect after
-    text("上面求梯度的过程是 BP；减去学习率乘梯度的几行才是梯度下降。PyTorch 的 backward() 与 optimizer.step() 也对应这两个不同职责。")
-    gradient_check()
-    text("### 从能求导，到能训练")
-    text("相同隐藏单元若从相同参数开始，通常会收到相同梯度，难以分工。随机初始化打破对称性；尺度则影响激活和梯度传播。过大的 tanh 输入会饱和，使局部导数接近零。")
-    activations = np.tanh(np.array([0., 1., 5.]))  # @inspect activations
-    local_derivatives = 1 - activations ** 2  # @inspect local_derivatives
-    text(r"例如 Glorot 均匀初始化从 $[-\sqrt{6/(n_{in}+n_{out})},\sqrt{6/(n_{in}+n_{out})}]$ 采样。分母在根号内；初始化方案要适配激活函数与网络结构。")
-    network = fit_network(data["train_x"], data["train_y"])  # @stepover
-    validation = report(network, data["val_x"], data["val_y"])  # @inspect validation
-    plot(boundary_plot(network, data, "不手工提供乘积特征，让隐藏层学习表示"))  # @stepover @clear z loss upstream dw before after activations local_derivatives validation
-    text("回到最初的问题：同样的标签、同样的交叉熵，现在模型能学习弯曲的边界。它仍然不是完美的：样本有限、有噪声，优化和超参数也影响结果。")
+def backpropagation():
+    text("## 反向传播：链式法则在计算图上的组织方式")
+    text(r"对标量复合函数 $J(v(u))$，链式法则为 $\mathrm dJ/\mathrm du=(\mathrm dJ/\mathrm dv)(\mathrm dv/\mathrm du)$。记 $\bar u=\partial J/\partial u$，称其为损失对中间量的梯度。")
+    text(r"若 $u$ 通过多个后继节点影响损失，贡献要相加：$$\bar u=\sum_{v\in\mathrm{children}(u)}\left(\frac{\partial v}{\partial u}\right)^\top\bar v.$$每条路径使用链式法则，多条路径使用加法。")
+    text("前向按依赖顺序计算节点值；反向从标量损失的梯度 1 出发，按逆拓扑顺序累计梯度。局部运算只需知道自己的输入、输出与上游梯度，无须重新理解整个网络。")
+    text("### 仿射层：用微分推导转置与外积")
+    text(r"考虑 $a=Wh+b$。其微分为 $\mathrm da=(\mathrm dW)h+W\mathrm dh+\mathrm db$，而 $\mathrm dJ=\bar a^\top\mathrm da$。分别收集各个变量的微分系数。")
+    text(r"由 $\bar a^\top W\mathrm dh=(W^\top\bar a)^\top\mathrm dh$，得到 $$\bar h=W^\top\bar a.$$转置把输出空间中的梯度映回输入空间，不是把前向运算‘求逆’。")
+    text(r"逐元素看权重项，$\mathrm dJ=\sum_{j,k}\bar a_jh_k\quad \mathrm dW_{jk}+\cdots$，所以 $$\nabla_WJ=\bar a h^\top,\qquad\nabla_bJ=\bar a.$$权重梯度是上游梯度与输入的外积。")
+    text(r"若 $h\in\mathbb R^{d_{in}}$，$a\in\mathbb R^{d_{out}}$，则 $W\in\mathbb R^{d_{out}\times d_{in}}$，$\bar a h^\top$ 与 $W$ 同形。梯度的形状必须与被求导的参数一致。")
+    text("### 激活层：逐元素相乘")
+    text(r"若 $h=\sigma(a)$ 且激活逐元素作用，其 Jacobian 为对角矩阵，因此 $$\bar a=\bar h\odot\sigma'(a).$$符号 $\odot$ 表示逐元素乘法，不是矩阵乘法。")
+    text(r"对 sigmoid，$\sigma'(a)=\sigma(a)(1-\sigma(a))$；对 tanh，$\sigma'(a)=1-\tanh^2(a)$；对 ReLU，正半轴导数为 1、负半轴为 0，在零点需约定所用的次梯度。")
+    text("### 递推：把局部规则组成完整 BP")
+    text(r"令 $\delta^{(l)}=\partial\ell/\partial a^{(l)}$。输出采用 sigmoid 与二元交叉熵时，单样本输出层有 $\delta^{(L)}=p-y$。这一步由损失与输出激活的联合求导决定。")
+    text(r"隐藏层依次递推：$$\delta^{(l)}=\big((W^{(l+1)})^\top\delta^{(l+1)}\big)\odot\sigma_l'(a^{(l)}).$$先跨过下一层的线性变换，再跨过本层激活。")
+    text(r"得到每层误差信号后，$$\nabla_{W^{(l)}}\ell=\delta^{(l)}(h^{(l-1)})^\top,\qquad\nabla_{b^{(l)}}\ell=\delta^{(l)}.$$这里的‘误差信号’是局部导数，不是每层各自的分类错误率。")
+    text(r"对平均损失，参数被所有样本共享，故 $$\nabla_{W^{(l)}}J=\frac1m\sum_i\delta_i^{(l)}(h_i^{(l-1)})^\top+\lambda\nabla_{W^{(l)}}\Omega.$$可以在输出梯度处除以 $m$，也可以最终平均，但不能重复除。")
+    text("同一参数在多个位置复用时，也必须累计所有使用位置的贡献。BP 负责计算梯度，优化器负责用梯度更新参数；反向过程中提前修改参数会破坏对同一次前向计算的求导。")
+    text("### 高效不代表没有代价")
+    text("反向模式自动微分通过向量—Jacobian 乘积计算标量损失对大量参数的梯度，不必显式构造完整 Jacobian。在常见运算图中，反向计算量与前向同阶；保存中间激活则带来内存成本。")
+    text(r"梯度沿深度反复乘权重与激活导数；这些因子可能导致梯度消失或爆炸。初始化影响传播尺度，对称初始化也可能使隐藏单元一直学到相同表示。BP 本身不消除这些优化问题。")
+    text(r"中心差分 $\partial_jJ\approx[J(\theta+\varepsilon e_j)-J(\theta-\varepsilon e_j)]/(2\varepsilon)$ 可独立检查求导，但每个参数都需额外前向。它是验证工具，不是高维训练中 BP 的等价效率替代。")
+    text("至此，神经网络的学习机制已经闭合：复合函数定义表示，损失定义目标，BP 计算梯度，优化器改变参数。另一条路线则保留固定特征空间，改变特征计算方式。")
 
 
-def network_loss_and_gradients(X, y, w1, b1, w2, b2):
-    """无正则的平均 BCE；这一函数既用于逐行讲解，也接受独立梯度检查。"""
-    preactivation = X @ w1 + b1  # @inspect preactivation preactivation.shape
-    hidden = np.tanh(preactivation)  # @inspect hidden hidden.shape
-    logits = hidden @ w2 + b2  # @inspect logits logits.shape
-    probabilities = sigmoid(logits)  # @inspect probabilities
-    loss = binary_loss_from_logits(logits, y)  # @inspect loss
-    text("开始反传。先从输出的平均交叉熵出发，再穿过输出层、tanh 与输入层。")  # @clear preactivation logits probabilities
-    dlogits = (probabilities - y) / len(y)  # @inspect dlogits
-    dw2 = hidden.T @ dlogits  # @inspect dw2
-    db2 = dlogits.sum()  # @inspect db2
-    dhidden = dlogits[:, None] * w2[None, :]  # @inspect dhidden dhidden.shape
-    dpreactivation = dhidden * (1 - hidden ** 2)  # @inspect dpreactivation
-    dw1 = X.T @ dpreactivation  # @inspect dw1 dw1.shape
-    db1 = dpreactivation.sum(axis=0)  # @inspect db1
-    text("逐个核对 shape：dW₁ 与 W₁ 一样是 (2,4)，db₁ 是 (4,)，dW₂ 是 (4,)。权重被一批样本共享，所以对 batch 求和；一份上游梯度经过多条输出路径时，也对路径求和。")  # @clear hidden dhidden dpreactivation dlogits
-    return loss, {"w1": dw1, "b1": db1, "w2": dw2, "b2": db2}
+def kernel_methods():
+    text("## 核方法：用内积表示一个特征空间")
+    text(r"设 $\phi:\mathcal X\to\mathcal F$ 把输入映射到内积空间，模型为 $f(x)=\langle w,\phi(x)\rangle+b$。若算法仅通过内积使用特征，可以直接计算 $$k(x,z)=\langle\phi(x),\phi(z)\rangle.$$这就是核技巧。")
+    text("核技巧不会自动改变学习目标。它改变的是表示与计算方式：无需显式列出特征坐标，就可以得到算法所需的内积。隐式特征空间可以是高维乃至无限维。")
+    text("### 合法性：对称与半正定")
+    text(r"对任意有限输入集合，Gram 矩阵定义为 $K_{ij}=k(x_i,x_j)$。若核来自实内积，则 $K=K^\top$，并且对任意系数 $c$，$$c^\top Kc=\left\Vert\sum_i c_i\phi(x_i)\right\Vert^2\ge0.$$因此它必须半正定。")
+    text("反过来，一个对称函数若对任意有限输入集合都产生半正定 Gram 矩阵，就能作为某个 Hilbert 特征空间的内积。只检查一个矩阵，不能证明对所有输入都成立；任意相似度也不自动是合法核。")
+    text(r"多项式核 $k(x,z)=(x^\top z+c)^q$（$c\ge0$，$q$ 为正整数）把多项式特征的内积压缩成一个表达式。展开后，各单项式系数可吸收到特征坐标的缩放中。")
+    text(r"RBF 核为 $k(x,z)=\exp(-\Vertx-z\Vert^2/(2\sigma^2))$，其中 $\sigma>0$。它通过距离确定内积，宽度控制相似度随距离衰减的尺度。")
+    text(r"将 RBF 写成 $e^{-\Vertx\Vert^2/(2\sigma^2)}e^{-\Vertz\Vert^2/(2\sigma^2)}\sum_{q=0}^{\infty}(x^\top z)^q/(q!\sigma^{2q})$：每个多项式内积项具有非负权重，再乘两端相同的缩放。这也说明其正定核结构与无限维特征解释。")
+    text("### 表示定理的关键：为什么只需训练样本的线性组合？")
+    text(r"考虑目标 $\frac1m\sum_i\ell(\langle w,\phi(x_i)\rangle+b,y_i)+\frac\lambda2\Vertw\Vert^2$，取 $\lambda>0$。把 $w$ 分解为训练特征张成空间内的 $w_{\parallel}$ 与正交分量 $w_{\perp}$。")
+    text(r"对所有训练点，$\langle w_\perp,\phi(x_i)\rangle=0$，所以删除正交部分不改变经验损失；而 $\Vertw\Vert^2=\Vertw_\parallel\Vert^2+\Vertw_\perp\Vert^2$，删除它不会增大正则项。若最优解存在，可在样本张成空间中寻找。")
+    text(r"于是可写成 $w=\sum_{i=1}^m\alpha_i\phi(x_i)$，预测变为 $$f(x)=\sum_i\alpha_i k(x_i,x)+b.$$参数从显式特征坐标转为样本展开系数。系数不一定唯一，也不一定稀疏。")
+    text(r"同样，$$\Vertw\Vert^2=\sum_{i,j}\alpha_i\alpha_j k(x_i,x_j)=\alpha^\top K\alpha.$$因此特征空间的平方范数正则一般不是 $\Vert\alpha\Vert^2$。")
+    text("### 与前面的损失和优化重新连接")
+    text(r"使用二元交叉熵时，令 $z=K\alpha+b\mathbf1$、$p=\sigma(z)$，则 $$J=\frac1m\sum_i\ell(z_i,y_i)+\frac\lambda2\alpha^\top K\alpha.$$这给出核逻辑回归，核并不专属于 SVM。")
+    text(r"由同一套链式法则，$$\nabla_\alpha J=\frac1mK^\top(p-y)+\lambda K\alpha,\qquad\partial_bJ=\frac1m\mathbf1^\top(p-y).$$正则梯度使用 $K=K^\top$；奇异核矩阵仍可用于这个目标，但系数可能不唯一。")
+    text("固定核预先规定特征空间，训练学习其中的组合；神经网络则通过参数更新改变特征映射。这是两类表示方式的区别，不是‘能处理非线性’与‘不能处理非线性’的区别。")
+    text(r"显式存储 Gram 矩阵需要 $O(m^2)$ 空间；预测通常涉及训练样本的核值。隐式高维特征节省的坐标计算，可能换来随样本量增长的成本。")
 
 
-def gradient_check():
-    text("### 正确性证据：用另一种方法核对梯度")
-    text(r"中心差分：$g_j\approx[J(\theta+\epsilon e_j)-J(\theta-\epsilon e_j)]/(2\epsilon)$。它不使用手写反向公式，适合检查小网络；每个参数要多次前向，通常不用于大网络训练。")
-    epsilon, theta = 1e-5, 0.4
-    loss_plus = np.logaddexp(0., theta + epsilon) - (theta + epsilon)
-    loss_minus = np.logaddexp(0., theta - epsilon) - (theta - epsilon)
-    numerical = (loss_plus - loss_minus) / (2 * epsilon)  # @inspect numerical
-    analytical = sigmoid(theta) - 1  # @inspect analytical
-    assert np.isclose(numerical, analytical)
-    text("完整配套测试会对上面的两层网络逐参数做有限差分，并与 PyTorch autograd 对照。ε 太大或太小都可能影响数值检查，不能只看最后一个小数位。")
+def margins_and_svm():
+    text("## SVM：在表示之外，加入间隔目标")
+    text(r"采用标签 $y_i\in\lbrace -1,+1\rbrace$ 与分数 $f(x)=w^\top x+b$。$y_if(x_i)>0$ 表示分类正确，$y_if(x_i)$ 称为函数间隔；它会随 $w,b$ 的共同正比例缩放而改变。")
+    text(r"当 $w\ne0$，几何间隔为 $y_if(x_i)/\Vertw\Vert$，不受这种缩放影响。对可分数据，把最小函数间隔规范化为 1，最大化几何间隔等价于 $$\min_{w,b}\frac12\Vertw\Vert^2\quad\text{s.t. }y_i(w^\top x_i+b)\ge1.$$这就是硬间隔形式。")
+    text(r"允许违反间隔约束，得到软间隔形式：$$\min_{w,b,\xi}\frac12\Vertw\Vert^2+C\sum_i\xi_i,$$约束为 $y_if(x_i)\ge1-\xi_i$、$\xi_i\ge0$，且 $C>0$。")
+    text(r"固定 $w,b$ 后，最小可行松弛变量是 $\xi_i=\max(0,1-y_if(x_i))$。消去它便得到 hinge loss：$$\min_{w,b}\frac12\Vertw\Vert^2+C\sum_i\max(0,1-y_if(x_i)).$$")
+    text("交叉熵惩罚分给真实标签的低概率；hinge 惩罚未达到规定函数间隔的分数。SVM 的原始分数不是概率。C 控制违反间隔的代价，增大 C 不保证零错误或更大几何间隔。")
+    text("### 对偶形式怎样引入核？")
+    text(r"将输入换为特征 $\phi(x_i)$，对两组不等式分别引入 $\beta_i,\mu_i\ge0$。拉格朗日函数是 $$\mathcal L=\frac12\Vert w\Vert^2+C\sum_i\xi_i+\sum_i\beta_i(1-\xi_i-y_i(\langle w,\phi(x_i)\rangle+b))-\sum_i\mu_i\xi_i.$$乘子把约束并入目标。")
+    text(r"对偶函数先对原始变量取下确界，再对非负乘子最大化。对偶目标给原始最小值提供下界；这里软间隔问题是凸的且可取严格可行松弛变量，满足强对偶的条件。")
+    text(r"为间隔约束引入乘子 $\beta_i\ge0$。对 $w,b,\xi$ 的驻点条件给出 $w=\sum_i\beta_i y_i\phi(x_i)$、$\sum_i\beta_i y_i=0$ 与 $C-\beta_i-\mu_i=0$。由两个乘子非负得到 $0\le\beta_i\le C$。这里 $\beta$ 是 SVM 对偶变量，与前面的通用展开系数区分。")
+    text(r"代回拉格朗日函数，得到 $$\max_\beta\ \sum_i\beta_i-\frac12\sum_{i,j}\beta_i\beta_jy_iy_jk(x_i,x_j),$$约束为 $0\le\beta_i\le C$ 与 $\sum_i\beta_i y_i=0$。特征只以内积形式出现，故可替换为核。")
+    text(r"预测为 $f(x)=\sum_i\beta_i y_i k(x_i,x)+b$。由互补松弛，严格位于间隔外、约束不活跃的点有 $\beta_i=0$；非零系数对应支持向量。软间隔中支持向量也可能在间隔内或被错分。")
+    text("核方法提供内积计算，SVM 提供间隔目标及相应优化问题。理解它们的联系，不应把两者当成同一个概念。")
 
 
-def kernel_methods(data):
-    text("## 核方法：另一条获得非线性表示的路线")
-    text("手工特征与神经网络都在改变表示。核方法问的是：如果算法只需要特征之间的内积，能否直接计算这个内积，而不把全部特征展开？")
-    text("### 从一个能手算的特征映射开始")
-    x = np.array([1., 2.])
-    z = np.array([3., 4.])
-    phi_x = np.array([x[0] ** 2, np.sqrt(2) * x[0] * x[1], x[1] ** 2])  # @inspect phi_x
-    phi_z = np.array([z[0] ** 2, np.sqrt(2) * z[0] * z[1], z[1] ** 2])  # @inspect phi_z
-    explicit_inner_product = phi_x @ phi_z  # @inspect explicit_inner_product
-    kernel_value = (x @ z) ** 2  # @inspect kernel_value
-    assert np.isclose(explicit_inner_product, kernel_value)
-    text(r"这里 $\phi(x)=[x_1^2,\sqrt2x_1x_2,x_2^2]$，恰有 $\phi(x)^\top\phi(z)=(x^\top z)^2$。右边就是多项式核。特征空间中的线性计算，对原始输入可以是非线性的。")
-    text("### 为什么一个内积就能参与预测？")
-    text(r"设特征空间中的权重可写成 $w=\sum_i\alpha_i\phi(x_i)$，则新样本的分数为 $f(x)=\sum_i\alpha_iK(x_i,x)+b$，其中 $K(x,z)=\phi(x)^\top\phi(z)$。训练得到的是系数 α；预测通过新样本与训练样本的核值完成。")
-    text("为什么可以这样写 w？对于依赖训练预测的损失与平方范数正则，把 w 分成训练特征张成空间内的分量与正交分量：正交部分不改变任何训练分数，却增加范数。因此可以在训练特征张成的空间中寻找一个最优解。")
-    text(r"进一步，$\|w\|^2=\sum_{i,j}\alpha_i\alpha_j\phi(x_i)^\top\phi(x_j)=\alpha^\top K\alpha$。核矩阵同时决定预测与特征空间中的范数。")
-    text("不能把任意‘看起来像相似度’的函数直接当作合法内积核：对任意有限样本集合形成的核矩阵，都应对称、半正定。")
-    text(r"本实验使用 RBF 核：$K(x,z)=\exp(-\|x-z\|^2/(2\sigma^2))$。σ 控制距离多大还算相近。它对应隐式特征空间，无须在代码中列出所有特征。")
-    X = data["train_x"][:4]  # @inspect X
-    K = rbf_kernel(X, X, sigma=0.7)  # @inspect K
-    eigenvalues = np.linalg.eigvalsh(K)  # @inspect eigenvalues
-    text("对角线是 1，近点通常更相似。这四个非负特征值是一个实例检查，不是对 RBF 合法性的完整证明。计算整个训练核矩阵需要约 m² 个存储位置，核方法也有规模成本。")
-    text("### 保留交叉熵，只替换分数的构造方式")
-    text(r"用 $z=K\alpha+b$ 做核逻辑回归，最小化平均交叉熵加 $\frac\lambda2\alpha^\top K\alpha$。注意核空间的范数正则不是简单的 $\|\alpha\|^2$。")
-    coefficients = np.zeros(len(X))
-    targets = data["train_y"][:4]
-    probabilities = sigmoid(K @ coefficients)
-    residual = (probabilities - targets) / len(targets)
-    dcoefficients = K.T @ residual + 0.001 * K @ coefficients  # @inspect dcoefficients
-    coefficients = coefficients - 0.05 * dcoefficients  # @inspect coefficients
-    text("这是一小批核中心上的一次系数更新，完整实验还会更新截距。它仍是熟悉的链式法则与梯度下降，只是线性组合的对象从输入特征换成了核值。")
-    kernel = fit_kernel(data["train_x"], data["train_y"])  # @stepover
-    validation = report(kernel, data["val_x"], data["val_y"])  # @inspect validation
-    plot(boundary_plot(kernel, data, "同一个分类问题：RBF 核诱导出的非线性边界"))  # @stepover @clear phi_x phi_z explicit_inner_product kernel_value X K eigenvalues dcoefficients coefficients validation
-    text("本例中，神经网络通过训练改变特征映射；给定 σ 的 RBF 核已经确定了特征空间，训练主要学习如何组合训练样本的影响。σ 本身作为超参数选择。核是一种表示与计算工具，不专属于 SVM。")
-    svm_as_another_objective()
+def generalization():
+    text("## 泛化：为何训练目标小还不够？")
+    text(r"回到总体风险 $R(f)$。记 $f^{\star}$ 为所有允许的预测规则中的总体风险最优者，$f_\mathcal H^{\star}$ 为假设空间内最优者，$\hat f$ 为训练所得模型。若这些最优者存在，则 $$R(\hat f)-R(f^{\star})=[R(\hat f)-R(f_\mathcal H^{\star})]+[R(f_\mathcal H^{\star})-R(f^{\star})].$$")
+    text("第二项是模型类限制带来的逼近误差；第一项还受有限样本估计与实际优化影响。扩大模型类可能减小逼近误差，却同时改变估计难度与优化难度。没有单靠参数更多就保证总体风险更小的推论。")
+    text(r"更具体地，若所有 $f\in\mathcal H$ 都满足 $|R(f)-\widehat R_D(f)|\le\varepsilon$，且训练得到的经验风险距离类内最小值不超过 $\delta$，则 $$R(\hat f)\le R(f_\mathcal H^{\star})+2\varepsilon+\delta.$$两次经验风险与总体风险的替换产生 $2\varepsilon$，优化不足产生 $\delta$。")
+    text(r"证明只需依次应用三个条件：$$R(\hat f)\le\widehat R_D(\hat f)+\varepsilon\le\widehat R_D(f_\mathcal H^{\star})+\delta+\varepsilon\le R(f_\mathcal H^{\star})+\delta+2\varepsilon.$$中间一步用的是经验目标的优化保证，不是总体风险的最优保证。")
+    text("这个条件性推导把统计估计与优化分开了，但还没有证明一致偏差界一定很小。它是否成立、需要多少样本，取决于损失的性质、模型类复杂度与抽样假设。")
+    text("正则化通过约束参数或函数来改变选择偏好；它可能改善泛化，也可能引入更多逼近偏差。过拟合描述模型对有限训练数据的特殊性适应过强，不能只用‘参数多’来定义。")
+    text("训练集用于拟合参数，验证集用于选择模型结构与超参数，测试集用于评价已确定的方案。频繁根据验证或测试反馈改方案，会使评价数据也参与选择，削弱独立评价的含义。")
+    text("学习曲线、训练与验证差距可以提供诊断线索，但不能唯一确定问题原因。表示限制、优化未完成、标签噪声、样本不足与分布变化都可能影响预测质量。")
+    text("有些不确定性来自输入无法完全决定目标。即便找到了总体风险最优预测规则，风险也未必为零。学习的理论目标是接近该任务与损失下的最优风险，而不是保证记忆所有观测。")
 
 
-def svm_as_another_objective():
-    text("### 补充讨论：SVM 改变了哪一部分？")
-    text("把标签改成 −1/+1。SVM 常用 hinge loss：分类正确还不够，希望有符号分数 y·f(x) 至少达到 1。这里的 f(x) 是原始分数，不是概率或阈值化的类别。")
-    margins = np.array([-0.5, 0.2, 1.5])  # @inspect margins
-    hinge = np.maximum(0., 1 - margins)  # @inspect hinge
-    text(r"软间隔目标可写为 $\frac12\|w\|^2+C\sum_i\max(0,1-y_if(x_i))$。权重范数与违反间隔的惩罚在竞争；C 大意味着更重视惩罚，不保证零错误，也不保证几何间隔更大。")
-    text(r"对线性分数，点到边界的有符号距离是 $f(x)/\|w\|$。将 w 与 b 同乘一个正数不改变边界和这个距离，却会改变原始分数。规范化后两条间隔面的距离是 $2/\|w\|$。")
-    text("SVM 可以使用线性核，也可以使用 RBF 等核。‘核方法’与‘SVM’不等同：前者提供特征内积的计算方式，后者规定一种学习目标和约束。")
-
-
-def generalization_and_experiment(data):
-    text("## 实验：比较方案，而不是挑一个好看的结果")
-    text("现在固定数据划分、训练算法和候选范围，再比较线性、交互特征、不同容量/正则强度的网络，以及不同核宽度的模型。所有候选使用相同的验证集与平均交叉熵。")
-    text("参数在训练集上学习；隐藏层宽度、λ、σ 等超参数由验证表现选择。可以联合选择多个超参数，但反复尝试过多方案仍可能过拟合验证集。")
-    text(r"神经网络的本例目标为 $J=\mathrm{mean}(\ell)+\frac\lambda2(\|W_1\|_F^2+\|W_2\|^2)$，不惩罚 bias。λ 的数值依赖归一化约定；不要跨实现直接照搬。")
-    result = select_model(data)  # @stepover
-    table = comparison_table(result["rows"])  # @inspect table @stepover
-    text("列依次是：训练交叉熵、验证交叉熵、训练准确率、验证准确率。模型名标在对应行。评价损失不包含正则项，因此不同 λ 的成绩可以比较。")
-    plot(comparison_plot(result["rows"]))  # @stepover @clear table
-    selected_name = result["selected"]["name"]  # @inspect selected_name
-    highest_accuracy = max(result["rows"], key=lambda row: row["val_accuracy"])["name"]  # @inspect highest_accuracy
-    text("对比这两个名字：默认实验里，验证准确率最高的方案并没有最小交叉熵。选模必须事先明确目标指标；不能看到结果后换一个对自己有利的指标。")
-    text("选择规则在看测试集之前就确定：验证交叉熵最小。这一次哪个模型获胜，是当前数据、候选范围与优化预算的实验结果，不是算法的永久排名。")
-    text("### 解释结果时，把不同误差来源分开")
-    text("训练与验证都差：检查模型表示能力、优化是否完成、实现与数据。训练明显好而验证差：检查容量、正则化、数据量、泄漏与分布变化。只靠两个数字，不能唯一确定原因。")
-    text("本例存在 8% 独立标签翻转，即使知道干净规则，对新噪声标签的最优总体准确率也只能达到 92%。有限测试集的实际准确率会波动；不能把某一次超过 92% 当作理论被推翻。")
-    text("### 最后揭开独立测试集")
-    test_result = result["test"]  # @inspect test_result
-    text("这一步估计已经选定的方案在同分布新样本上的表现。若根据这个结果继续改超参数，它就不再是未参与选择的测试证据，需要新的独立评价。")
-    return result
-
-
-def discussion_and_next_steps(result):
-    text("## 讨论：把这些方法放回同一个框架")
-    text("一套学习系统至少包含：数据与划分、表示/模型、训练目标、梯度与优化、评价协议。改变其中一项，应尽量固定其余项，才能解释结果为何变化。")
-    text("线性模型限制了边界；手工特征改变输入表示；神经网络学习表示；核方法计算隐式表示的内积。交叉熵与 hinge 定义不同目标；BP 计算可微图的梯度；优化器使用梯度更新参数。它们分别回答不同问题。")
-    text("本实验没有证明哪种方法在现实中普遍最好。样本少、任务人工、随机种子固定，候选和计算预算也有限。它的用途是把学习机制拆开，建立能迁移到更大模型的理解。")
-    text("### 通向语言模型：保留训练骨架，扩大模型与输出空间")
-    text("补充一个多分类例子。语言模型会为词表中的候选 token 产生分数，用 softmax 构成概率分布，再对真实下一个 token 计算负对数概率。")
-    logits = np.array([2., 1., -1.])  # @inspect logits
-    shifted = logits - logits.max()
-    probabilities = np.exp(shifted) / np.exp(shifted).sum()  # @inspect probabilities
-    true_class = 1
-    loss = -np.log(probabilities[true_class])  # @inspect loss
-    predicted_class = int(probabilities.argmax())  # @inspect predicted_class
-    text("argmax 返回类别位置，max 返回最高分。减去最大 logit 不改变 softmax 概率，却改善数值稳定性。这个多分类扩展是为后续 CS224N/CS336 增补的内容。")
-    text("从这个小实验到 Transformer，变化最大的是数据、表示、参数规模与计算组织。‘前向预测 → 损失 → 反向求梯度 → 参数更新 → 独立评价’仍然是同一条基本链路。")
-    text("### 用自己的话重建，而不是记住这一份输出")
-    text("合上讲稿后，解释三件事：为什么线性模型训练收敛仍会失败；一个隐藏层权重的梯度怎样从损失传回来；为什么核值可以替代显式特征的内积。然后改变数据噪声或特征表示，先写下预测，再运行验证。")
-    text("下一次复习时，从空文件重写一个小分类器及一次 BP。记录‘原先的预测、实际结果、错误原因、现在的解释’，再录成自己的讲解。")
-
-
-def sample_rows(X, y):
-    return [{"x₁": float(x[0]), "x₂": float(x[1]), "标签": str(int(label))} for x, label in zip(X, y)]
-
-
-def learning_rate_rows():
-    rows = []
-    for alpha in [0.2, 1.2, 2.2]:
-        theta = 3.
-        for step in range(12):
-            rows.append({"轮次": step, "损失": theta ** 2 / 2, "学习率": str(alpha)})
-            theta -= alpha * theta
-    return rows
-
-
-def history_plot(model, title):
-    rows = [{"轮次": row["step"], "训练目标": row["loss"]} for row in model["history"]]
-    return line(rows, "轮次", "训练目标", title=title)
-
-
-def boundary_plot(model, data, title):
-    edges = np.linspace(-1., 1., 32)
-    axis = (edges[:-1] + edges[1:]) / 2
-    grid = np.array([(x, y) for x in axis for y in axis])
-    probabilities = sigmoid(predict_logits(model, grid))
-    background = [{"左": float(edges[i]), "右": float(edges[i + 1]),
-                   "下": float(edges[j]), "上": float(edges[j + 1]),
-                   "p": float(probabilities[i * len(axis) + j])}
-                  for i in range(len(axis)) for j in range(len(axis))]
-    return {
-        "$schema": "https://vega.github.io/schema/vega-lite/v6.json", "title": title,
-        "width": 430, "height": 310,
-        "layer": [
-            {"data": {"values": background}, "mark": {"type": "rect", "opacity": 0.5},
-             "encoding": {"x": {"field": "左", "type": "quantitative", "title": "x₁"}, "x2": {"field": "右"},
-                          "y": {"field": "下", "type": "quantitative", "title": "x₂"}, "y2": {"field": "上"},
-                          "color": {"field": "p", "type": "quantitative", "scale": {"domain": [0, 1], "scheme": "blueorange"}, "title": "预测 P(y=1)"}}},
-            {"data": {"values": sample_rows(data["train_x"], data["train_y"])},
-             "mark": {"type": "point", "size": 55, "stroke": "#222", "filled": False},
-             "encoding": {"x": {"field": "x₁", "type": "quantitative"}, "y": {"field": "x₂", "type": "quantitative"},
-                          "shape": {"field": "标签", "type": "nominal", "scale": {"range": ["circle", "cross"]}},
-                          "tooltip": [{"field": "x₁"}, {"field": "x₂"}, {"field": "标签"}]}}
-        ],
-    }
-
-
-def comparison_table(rows):
-    return {r["name"]: [round(r[k], 4) for k in ("train_loss", "val_loss", "train_accuracy", "val_accuracy")] for r in rows}
-
-
-def comparison_plot(rows):
-    values = [{"模型": r["name"], "数据": group, "交叉熵": r[key]}
-              for r in rows for group, key in [("训练", "train_loss"), ("验证", "val_loss")]]
-    return {"$schema": "https://vega.github.io/schema/vega-lite/v6.json", "title": "相同数据与评价协议下的候选模型",
-            "width": 430, "height": 280, "data": {"values": values}, "mark": {"type": "point", "filled": True, "size": 100},
-            "encoding": {"x": {"field": "交叉熵", "type": "quantitative"},
-                         "y": {"field": "模型", "type": "nominal", "sort": None},
-                         "color": {"field": "数据", "type": "nominal"},
-                         "shape": {"field": "数据", "type": "nominal"},
-                         "tooltip": [{"field": "模型"}, {"field": "数据"}, {"field": "交叉熵"}]}}
+def synthesis():
+    text("## 讨论：把理论放回同一套结构")
+    text("学习问题规定输入、输出与分布；假设空间规定候选函数；损失与正则化定义优化目标；BP 提供复合函数梯度；优化算法寻找参数；泛化理论研究所得函数如何超出训练样本。")
+    text("神经网络与核方法回应的是表示问题。链式法则与 BP 回应的是求导问题。梯度下降回应的是优化问题。交叉熵与间隔目标回应的是评价与偏好问题。把这些层次分开，才能理解它们如何组合。")
+    text("### 通向语言模型：输出空间改变，基本结构延续")
+    text(r"对多类别分数 $z\in\mathbb R^V$，softmax 定义 $p_j=e^{z_j}/\sum_k e^{z_k}$。若目标分布 $y$ 为 one-hot，交叉熵 $\ell=-\sum_j y_j\log p_j$，其 logit 梯度仍为 $\partial\ell/\partial z_j=p_j-y_j$。")
+    text(r"自回归语言模型使用分解 $p_\theta(x_{1:T})=\prod_{t=1}^T p_\theta(x_t\mid x_{<t})$，训练目标是各位置负对数条件概率的和或平均。这来自概率链式法则，不是假设序列中的 token 彼此独立。")
+    text("更复杂的表示与更大的参数规模，没有替代模型、目标、求导、优化、泛化之间的关系。后续学习 Transformer 时，可以先识别它改变了其中哪一部分，再进入具体结构与计算细节。")
+    text("这份讨论建立的是理解学习系统的理论框架：每个公式回答一个明确问题，每个结论附带条件，各方法通过共同的风险最小化目标联系起来。")
 
 
 if __name__ == "__main__":

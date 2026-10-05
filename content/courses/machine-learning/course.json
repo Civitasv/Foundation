@@ -1,12 +1,12 @@
 {
   "id": "machine-learning",
   "title": {
-    "zh-CN": "从数据到可泛化的程序",
-    "en": "From Data to Programs That Generalize"
+    "zh-CN": "机器学习的理论脉络",
+    "en": "The Theoretical Structure of Machine Learning"
   },
   "description": {
-    "zh-CN": "一份连续的中文入门课件，从问题与数据出发，逐步讨论模型如何表示预测、损失如何定义目标、梯度如何驱动学习，以及如何用独立数据检验泛化。沿同一份二维带噪 XOR 数据，把机器学习基础、反向传播与核方法联系起来。",
-    "en": "One continuous introductory presentation in Chinese develops the discussion from a problem and data to models, losses, gradient-based learning and independent checks of generalization. Follow one noisy two-dimensional XOR dataset to connect machine learning foundations, backpropagation and kernel methods."
+    "zh-CN": "一份连续的中文理论课件，从学习问题与经验风险出发，推导损失函数、梯度下降和反向传播，再讨论核方法、支持向量机与泛化。以定义、推导、成立条件和概念联系组织讲解。",
+    "en": "One continuous theoretical presentation in Chinese: from the learning problem and empirical risk to losses, gradient descent, backpropagation, kernel methods, support vector machines and generalization. The discussion is organized around definitions, derivations, assumptions and connections."
   },
   "status": "ai-draft",
   "presentationLocale": "zh-CN",
@@ -15,12 +15,12 @@
     {
       "id": "problem-data",
       "title": {
-        "zh-CN": "问题与数据",
-        "en": "The problem and the data"
+        "zh-CN": "学习问题与风险",
+        "en": "The learning problem and risk"
       },
       "summary": {
-        "zh-CN": "先说明任务、样本与标签，再追问：程序需要记住已有数据，还是预测尚未见过的样本？",
-        "en": "Define the task, examples and labels, then ask whether the program should remember existing data or predict unseen examples."
+        "zh-CN": "输入、目标、假设空间、归纳偏置，以及总体风险与经验风险的区别。",
+        "en": "Inputs, targets, hypothesis spaces, inductive bias, and the distinction between population and empirical risk."
       },
       "sourceWeeks": [
         1,
@@ -30,12 +30,12 @@
     {
       "id": "models-loss",
       "title": {
-        "zh-CN": "模型与损失",
-        "en": "Models and losses"
+        "zh-CN": "概率模型与损失",
+        "en": "Probability models and losses"
       },
       "summary": {
-        "zh-CN": "用参数化函数表达预测，区分 logit、概率与决策，再用损失把“预测得好”变成可计算的目标。",
-        "en": "Represent predictions with a parameterized function, distinguish logits, probabilities and decisions, and turn a good prediction into a computable objective."
+        "zh-CN": "从条件似然推导平方误差与交叉熵，明确分数、概率、决策和梯度。",
+        "en": "Derive squared error and cross-entropy from conditional likelihood, distinguishing scores, probabilities, decisions and gradients."
       },
       "sourceWeeks": [
         1,
@@ -46,12 +46,12 @@
     {
       "id": "optimization-diagnosis",
       "title": {
-        "zh-CN": "优化与诊断",
-        "en": "Optimization and diagnosis"
+        "zh-CN": "梯度与优化",
+        "en": "Gradients and optimization"
       },
       "summary": {
-        "zh-CN": "从单个导数走到矩阵梯度与训练循环，检查学习率和优化过程，定位线性模型的表示边界。",
-        "en": "Develop matrix gradients and a training loop from a single derivative, inspect learning rates and optimization, and locate the limits of a linear representation."
+        "zh-CN": "用一阶近似和下降引理解释负梯度、步长条件、随机梯度与收敛边界。",
+        "en": "Use first-order approximations and the descent lemma to explain negative gradients, step sizes, stochastic gradients and convergence conditions."
       },
       "sourceWeeks": [
         1,
@@ -62,12 +62,12 @@
     {
       "id": "representation-backprop",
       "title": {
-        "zh-CN": "表示学习与反向传播",
-        "en": "Representation learning and backpropagation"
+        "zh-CN": "表示与反向传播",
+        "en": "Representations and backpropagation"
       },
       "summary": {
-        "zh-CN": "从手工交互特征走向网络学习的表示；沿计算图推导局部梯度，解释梯度如何汇总、共享并传回参数。",
-        "en": "Move from hand-crafted interaction features to learned representations; derive local gradients through a computation graph and explain how they accumulate and flow back to parameters."
+        "zh-CN": "沿计算图推导仿射层、激活层与完整梯度递推，区分求导和参数更新。",
+        "en": "Derive affine and activation layer gradients and the full recurrence through a computation graph; distinguish differentiation from parameter updates."
       },
       "sourceWeeks": [
         4,
@@ -77,12 +77,12 @@
     {
       "id": "kernel-methods",
       "title": {
-        "zh-CN": "核方法",
-        "en": "Kernel methods"
+        "zh-CN": "核方法与支持向量机",
+        "en": "Kernel methods and support vector machines"
       },
       "summary": {
-        "zh-CN": "把特征映射、内积与相似度连在一起，理解核如何隐式表达非线性，以及 SVM 的间隔目标。",
-        "en": "Connect feature maps, inner products and similarity to understand implicit nonlinear representations and the margin objective of SVMs."
+        "zh-CN": "从内积、半正定性和样本空间分解，走向核技巧、范数正则与 SVM 对偶。",
+        "en": "Develop kernel computation, norm regularization and the SVM dual from inner products, positive semidefiniteness and the sample-span decomposition."
       },
       "sourceWeeks": [
         7
@@ -91,12 +91,12 @@
     {
       "id": "generalization-discussion",
       "title": {
-        "zh-CN": "泛化实验与讨论",
-        "en": "Generalization experiments and discussion"
+        "zh-CN": "泛化与理论边界",
+        "en": "Generalization and theoretical limits"
       },
       "summary": {
-        "zh-CN": "在同一任务上比较候选表示与模型，用验证数据作选择，最后用独立测试数据检查泛化。",
-        "en": "Compare candidate representations and models on the same task, select with validation data, and check generalization with independent test data at the end."
+        "zh-CN": "区分逼近、估计与优化的影响，讨论一致偏差界、正则化与独立评价。",
+        "en": "Distinguish approximation, estimation and optimization, and discuss uniform deviation bounds, regularization and independent evaluation."
       },
       "sourceWeeks": [
         3,
@@ -110,8 +110,8 @@
         "en": "Towards language models"
       },
       "summary": {
-        "zh-CN": "回到表示、目标、优化和泛化这条共同主线，为理解 CS224N 与 CS336 中更大的模型建立连接。",
-        "en": "Return to the shared thread of representations, objectives, optimization and generalization, preparing for the larger models studied in CS224N and CS336."
+        "zh-CN": "以 softmax、交叉熵和概率链式分解连接后续语言模型学习。",
+        "en": "Connect the framework to language models through softmax, cross-entropy and the probability chain rule."
       },
       "sourceWeeks": [
         3,
