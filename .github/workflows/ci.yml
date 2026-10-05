@@ -17,7 +17,7 @@ jobs:
   validate:
     name: Content, typecheck, lint, test, build
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
 
     steps:
       - name: Checkout
@@ -36,6 +36,24 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile
+
+      - name: Set up Python for executable lessons
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: content/courses/machine-learning/requirements.txt
+
+      - name: Cache edtrace frontend packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-edtrace-npm-${{ hashFiles('scripts/build-edtrace.mjs') }}
+
+      - name: Install lesson dependencies on CPU
+        run: |
+          python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
+          python -m pip install -r content/courses/machine-learning/requirements.txt
 
       - name: Validate
         run: pnpm check

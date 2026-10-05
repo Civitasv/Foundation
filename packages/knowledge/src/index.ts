@@ -15,6 +15,9 @@ export {
 
 export { localize } from "./localize";
 
+export { assertPresentationCourse } from "./course";
+export type { PresentationCourse, PresentationSection } from "./course";
+
 export {
   conceptDepths,
   conceptDomains,

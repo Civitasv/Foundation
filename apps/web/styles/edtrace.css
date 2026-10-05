@@ -1,0 +1,32 @@
+/* Keep the official player usable inside a narrow browser panel as well as a recording window. */
+#root {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 1120px;
+  padding: 0 20px 32px;
+}
+
+.lines-panel {
+  min-width: 0;
+}
+
+.renderings {
+  width: min(800px, calc(100vw - 120px));
+  white-space: normal;
+}
+
+.env {
+  box-sizing: border-box;
+  min-width: 0;
+  width: min(500px, calc(100vw - 60px));
+}
+
+@media (max-width: 600px) {
+  #root {
+    padding-inline: 8px;
+  }
+
+  .renderings {
+    width: calc(100vw - 100px);
+  }
+}

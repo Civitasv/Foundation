@@ -95,3 +95,13 @@ See `docs/design/sidebar-system.md`.
 7. UI ordering is derived, not encoded as a second source of truth.
 
 These rules are enforced by `pnpm content:validate`.
+
+## Course presentations
+
+Course catalogs live at `content/courses/<course-id>/course.json`, separately from the concept graph. They preserve bilingual titles and descriptions. A presentation course adds a bilingual subtitle, its authoring `status`, `presentationLocale`, and a `presentationTrace` identifying its Python source and generated trace. An ordered `sections` array describes the flow of its discussion with stable IDs, bilingual titles/summaries, and source weeks. This directory does not impose a fixed chapter count or separate lesson boundaries.
+
+The catalog is the source of truth for the section directory and presentation identity. The web directory and presentation build consume it; neither keeps a second presentation manifest. Sections belong to one continuous presentation, not separate player routes. `@foundation/knowledge` validates this presentation metadata when rendering, and its tests check the catalog against the Python source. Existing learning journals without presentations keep their current metadata shape.
+
+AI-assisted presentations remain `ai-draft`. Generating a working player does not record learning progress, imply a video recording, or promote the maturity of any concept chapter. The machine-learning presentation is Chinese; its English course directory identifies that language explicitly.
+
+The Python source and deterministic numerical experiments live alongside the catalog and do not depend on Next.js. The web layer presents the directory; the build generates its independent static player. See [Feature-07](../specs/Feature-07-machine-learning-edtrace.md).

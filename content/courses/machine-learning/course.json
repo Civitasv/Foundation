@@ -1,0 +1,128 @@
+{
+  "id": "machine-learning",
+  "title": {
+    "zh-CN": "从数据到可泛化的程序",
+    "en": "From Data to Programs That Generalize"
+  },
+  "description": {
+    "zh-CN": "一份连续的中文入门课件，从问题与数据出发，逐步讨论模型如何表示预测、损失如何定义目标、梯度如何驱动学习，以及如何用独立数据检验泛化。沿同一份二维带噪 XOR 数据，把机器学习基础、反向传播与核方法联系起来。",
+    "en": "One continuous introductory presentation in Chinese develops the discussion from a problem and data to models, losses, gradient-based learning and independent checks of generalization. Follow one noisy two-dimensional XOR dataset to connect machine learning foundations, backpropagation and kernel methods."
+  },
+  "status": "ai-draft",
+  "presentationLocale": "zh-CN",
+  "presentationTrace": "machine_learning",
+  "sections": [
+    {
+      "id": "problem-data",
+      "title": {
+        "zh-CN": "问题与数据",
+        "en": "The problem and the data"
+      },
+      "summary": {
+        "zh-CN": "先说明任务、样本与标签，再追问：程序需要记住已有数据，还是预测尚未见过的样本？",
+        "en": "Define the task, examples and labels, then ask whether the program should remember existing data or predict unseen examples."
+      },
+      "sourceWeeks": [
+        1,
+        6
+      ]
+    },
+    {
+      "id": "models-loss",
+      "title": {
+        "zh-CN": "模型与损失",
+        "en": "Models and losses"
+      },
+      "summary": {
+        "zh-CN": "用参数化函数表达预测，区分 logit、概率与决策，再用损失把“预测得好”变成可计算的目标。",
+        "en": "Represent predictions with a parameterized function, distinguish logits, probabilities and decisions, and turn a good prediction into a computable objective."
+      },
+      "sourceWeeks": [
+        1,
+        2,
+        3
+      ]
+    },
+    {
+      "id": "optimization-diagnosis",
+      "title": {
+        "zh-CN": "优化与诊断",
+        "en": "Optimization and diagnosis"
+      },
+      "summary": {
+        "zh-CN": "从单个导数走到矩阵梯度与训练循环，检查学习率和优化过程，定位线性模型的表示边界。",
+        "en": "Develop matrix gradients and a training loop from a single derivative, inspect learning rates and optimization, and locate the limits of a linear representation."
+      },
+      "sourceWeeks": [
+        1,
+        2,
+        3
+      ]
+    },
+    {
+      "id": "representation-backprop",
+      "title": {
+        "zh-CN": "表示学习与反向传播",
+        "en": "Representation learning and backpropagation"
+      },
+      "summary": {
+        "zh-CN": "从手工交互特征走向网络学习的表示；沿计算图推导局部梯度，解释梯度如何汇总、共享并传回参数。",
+        "en": "Move from hand-crafted interaction features to learned representations; derive local gradients through a computation graph and explain how they accumulate and flow back to parameters."
+      },
+      "sourceWeeks": [
+        4,
+        5
+      ]
+    },
+    {
+      "id": "kernel-methods",
+      "title": {
+        "zh-CN": "核方法",
+        "en": "Kernel methods"
+      },
+      "summary": {
+        "zh-CN": "把特征映射、内积与相似度连在一起，理解核如何隐式表达非线性，以及 SVM 的间隔目标。",
+        "en": "Connect feature maps, inner products and similarity to understand implicit nonlinear representations and the margin objective of SVMs."
+      },
+      "sourceWeeks": [
+        7
+      ]
+    },
+    {
+      "id": "generalization-discussion",
+      "title": {
+        "zh-CN": "泛化实验与讨论",
+        "en": "Generalization experiments and discussion"
+      },
+      "summary": {
+        "zh-CN": "在同一任务上比较候选表示与模型，用验证数据作选择，最后用独立测试数据检查泛化。",
+        "en": "Compare candidate representations and models on the same task, select with validation data, and check generalization with independent test data at the end."
+      },
+      "sourceWeeks": [
+        3,
+        6
+      ]
+    },
+    {
+      "id": "language-models",
+      "title": {
+        "zh-CN": "通向语言模型",
+        "en": "Towards language models"
+      },
+      "summary": {
+        "zh-CN": "回到表示、目标、优化和泛化这条共同主线，为理解 CS224N 与 CS336 中更大的模型建立连接。",
+        "en": "Return to the shared thread of representations, objectives, optimization and generalization, preparing for the larger models studied in CS224N and CS336."
+      },
+      "sourceWeeks": [
+        3,
+        4,
+        5,
+        6
+      ]
+    }
+  ],
+  "subtitle": {
+    "zh-CN": "机器学习基础 · 反向传播 · 核方法",
+    "en": "Machine Learning Foundations · Backpropagation · Kernel Methods"
+  }
+}
