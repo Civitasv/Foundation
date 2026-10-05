@@ -5,8 +5,8 @@
     "en": "The Theoretical Structure of Machine Learning"
   },
   "description": {
-    "zh-CN": "一份连续的中文理论课件，从学习问题与经验风险出发，推导损失函数、梯度下降和反向传播，再讨论核方法、支持向量机与泛化。以定义、推导、成立条件和概念联系组织讲解。",
-    "en": "One continuous theoretical presentation in Chinese: from the learning problem and empirical risk to losses, gradient descent, backpropagation, kernel methods, support vector machines and generalization. The discussion is organized around definitions, derivations, assumptions and connections."
+    "zh-CN": "一份连续的中文理论课件，依次介绍机器学习定义、多变量线性回归、梯度下降、矩阵运算、逻辑回归、神经网络、BP 算法、学习曲线，以及支持向量机与核函数。以公式推导和概念联系组织讲解。",
+    "en": "One continuous theoretical presentation in Chinese covering the definition of machine learning, multivariate linear regression, gradient descent, matrix operations, logistic regression, neural networks, backpropagation, learning curves, and support vector machines with kernels, in that order."
   },
   "status": "ai-draft",
   "presentationLocale": "zh-CN",
@@ -15,109 +15,130 @@
     {
       "id": "problem-data",
       "title": {
-        "zh-CN": "学习问题与风险",
-        "en": "The learning problem and risk"
+        "zh-CN": "机器学习定义",
+        "en": "Definition of machine learning"
       },
       "summary": {
-        "zh-CN": "输入、目标、假设空间、归纳偏置，以及总体风险与经验风险的区别。",
-        "en": "Inputs, targets, hypothesis spaces, inductive bias, and the distinction between population and empirical risk."
+        "zh-CN": "任务、经验与评价标准；输入、标签、参数和假设空间。",
+        "en": "Tasks, experience and performance; inputs, targets, parameters and hypothesis spaces."
       },
       "sourceWeeks": [
-        1,
-        6
+        1
       ]
     },
     {
-      "id": "models-loss",
+      "id": "linear-regression",
       "title": {
-        "zh-CN": "概率模型与损失",
-        "en": "Probability models and losses"
+        "zh-CN": "线性回归（多变量）",
+        "en": "Multivariate linear regression"
       },
       "summary": {
-        "zh-CN": "从条件似然推导平方误差与交叉熵，明确分数、概率、决策和梯度。",
-        "en": "Derive squared error and cross-entropy from conditional likelihood, distinguishing scores, probabilities, decisions and gradients."
+        "zh-CN": "多个特征的预测函数、平方误差 Cost Function 及偏导。",
+        "en": "Prediction with multiple features, the squared-error cost and partial derivatives."
       },
       "sourceWeeks": [
         1,
-        2,
+        2
+      ]
+    },
+    {
+      "id": "gradient-descent",
+      "title": {
+        "zh-CN": "梯度下降",
+        "en": "Gradient descent"
+      },
+      "summary": {
+        "zh-CN": "负梯度方向、学习率、同时更新及线性回归的更新公式。",
+        "en": "Negative gradients, learning rates, simultaneous updates and regression update equations."
+      },
+      "sourceWeeks": [
+        1,
+        2
+      ]
+    },
+    {
+      "id": "matrix-operations",
+      "title": {
+        "zh-CN": "矩阵运算",
+        "en": "Matrix operations"
+      },
+      "summary": {
+        "zh-CN": "内积、矩阵乘法、转置、逐元素运算与批量求和。",
+        "en": "Inner products, matrix multiplication, transpose, elementwise operations and batch reductions."
+      },
+      "sourceWeeks": [
+        1,
+        2
+      ]
+    },
+    {
+      "id": "logistic-regression",
+      "title": {
+        "zh-CN": "分类问题（逻辑回归）",
+        "en": "Classification with logistic regression"
+      },
+      "summary": {
+        "zh-CN": "sigmoid 模型、交叉熵 Cost Function 及梯度下降函数。",
+        "en": "The sigmoid model, cross-entropy cost and gradient descent equations."
+      },
+      "sourceWeeks": [
         3
       ]
     },
     {
-      "id": "optimization-diagnosis",
+      "id": "neural-networks",
       "title": {
-        "zh-CN": "梯度与优化",
-        "en": "Gradients and optimization"
+        "zh-CN": "神经网络",
+        "en": "Neural networks"
       },
       "summary": {
-        "zh-CN": "用一阶近似和下降引理解释负梯度、步长条件、随机梯度与收敛边界。",
-        "en": "Use first-order approximations and the descent lemma to explain negative gradients, step sizes, stochastic gradients and convergence conditions."
+        "zh-CN": "多层前向传播、非线性激活与可学习表示。",
+        "en": "Multilayer forward propagation, nonlinear activations and learned representations."
       },
       "sourceWeeks": [
-        1,
-        2,
-        3
+        4
       ]
     },
     {
-      "id": "representation-backprop",
+      "id": "backpropagation",
       "title": {
-        "zh-CN": "表示与反向传播",
-        "en": "Representations and backpropagation"
+        "zh-CN": "BP 算法",
+        "en": "Backpropagation"
       },
       "summary": {
-        "zh-CN": "沿计算图推导仿射层、激活层与完整梯度递推，区分求导和参数更新。",
-        "en": "Derive affine and activation layer gradients and the full recurrence through a computation graph; distinguish differentiation from parameter updates."
+        "zh-CN": "链式法则、局部梯度、逐层递推与参数共享。",
+        "en": "The chain rule, local gradients, layerwise recurrence and shared parameters."
       },
       "sourceWeeks": [
-        4,
         5
       ]
     },
     {
-      "id": "kernel-methods",
+      "id": "learning-curves",
       "title": {
-        "zh-CN": "核方法与支持向量机",
-        "en": "Kernel methods and support vector machines"
+        "zh-CN": "学习曲线",
+        "en": "Learning curves"
       },
       "summary": {
-        "zh-CN": "从内积、半正定性和样本空间分解，走向核技巧、范数正则与 SVM 对偶。",
-        "en": "Develop kernel computation, norm regularization and the SVM dual from inner products, positive semidefiniteness and the sample-span decomposition."
+        "zh-CN": "训练规模与误差、偏差和方差、正则化与独立评价。",
+        "en": "Training size and errors, bias and variance, regularization and independent evaluation."
+      },
+      "sourceWeeks": [
+        6
+      ]
+    },
+    {
+      "id": "svm-kernels",
+      "title": {
+        "zh-CN": "支持向量机、核函数",
+        "en": "Support vector machines and kernels"
+      },
+      "summary": {
+        "zh-CN": "间隔、hinge loss、核技巧、半正定性与 SVM 对偶。",
+        "en": "Margins, hinge loss, the kernel trick, positive semidefiniteness and the SVM dual."
       },
       "sourceWeeks": [
         7
-      ]
-    },
-    {
-      "id": "generalization-discussion",
-      "title": {
-        "zh-CN": "泛化与理论边界",
-        "en": "Generalization and theoretical limits"
-      },
-      "summary": {
-        "zh-CN": "区分逼近、估计与优化的影响，讨论一致偏差界、正则化与独立评价。",
-        "en": "Distinguish approximation, estimation and optimization, and discuss uniform deviation bounds, regularization and independent evaluation."
-      },
-      "sourceWeeks": [
-        3,
-        6
-      ]
-    },
-    {
-      "id": "language-models",
-      "title": {
-        "zh-CN": "通向语言模型",
-        "en": "Towards language models"
-      },
-      "summary": {
-        "zh-CN": "以 softmax、交叉熵和概率链式分解连接后续语言模型学习。",
-        "en": "Connect the framework to language models through softmax, cross-entropy and the probability chain rule."
-      },
-      "sourceWeeks": [
-        3,
-        4,
-        5,
-        6
       ]
     }
   ],

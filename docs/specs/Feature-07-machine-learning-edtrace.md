@@ -12,7 +12,9 @@ The course is available at `/courses/machine-learning/`, with an English directo
 
 This is an `ai-draft` presentation, not an author-written concept chapter or a completed learning record. No graph dependencies, concept maturity, recorded videos, or learning progress are inferred. The original notes remain in the source repository.
 
-The discussion develops population and empirical risk, likelihood-derived losses, gradient descent and its step-size conditions, representations, complete layerwise backpropagation, positive semidefinite kernels and the sample-span argument, kernel regularization, SVM primal/dual forms, and generalization. Each derivation states notation and assumptions. Python organizes progressive exposition; numerical audit fixtures remain exclusively in tests. A final probability-chain discussion connects the framework to language models.
+The presentation follows the author's requested order exactly: (1) definition of machine learning, (2) multivariate linear regression, (3) gradient descent, (4) matrix operations, (5) classification with logistic regression, its cost function and update equations, (6) neural networks, (7) backpropagation, (8) learning curves, and (9) support vector machines and kernels. These are discussion sections within one presentation, not separate weekly decks.
+
+Derive scalar regression gradients before introducing matrix notation. Classification reuses the update structure with sigmoid and cross-entropy. BP derives the layerwise recurrence; learning curves distinguish training size from optimization progress and explain bias/variance diagnostics with explicit limitations. The final section develops SVM margins before introducing kernels and the dual. Each derivation states notation and assumptions. Numerical audit fixtures remain exclusively in tests.
 
 ## Static publication
 
